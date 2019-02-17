@@ -14,6 +14,8 @@ Used for automating Custom Fedora OS build in mock.
 
 [Kickstart File Docs](5)
 
+[Live Media Creator Docs](6)
+
 ## Prereq
 
 This assumes that you are running an RPM-based system like Fedora and use dnf for package management, depending how old your software is, the choices for the mock build env may be limited since newer mock has newer cfg file for newer OS.
@@ -72,3 +74,4 @@ For example, to build the live fedora cinnamon iso:
 [3]: https://linux.die.net/man/1/mock
 [4]: https://pagure.io/fedora-kickstarts
 [5]: https://pykickstart.readthedocs.io/en/latest/kickstart-docs.html?fbclid=IwAR3AwOKBMyrQxXm72itM4LSx2H9mnuTIaLIzF3yDvwRrwYfpiAWEjgeinJY#chapter-4-pre-installation-script
+[6]: https://weldr.io/lorax/livemedia-creator.html
