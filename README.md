@@ -55,6 +55,8 @@ The mock environment is reused after the first setup so if you ever change it(li
 
 **DURING BUILD SELINUX WILL ENTER PERMISSIVE MODE**, so make sure to prepare accordingly.
 
+There might be some warnings but if the build keeps going then it should be fine.
+
 The ```build.sh``` script is used to create a new build and will output an iso file in the current directory. Pass in the name of the unflattened target ks file without extension, the name of the output iso will be the same as the ks file.
 
 The build will take quite some time depending on your machine, there will be moments where it feels like the program freezes(low CPU usage and nothing seems to move), just wait patiently and if after like 3 hours and it still stays like that then it probably really froze.
