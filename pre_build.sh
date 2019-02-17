@@ -15,3 +15,4 @@ mock -r fedora-${env_fedora_ver}-x86_64 --install lorax-lmc-novirt nano pykickst
 # enable networking for mock
 sudo sed -i -r "/config_opts\['rpmbuild_networking'\]/s/^#//g"  /etc/mock/site-defaults.cfg
 sudo sed -i -r "/config_opts\['rpmbuild_networking'\]/s/False/True/g" /etc/mock/site-defaults.cfg
+sudo sed -i -r "/config_opts\['rpmbuild_networking'\]/s/^[ \t]*//g" /etc/mock/site-defaults.cfg
