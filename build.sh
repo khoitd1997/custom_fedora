@@ -2,7 +2,14 @@
 # build new image, output iso in current folder
 
 set -e
+set -x
 source settings.sh
+
+function cleanup {
+    printf "Exitting Build\n"
+    sudo setenforce 1
+}
+trap cleanup EXIT
 #-----------------------------------------------------
 
 sudo setenforce 0
@@ -15,5 +22,3 @@ mock -r fedora-${env_fedora_ver}-x86_64 --copyout /var/lmc/${1}.iso ./
 
 # for debugging only
 # mock -r fedora-${env_fedora_ver}-x86_64 --old-chroot --shell
-
-sudo setenforce 1
