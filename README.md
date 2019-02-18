@@ -40,6 +40,7 @@ nano settings.sh # customize settings
 git clone https://pagure.io/fedora-kickstarts fedora-kickstarts
 
 cd fedora-kickstarts
+git checkout f29 # replace f29 with fedora version you want to base on
 nano my_own_config.ks
 ```
 
