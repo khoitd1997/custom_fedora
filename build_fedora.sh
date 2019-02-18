@@ -12,9 +12,9 @@ cd fedora-kickstarts
 
 kickstart_name=${1}
 
-ksflatten --config ${kickstart_name}.ks -o flat-${kickstart_name}.ks --version ${build_fedora_ver}
+ksflatten --config ${kickstart_name}.ks -o flat-${kickstart_name}.ks --version F${build_fedora_ver}
 
 livemedia-creator --ks flat-${kickstart_name}.ks --no-virt \
---resultdir /var/lmc --project ${kickstart_name} --make-iso --volid ${kickstart_name} \
---iso-only --iso-name ${kickstart_name}.iso --releasever ${release_ver} \
---title ${kickstart_name} --macboot
+--resultdir /var/lmc --project ${os_name} --make-iso --volid ${os_name} \
+--iso-only --iso-name ${kickstart_name}.iso --releasever ${build_fedora_ver} \
+--title ${os_name} --macboot
