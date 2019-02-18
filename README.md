@@ -37,7 +37,7 @@ A good strategy is to clone the [fedora-kickstarts repo](4) into the same dir as
 ```shell
 cd custom_fedora
 nano settings.sh # customize settings
-git clone https://pagure.io/fedora-kickstarts
+git clone https://pagure.io/fedora-kickstarts fedora-kickstarts
 
 cd fedora-kickstarts
 nano my_own_config.ks
