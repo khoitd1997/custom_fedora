@@ -16,6 +16,10 @@ Used for automating Custom Fedora OS build in mock.
 
 [Live Media Creator Docs](6)
 
+## How to Customize DE in kickstart file
+
+[Gnome](./docs/gnome_customization.md)
+
 ## Prereq
 
 This assumes that you are running an RPM-based system like Fedora and use dnf for package management, depending how old your software is, the choices for the mock build env may be limited since newer mock has newer cfg file for newer OS.
