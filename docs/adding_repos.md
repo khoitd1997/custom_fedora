@@ -4,6 +4,23 @@ By default the kickstart will include the base fedora(and rawhide if you are on 
 
 **WARNING: THE ANNACONDA INSTALLER DOESN'T CHECK GPG KEYS OF REPOS DURING THE INSTALL STEPS"
 
+The hard part of adding repos is about finding the correct info, after you got all the details, it's as simple as:
+
+```shell
+# inside kickstart file
+# --install to make repo available after install
+# check manual for other flags
+repo --name=repo-name --install --mirrorlist=https://repo_mirror_link
+```
+
+## References
+
+These repos list are obtained by intentionally create the wrong url, the response contains all valid repo:
+
+[Fedora Mirror List](1)
+
+[Rpm Fusion List](2)
+
 ## Find the necessary information
 
 To add a repons, the bare minimum you need is the name(also called id) of the repos and either the mirrorlist or a base URL. It's a hit or miss process here and you have to guess the url sometimes, I will give a couple of pointers of where to find.
@@ -71,3 +88,6 @@ Repos that work this way:
 
 - rpm fusion free and non free
 - rpm fusion nvdia
+
+[1]: https://mirrors.fedoraproject.org/mirrorlist?repo=updates-released-modular-29&arch=x86_64
+[2]: https://mirrors.rpmfusion.org/mirrorlist?repo=nonfe-fedora-29&arch=x86_64
