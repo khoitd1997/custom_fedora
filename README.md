@@ -16,9 +16,11 @@ Used for automating Custom Fedora OS build in mock.
 
 [Live Media Creator Docs](6)
 
-## How to Customize DE in kickstart file
+## How to Customize DE and Other Things in kickstart file
 
 [Gnome](./docs/gnome_customization.md)
+
+[Adding Repos](./docs/adding_repos)
 
 ## Prereq
 
