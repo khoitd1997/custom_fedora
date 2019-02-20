@@ -34,9 +34,9 @@ The sections below detail the steps to be followed, some of them may need to be 
 
 ### Configure build and image
 
-The ```settings.sh``` contains configurations for both the build env and the image, change it before doing anything else.
+The ``settings.sh`` contains configurations for both the build env and the image, change it before doing anything else.
 
-For a custom image, you will need your own unflattened kickstart(.ks) file, it's advisable to customize pre-made ks file like [here](4)(use the fedora-live-**.ks file for the most complete), there must be a folder called ```fedora-kickstarts``` where your main kickstart file and its dependencies reside. Check the [kickstart file docs](5) for how to customize.
+For a custom image, you will need your own unflattened kickstart(.ks) file, it's advisable to customize pre-made ks file like [here](4)(use the fedora-live-**.ks file for the most complete), there must be a folder called ``fedora-kickstarts`` where your main kickstart file and its dependencies reside. Check the [kickstart file docs](5) for how to customize.
 
 A good strategy is to clone the [fedora-kickstarts repo](4) into the same dir as this repo and then modify it in there.
 
@@ -52,9 +52,9 @@ nano my_own_config.ks
 
 ### Set up build env
 
-```pre_build.sh``` will install the necessary programs as well as init the basic mock env.
+``pre_build.sh`` will install the necessary programs as well as init the basic mock env.
 
-The mock environment is reused after the first setup so if you ever change it(like moving from fedora 29 to fedora 30, change ```settings.sh``` and rerun)
+The mock environment is reused after the first setup so if you ever change it(like moving from fedora 29 to fedora 30, change ``settings.sh`` and rerun)
 
 ```shell
 ./pre_build.sh
@@ -66,7 +66,7 @@ The mock environment is reused after the first setup so if you ever change it(li
 
 There might be some warnings but if the build keeps going then it should be fine.
 
-The ```build.sh``` script is used to create a new build and will output an iso file in the current directory. Pass in the name of the unflattened target ks file without extension, the name of the output iso will be the same as the ks file.
+The ``build.sh`` script is used to create a new build and will output an iso file in the current directory. Pass in the name of the unflattened target ks file without extension, the name of the output iso will be the same as the ks file.
 
 The build will take quite some time depending on your machine, there will be moments where it feels like the program freezes(low CPU usage and nothing seems to move), just wait patiently and if after like 3 hours and it still stays like that then it probably really froze.
 
