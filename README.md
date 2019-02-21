@@ -42,6 +42,8 @@ For a custom image, you will need your own unflattened kickstart(.ks) file, it's
 
 A good strategy is to clone the [fedora-kickstarts repo](4) into the same dir as this repo and then modify it in there.
 
+You can also put all the files you want to include into a folder inside fedora-kickstarts named user_file, it will be available at /usr/share/user_file on the installed distro.
+
 For more info and workflow check the documentation above about making your own kickstart.
 
 ```shell
@@ -50,6 +52,8 @@ nano settings.sh # customize settings
 git clone https://pagure.io/fedora-kickstarts fedora-kickstarts
 
 cd fedora-kickstarts
+mkdir user_file
+cp file_1 user_file
 git checkout f29 # replace f29 with fedora version you want to base on
 nano my_own_config.ks
 ```
@@ -70,7 +74,7 @@ The mock environment is reused after the first setup so if you ever change it(li
 
 There might be some warnings but if the build keeps going then it should be fine.
 
-The ``build.sh`` script is used to create a new build and will output an iso file in the current directory. Pass in the name of the unflattened target ks file without extension, the name of the output iso will be the same as the ks file.
+The ``build.sh`` script is used to create a new build and will output an iso file and build logs in the ``build`` folder. Pass in the name of the unflattened target ks file without extension, the name of the output iso will be the same as the ks file.
 
 The build will take quite some time depending on your machine, there will be moments where it feels like the program freezes(low CPU usage and nothing seems to move), just wait patiently and if after like 3 hours and it still stays like that then it probably really froze.
 

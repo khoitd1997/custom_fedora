@@ -1,1 +1,3 @@
 **.iso
+build/*
+user_file/*

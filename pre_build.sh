@@ -10,7 +10,7 @@ sudo usermod -a -G mock ${USER}
 
 # setup build env
 mock -r fedora-${env_fedora_ver}-x86_64 --init
-mock -r fedora-${env_fedora_ver}-x86_64 --install lorax-lmc-novirt nano pykickstart git bash genisoimage squashfs-tools 
+mock -r fedora-${env_fedora_ver}-x86_64 --install lorax-lmc-novirt nano pykickstart git bash genisoimage squashfs-tools nano vim
 
 # enable networking for mock
 sudo sed -i -r "/config_opts\['rpmbuild_networking'\]/s/^#//g"  /etc/mock/site-defaults.cfg

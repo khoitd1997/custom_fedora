@@ -7,6 +7,7 @@ source settings.sh
 #-----------------------------------------------------
 
 rm -rf /var/lmc # delete old output if there is any
+rm -rf /var/tmp/mnt
 
 cd fedora-kickstarts
 
@@ -19,27 +20,27 @@ livemedia-creator --ks flat-${kickstart_name}.ks --no-virt \
 --iso-only --iso-name ${kickstart_name}.iso --releasever ${build_fedora_ver} \
 --title ${os_name} --macboot
 
-# # extract filesystem to modify it
-# mkdir -p /mnt/linux
-# mount -o loop /var/lmc/${kickstart_name}.iso /mnt/linux
-# cd /mnt/
-# tar -cvf - linux | (cd /var/tmp/ && tar -xf - )
-# umount /mnt/linux
+# extract filesystem to modify it
+mkdir -p /mnt/linux
+mount -o loop /var/lmc/${kickstart_name}.iso /mnt/linux
+tar -cvf - /mnt/linux | (cd /var/tmp/ && tar -xf - )
+umount /mnt/linux
 
-# # modify files in /var/tmp/linux
-# cd /var/tmp/linux
-# cp -rv /builddir/user_file . # move user file to iso
+# extract squashfs to get to rootfs
+cd /var/tmp/mnt/linux/LiveOS
+unsquashfs -i squashfs.img 
 
-# # repackage image
-# cd /var/tmp/linux
-# mkisofs -o ../${kickstart_name}.iso -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot \
-# -boot-load-size 4 -boot-info-table -J -R -V ${os_name} .
-# mv -v ../${kickstart_name}.iso /var/lmc/${kickstart_name}.iso
+# insert user_file into rootfs
+mount -o loop squashfs-root/LiveOS/rootfs.img /mnt/linux
+cp -vr /builddir/fedora-kickstarts/user_file /mnt/linux/usr/share/
+chmod -R a+r+x /mnt/linux/usr/share/user_file
+umount /mnt/linux
+cd /var/tmp/mnt/linux/LiveOS
+rm -rf squashfs.img
+mksquashfs squashfs-root squashfs.img
 
-# sudo unsquashfs -i squashfs.img 
-# sudo mksquashfs squashfs-root squashfs.img
-# sudo mount -o loop rootfs.img /mnt/linux
-# sudo touch /mnt/linux/usr/share/khoi_was_here.txt 
-
-# cd /
-# rm -rf /var/tmp/linux
+# repackage image
+cd /var/tmp/mnt/linux
+mkisofs -allow-limited-size -o ../${kickstart_name}.iso -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot \
+-boot-load-size 4 -boot-info-table -J -R -V ${os_name} .
+mv -v ../${kickstart_name}.iso /var/lmc/${kickstart_name}.iso
