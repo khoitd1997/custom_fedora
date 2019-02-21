@@ -20,7 +20,9 @@ Used for automating Custom Fedora OS build in mock.
 
 [Gnome](./docs/gnome_customization.md)
 
-[Adding Repos](./docs/adding_repos)
+[Adding Software Repos](./docs/adding_repos)
+
+[Making Your Own Kickstart](./docs/making_kickstart)
 
 ## Prereq
 
@@ -39,6 +41,8 @@ The ``settings.sh`` contains configurations for both the build env and the image
 For a custom image, you will need your own unflattened kickstart(.ks) file, it's advisable to customize pre-made ks file like [here](4)(use the fedora-live-**.ks file for the most complete), there must be a folder called ``fedora-kickstarts`` where your main kickstart file and its dependencies reside. Check the [kickstart file docs](5) for how to customize.
 
 A good strategy is to clone the [fedora-kickstarts repo](4) into the same dir as this repo and then modify it in there.
+
+For more info and workflow check the documentation above about making your own kickstart.
 
 ```shell
 cd custom_fedora
