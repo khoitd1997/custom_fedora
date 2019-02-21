@@ -36,5 +36,10 @@ livemedia-creator --ks flat-${kickstart_name}.ks --no-virt \
 # -boot-load-size 4 -boot-info-table -J -R -V ${os_name} .
 # mv -v ../${kickstart_name}.iso /var/lmc/${kickstart_name}.iso
 
+# sudo unsquashfs -i squashfs.img 
+# sudo mksquashfs squashfs-root squashfs.img
+# sudo mount -o loop rootfs.img /mnt/linux
+# sudo touch /mnt/linux/usr/share/khoi_was_here.txt 
+
 # cd /
 # rm -rf /var/tmp/linux
