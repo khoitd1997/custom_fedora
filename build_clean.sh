@@ -6,4 +6,5 @@ set -e
 source settings.sh
 #---------------------------------------------------
 
+mock -r fedora-${env_fedora_ver}-x86_64 --orphanskill
 mock -r fedora-${env_fedora_ver}-x86_64 --clean

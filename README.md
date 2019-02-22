@@ -1,6 +1,6 @@
-# Custom Fedora
+# Hatter
 
-Used for automating Custom Fedora OS build in mock.
+Hatter is a tool used for automating Custom Fedora OS build.
 
 ## References
 
