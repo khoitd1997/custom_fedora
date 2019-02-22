@@ -4,9 +4,11 @@ There are multiple methods to customize Gnome, and they are outlined below, some
 
 ## Using dconf at first login
 
-The best method to customize Gnome is to use dconf when the user first logs in, the recommended method is to create a script in /etc/profile.d/ and checks if the first time config has already been done.
+The best method to customize Gnome is to use dconf when the user first logs in, the recommended method is to create a script in ``/etc/profile.d/`` and checks if the first time config has already been done.
 
 The script will have the logged in user variable such as $HOME or ~ so you can customize per person. If inside the script uses sudo, the first timet the user opens a command prompt, they will be prompted admin password and if they entered correctly, the script will proceed.
+
+You can create a file in ``/etc/profile.d/`` during the %post section of the kickstart file.
 
 Example:
 

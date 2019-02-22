@@ -84,6 +84,15 @@ For example, to build the live fedora cinnamon iso:
 ./build.sh fedora-live-cinnamon
 ```
 
+### Clean Build
+
+If you think there is something wrong with the mock env, run the ``build_clean`` script and the ``pre_build`` script again.
+
+```shell
+./build_clean.sh
+./pre_build.sh
+```
+
 [1]: https://fedoraproject.org/wiki/Livemedia-creator-_How_to_create_and_use_a_Live_CD?fbclid=IwAR0ghE6C136ATschv_J9OSWIRHqCp5mxTXvrNPLcZ_p82EHW_thuEJY_oB0
 [2]: https://docs.fedoraproject.org/en-US/remix-building/remix-ci/?fbclid=IwAR2ucku-HsEbKXy4H2K5h22kk2wU9-WIrgWvnRVsrxNf38Sk2PSvRgjZTbs
 [3]: https://linux.die.net/man/1/mock
