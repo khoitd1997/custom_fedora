@@ -54,7 +54,9 @@ git clone https://pagure.io/fedora-kickstarts fedora-kickstarts
 cd fedora-kickstarts
 mkdir user_file
 cp file_1 user_file
-git checkout f29 # replace f29 with fedora version you want to base on
+# replace f29 with fedora version you want to base on
+# use tags if you want to be sure
+git checkout tags/0.29.2
 nano my_own_config.ks
 ```
 
