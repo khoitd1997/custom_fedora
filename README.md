@@ -4,17 +4,17 @@ Hatter is a tool used for automating Custom Fedora OS build.
 
 ## References
 
-[Fedora Mock Tutorial](1)
+[Fedora Mock Tutorial](https://fedoraproject.org/wiki/Livemedia-creator-_How_to_create_and_use_a_Live_CD?fbclid=IwAR0ghE6C136ATschv_J9OSWIRHqCp5mxTXvrNPLcZ_p82EHW_thuEJY_oB0)
 
-[Fedora Iso Build Instruction](2)
+[Fedora Iso Build Instruction](https://docs.fedoraproject.org/en-US/remix-building/remix-ci/?fbclid=IwAR2ucku-HsEbKXy4H2K5h22kk2wU9-WIrgWvnRVsrxNf38Sk2PSvRgjZTbs)
 
-[Mock Command Options](3)
+[Mock Command Options](https://linux.die.net/man/1/mock)
 
-[Fedora Project Kickstart Files](4)
+[Fedora Project Kickstart Files](https://pagure.io/fedora-kickstarts)
 
-[Kickstart File Docs](5)
+[Kickstart File Docs](https://pykickstart.readthedocs.io/en/latest/kickstart-docs.html?fbclid=IwAR3AwOKBMyrQxXm72itM4LSx2H9mnuTIaLIzF3yDvwRrwYfpiAWEjgeinJY#chapter-4-pre-installation-script)
 
-[Live Media Creator Docs](6)
+[Live Media Creator Docs](https://weldr.io/lorax/livemedia-creator.html)
 
 ## How to Customize DE and Other Things in kickstart file
 
@@ -23,6 +23,8 @@ Hatter is a tool used for automating Custom Fedora OS build.
 [Adding Software Repos](./docs/adding_repos)
 
 [Making Your Own Kickstart](./docs/making_kickstart)
+
+[Plymouth Customization](./docs/plymouth)
 
 ## Prereq
 
@@ -94,10 +96,3 @@ If you think there is something wrong with the mock env, run the ``build_clean``
 ./build_clean.sh
 ./pre_build.sh
 ```
-
-[1]: https://fedoraproject.org/wiki/Livemedia-creator-_How_to_create_and_use_a_Live_CD?fbclid=IwAR0ghE6C136ATschv_J9OSWIRHqCp5mxTXvrNPLcZ_p82EHW_thuEJY_oB0
-[2]: https://docs.fedoraproject.org/en-US/remix-building/remix-ci/?fbclid=IwAR2ucku-HsEbKXy4H2K5h22kk2wU9-WIrgWvnRVsrxNf38Sk2PSvRgjZTbs
-[3]: https://linux.die.net/man/1/mock
-[4]: https://pagure.io/fedora-kickstarts
-[5]: https://pykickstart.readthedocs.io/en/latest/kickstart-docs.html?fbclid=IwAR3AwOKBMyrQxXm72itM4LSx2H9mnuTIaLIzF3yDvwRrwYfpiAWEjgeinJY#chapter-4-pre-installation-script
-[6]: https://weldr.io/lorax/livemedia-creator.html
