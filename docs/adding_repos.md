@@ -22,15 +22,15 @@ Note that **metalink provides more security and as such should be preferred**.
 
 These repos list are obtained by intentionally create the wrong url, the response contains all valid repo:
 
-[Fedora Mirror List](1)
+[Fedora Mirror List][1]
 
-[Rpm Fusion List](2)
+[Rpm Fusion List][2]
 
 Documentation from Fedora
 
-[Format of Mirror Links](3)
+[Format of Mirror Links][3]
 
-[PyKickstart Docs](4)
+[PyKickstart Docs][4]
 
 ## Find the necessary information
 

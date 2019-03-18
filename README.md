@@ -40,9 +40,9 @@ The sections below detail the steps to be followed, some of them may need to be 
 
 The ``settings.sh`` contains configurations for both the build env and the image, change it before doing anything else.
 
-For a custom image, you will need your own unflattened kickstart(.ks) file, it's advisable to customize pre-made ks file like [here](4)(use the fedora-live-**.ks file for the most complete), there must be a folder called ``fedora-kickstarts`` where your main kickstart file and its dependencies reside. Check the [kickstart file docs](5) for how to customize.
+For a custom image, you will need your own unflattened kickstart(.ks) file, it's advisable to customize pre-made ks file like [here][4](use the fedora-live-**.ks file for the most complete), there must be a folder called ``fedora-kickstarts`` where your main kickstart file and its dependencies reside. Check the [kickstart file docs][5] for how to customize.
 
-A good strategy is to clone the [fedora-kickstarts repo](4) into the same dir as this repo and then modify it in there.
+A good strategy is to clone the [fedora-kickstarts repo][4] into the same dir as this repo and then modify it in there.
 
 You can also put all the files you want to include into a folder inside fedora-kickstarts named user_file, it will be available at /usr/share/user_file on the installed distro.
 

@@ -22,7 +22,7 @@ git # add git
 %end
 ```
 
-The fastest and easiest way is to build on top of the kickstart files of the Fedora project, it's recommended that you create your own repo for the kickstart file, add the [Fedora Kickstart Repo](1) as the gitsubmodule, and have your kickstart file include those kickstart files. The gitsubmodule makes sure that you can easily update from upstream Fedora devs. Out of the kickstart files from Fedora, the most complete ones are usually the live ones, base yours on those if you just want simple desktops.
+The fastest and easiest way is to build on top of the kickstart files of the Fedora project, it's recommended that you create your own repo for the kickstart file, add the [Fedora Kickstart Repo][1] as the gitsubmodule, and have your kickstart file include those kickstart files. The gitsubmodule makes sure that you can easily update from upstream Fedora devs. Out of the kickstart files from Fedora, the most complete ones are usually the live ones, base yours on those if you just want simple desktops.
 
 Adding submodule dependency:
 
