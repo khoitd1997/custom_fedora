@@ -4,9 +4,6 @@
 set -e
 source settings.sh
 #---------------------------------------------------
-# install necessary programs
-sudo dnf install kernel-modules-$(uname -r) mock
-sudo usermod -a -G mock ${USER}
 
 # setup build env
 mock -r fedora-${env_fedora_ver}-x86_64 --init
