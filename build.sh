@@ -10,7 +10,7 @@ currDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 function cleanup {
 sudo -i -u ${original_user} bash << EOF
 # copy logs even in failure case
-mock -r fedora-${env_fedora_ver}-x86_64 --copyout /builddir/fedora-kickstarts/*.log ${currDir}build/
+mock -r fedora-${env_fedora_ver}-x86_64 --copyout /builddir/fedora-kickstarts/*.log ${currDir}/build/
 printf "Exitting Build\n"
 EOF
 sudo setenforce 1

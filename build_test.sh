@@ -13,7 +13,9 @@ qemu-img create -f ${virtual_sys_type} ${fs_path} ${image_disk_size}G
 fi
 
 if virsh list --all | grep -q ${os_name}; then
+    if ! virsh list --inactive | grep -q ${os_name}; then
     virsh destroy ${os_name}
+    fi
     virsh undefine ${os_name}
 fi
 
