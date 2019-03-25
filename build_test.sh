@@ -12,13 +12,6 @@ if [ ! -f ${fs_path} ]; then
 qemu-img create -f ${virtual_sys_type} ${fs_path} ${image_disk_size}G
 fi
 
-if virsh list --all | grep -q ${os_name}; then
-    if ! virsh list --inactive | grep -q ${os_name}; then
-    virsh destroy ${os_name}
-    fi
-    virsh undefine ${os_name}
-fi
-
 virt-install --name ${os_name} \
 --description \"${os_name}\" \
 --ram ${image_ram_size} \
@@ -32,4 +25,7 @@ virt-install --name ${os_name} \
 --noautoconsole
 
 vncviewer 127.0.0.1:1
+
+if ! virsh list --inactive | grep -q ${os_name}; then
 virsh shutdown ${os_name}
+fi
