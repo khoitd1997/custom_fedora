@@ -6,8 +6,11 @@ source settings.sh
 #---------------------------------------------------
 
 # setup build env
-mock -r fedora-${env_fedora_ver}-x86_64 --init
-mock -r fedora-${env_fedora_ver}-x86_64 --install lorax-lmc-novirt nano pykickstart git bash genisoimage squashfs-tools nano vim
+mock -r fedora-${env_fedora_ver}-x86_64 --init 
+mock -r fedora-${env_fedora_ver}-x86_64 --install lorax-lmc-novirt nano pykickstart git bash genisoimage squashfs-tools nano vim dnf-plugins-core dnf createrepo cpp
+
+# disable metadata override
+sudo sed -i '/metadata_expire/d' /etc/mock/fedora-${env_fedora_ver}-x86_64.cfg
 
 # enable networking for mock
 sudo sed -i -r "/config_opts\['rpmbuild_networking'\]/s/^#//g"  /etc/mock/site-defaults.cfg
