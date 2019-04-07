@@ -1,0 +1,4 @@
+*:*thirdparty/*
+unusedFunction:*
+missingIncludeSystem:*
+unmatchedSuppression:*
