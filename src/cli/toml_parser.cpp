@@ -22,11 +22,9 @@
 #include <stdexcept>
 #include <string>
 
-#include <chrono>
-#include <ctime>
-#include <iomanip>
-
-#include "mock_config.hpp"
+#include "config_builder.hpp"
+#include "raw_config_parser.hpp"
+#include "utils.hpp"
 
 #include "cpptoml.hpp"
 
@@ -41,13 +39,8 @@ static std::string getExeDir(void) {
     return std::string("");
 }
 
-static void logInit(const std::string& osName, const std::string& buildDir) {
-    typedef std::chrono::system_clock sysclock;
-    auto                              now = sysclock::to_time_t(sysclock::now());
-    auto                              ss  = std::stringstream();
-    ss << std::put_time(std::localtime(&now), "%Y-%m-%d-%T");
-    auto logName = osName + "-" + ss.str();
-    auto logPath = buildDir + "/logs/" + logName + ".log";
+static void logInit(const std::string& buildDir) {
+    auto logPath = buildDir + "/logs/" + "pre_build.log";
 
     auto consoleLog = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
     consoleLog->set_level(spdlog::level::warn);
@@ -55,7 +48,7 @@ static void logInit(const std::string& osName, const std::string& buildDir) {
     fileLog->set_level(spdlog::level::debug);
     std::vector<spdlog::sink_ptr> logs{consoleLog, fileLog};
 
-    auto logger = std::make_shared<spdlog::logger>("parser_log", logs.begin(), logs.end());
+    auto logger = std::make_shared<spdlog::logger>("pre_build_log", logs.begin(), logs.end());
     spdlog::set_default_logger(logger);
     spdlog::info("hatter log initialized");
 }
@@ -66,22 +59,27 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    std::cout << "Current path is " << getExeDir() << std::endl;
+    // std::cout << "Current path is " << getExeDir() << std::endl;
     auto buildDir = getExeDir() + "/build";
 
     try {
-        auto config = cpptoml::parse_file(argv[1]);
+        logInit(buildDir);
+        auto config        = cpptoml::parse_file(argv[1]);
+        auto isValidConfig = true;
 
         // TODO(kd): add more error checking
-        auto buildConfig = config->get_table("build");
-        mockconfig::verify(buildConfig.get());
+        auto                rawBasicConfig = config->get_table("basic");
+        hatter::BasicConfig basicConfig;
+        isValidConfig &= hatter::getBasicConfig(rawBasicConfig.get(), basicConfig);
 
-        // TODO(kd): verify build info before log init
-        logInit(*(buildConfig->get_as<std::string>("os_name")), buildDir);
+        if (!isValidConfig) {
+            spdlog::error("Invalid configuration, exitting");
+            return 1;
+        }
 
-        // mockconfig::build(buildConfig.get(), buildDir);
+        hatter::buildMockConfig(basicConfig, buildDir);
     } catch (const cpptoml::parse_exception& e) {
-        std::cerr << "Failed to parse " << argv[1] << ": " << e.what() << std::endl;
+        std::cerr << "Failed to parse setting file: " << argv[1] << ": " << e.what() << std::endl;
         return 1;
     }
 
