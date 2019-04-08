@@ -1,47 +1,34 @@
-#include "cpptoml.hpp"
+/**
+ * @file toml_parser.cpp
+ * @author Khoi Trinh
+ * @brief
+ * @version 0.1
+ * @date 2019-04-07
+ *
+ * @copyright Copyright Khoi Trinh (c) 2019
+ *
+ */
+#include <libgen.h>
+#include <limits.h>
+#include <unistd.h>
 
-// #include <unistd.h>
 #include <cassert>
 #include <iostream>
 #include <stdexcept>
 #include <string>
 
-#include <libgen.h>
-#include <limits.h>
-#include <unistd.h>
+#include <chrono>
+#include <ctime>
+#include <iomanip>
 
-// static void checkBuildConfig(const cpptoml::table* buildConfig) {
-//     if (!buildConfig->get_as<std::string>("mock_env_fedora_version")){
+#include "mock_config.hpp"
 
-//     } }
+#include "cpptoml.hpp"
 
-static void buildConfigFile(const cpptoml::table* buildConfig, const std::string& buildDir) {
-    auto config = std::string{R"(
-# build dir
-config_opts['root'] = 'hatter-mock'
-
-# architecture and fedora version
-config_opts['target_arch'] = 'x86_64'
-config_opts['legal_host_arches'] = ('x86_64',)
-)"};
-    config.append("config_opts['dist'] = 'fc" +
-                  *(buildConfig->get_as<std::string>("image_fedora_version")) + "'\n");
-    config.append("config_opts['releasever'] = '" +
-                  *(buildConfig->get_as<std::string>("image_fedora_version")) + "'\n");
-
-    config.append(R"(
-# plugins
-config_opts['extra_chroot_dirs'] = [ '/run/lock', ]
-config_opts['plugin_conf']['ccache_enable'] = True
-
-# packages and chroot setup
-config_opts['package_manager'] = 'dnf'
-)");
-
-    std::ofstream configFile(buildDir + "/mock.cfg", std::ofstream::trunc);
-    configFile << config;
-    configFile.close();
-}
+#include "spdlog/logger.h"
+#include "spdlog/sinks/basic_file_sink.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
+#include "spdlog/spdlog.h"
 
 static std::string getExeDir(void) {
     char buff[PATH_MAX];
@@ -50,7 +37,27 @@ static std::string getExeDir(void) {
         buff[len] = '\0';
         return std::string(dirname(buff));
     }
+
     return std::string("");
+}
+
+static void logInit(const std::string& osName, const std::string& buildDir) {
+    typedef std::chrono::system_clock sysclock;
+    auto                              now = sysclock::to_time_t(sysclock::now());
+    auto                              ss  = std::stringstream();
+    ss << std::put_time(std::localtime(&now), "%Y-%m-%d-%T");
+    auto logName = osName + "-" + ss.str();
+    auto logPath = buildDir + "/logs/" + logName + ".log";
+
+    auto consoleLog = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+    consoleLog->set_level(spdlog::level::warn);
+    auto fileLog = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logPath, true);
+    fileLog->set_level(spdlog::level::debug);
+    std::vector<spdlog::sink_ptr> logs{consoleLog, fileLog};
+
+    auto logger = std::make_shared<spdlog::logger>("parser_log", logs.begin(), logs.end());
+    spdlog::set_default_logger(logger);
+    spdlog::info("hatter log initialized");
 }
 
 int main(int argc, char** argv) {
@@ -65,10 +72,14 @@ int main(int argc, char** argv) {
     try {
         auto config = cpptoml::parse_file(argv[1]);
 
-        // TODO: add more error checking
+        // TODO(kd): add more error checking
         auto buildConfig = config->get_table("build");
-        buildConfigFile(buildConfig.get(), buildDir);
+        mockconfig::verify(buildConfig.get());
 
+        // TODO(kd): verify build info before log init
+        logInit(*(buildConfig->get_as<std::string>("os_name")), buildDir);
+
+        // mockconfig::build(buildConfig.get(), buildDir);
     } catch (const cpptoml::parse_exception& e) {
         std::cerr << "Failed to parse " << argv[1] << ": " << e.what() << std::endl;
         return 1;

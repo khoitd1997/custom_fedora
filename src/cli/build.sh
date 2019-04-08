@@ -2,7 +2,7 @@
 
 currDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 # rm -rf ${currDir}/build
-# mkdir -p ${currDir}/build/bin/build
+mkdir -p ${currDir}/build/bin/build/logs
 # ln -sfv ~/hatter/fedora-kickstarts/settings.toml ~/hatter/src/cli/build/bin
 
 cd ${currDir}/build

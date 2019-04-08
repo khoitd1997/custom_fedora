@@ -11,17 +11,17 @@ find_program(CMAKE_CXX_CPPLINT NAMES cpplint)
 list(
   APPEND
     CMAKE_CXX_CPPLINT
-    "--filter=-legal/copyright, -whitespace/line_length, -whitespace/ending_newline"
+    "--filter=-legal/copyright, -whitespace/line_length, -whitespace/ending_newline, -build/c++11"
     "--quiet")
 list(APPEND CMAKE_CXX_CPPCHECK
             "--enable=all"
             "-q"
+            "--force"
             "--suppressions-list=${CMAKE_SOURCE_DIR}/cppcheck_suppression.txt")
 # set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE "iwyu")
 set(CMAKE_CXX_STANDARD 14)
 add_compile_options(-Wall
                     -Wextra
-                    -pedantic
                     -Werror
                     -fasynchronous-unwind-tables
                     -fstack-protector
@@ -33,12 +33,13 @@ add_compile_options(-Wall
 add_link_options(-fsanitize=address)
 
 add_subdirectory(thirdparty/cpptoml)
+add_subdirectory(thirdparty/spdlog)
 
 add_library(mockconfig mock_config.cpp)
-target_link_libraries(mockconfig PRIVATE cpptoml)
+target_link_libraries(mockconfig PRIVATE cpptoml spdlog)
 target_compile_options(mockconfig PRIVATE -g)
 target_include_directories(mockconfig PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(tomlparser toml_parser.cpp ${PROJECT_SOURCES})
 target_compile_options(tomlparser PRIVATE -Werror -Wall -Wextra)
-target_link_libraries(tomlparser PRIVATE cpptoml PRIVATE mockconfig)
+target_link_libraries(tomlparser PRIVATE cpptoml PRIVATE mockconfig spdlog)
