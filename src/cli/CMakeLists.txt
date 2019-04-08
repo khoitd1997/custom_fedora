@@ -33,13 +33,12 @@ add_compile_options(-Wall
 add_link_options(-fsanitize=address)
 
 add_subdirectory(thirdparty/cpptoml)
-add_subdirectory(thirdparty/spdlog)
 
 add_library(mockconfig mock_config.cpp)
-target_link_libraries(mockconfig PRIVATE cpptoml spdlog)
+target_link_libraries(mockconfig PRIVATE cpptoml)
 target_compile_options(mockconfig PRIVATE -g)
 target_include_directories(mockconfig PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(tomlparser toml_parser.cpp ${PROJECT_SOURCES})
 target_compile_options(tomlparser PRIVATE -Werror -Wall -Wextra)
-target_link_libraries(tomlparser PRIVATE cpptoml PRIVATE mockconfig spdlog)
+target_link_libraries(tomlparser PRIVATE cpptoml PRIVATE mockconfig)

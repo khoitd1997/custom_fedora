@@ -8,6 +8,11 @@
  * @copyright Copyright Khoi Trinh (c) 2019
  *
  */
+#include <spdlog/logger.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
+
 #include <libgen.h>
 #include <limits.h>
 #include <unistd.h>
@@ -24,11 +29,6 @@
 #include "mock_config.hpp"
 
 #include "cpptoml.hpp"
-
-#include "spdlog/logger.h"
-#include "spdlog/sinks/basic_file_sink.h"
-#include "spdlog/sinks/stdout_color_sinks.h"
-#include "spdlog/spdlog.h"
 
 static std::string getExeDir(void) {
     char buff[PATH_MAX];
