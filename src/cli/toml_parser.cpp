@@ -47,6 +47,7 @@ static void logInit(const std::string& buildDir) {
     auto fileLog = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logPath, true);
     fileLog->set_level(spdlog::level::debug);
     std::vector<spdlog::sink_ptr> logs{consoleLog, fileLog};
+    // TODO(kd): Change log format
 
     auto logger = std::make_shared<spdlog::logger>("pre_build_log", logs.begin(), logs.end());
     spdlog::set_default_logger(logger);
@@ -64,13 +65,16 @@ int main(int argc, char** argv) {
 
     try {
         logInit(buildDir);
-        auto config        = cpptoml::parse_file(argv[1]);
+        auto rawConfig     = cpptoml::parse_file(argv[1]);
         auto isValidConfig = true;
 
-        // TODO(kd): add more error checking
-        auto                rawBasicConfig = config->get_table("basic");
-        hatter::BasicConfig basicConfig;
-        isValidConfig &= hatter::getBasicConfig(rawBasicConfig.get(), basicConfig);
+        std::shared_ptr<cpptoml::table> rawBasicConfig;
+        hatter::BasicConfig             basicConfig;
+
+        isValidConfig &= hatter::getTOMLTable(rawConfig.get(), "basic", rawBasicConfig);
+        if (rawBasicConfig) {
+            isValidConfig &= hatter::getBasicConfig(rawBasicConfig.get(), basicConfig);
+        }
 
         if (!isValidConfig) {
             spdlog::error("Invalid configuration, exitting");

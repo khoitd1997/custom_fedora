@@ -39,13 +39,6 @@ add_subdirectory(config_builder)
 add_subdirectory(raw_config_parser)
 add_subdirectory(utils)
 
-# add_library(utils utils.cpp) target_link_libraries(utils PRIVATE cpptoml)
-# target_include_directories(utils PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-
-# add_library(config_builder config_builder.cpp)
-# target_link_libraries(config_builder PRIVATE utils PRIVATE raw_config_parser)
-# target_include_directories(config_builder PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-
 add_executable(tomlparser toml_parser.cpp ${PROJECT_SOURCES})
 # target_compile_options(tomlparser PRIVATE -Werror -Wall -Wextra)
 target_link_libraries(tomlparser
