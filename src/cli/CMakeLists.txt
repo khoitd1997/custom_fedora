@@ -42,8 +42,9 @@ add_compile_options(-Wall
                     -shared
                     -pipe
                     -fsanitize=address
+                    -fsanitize=undefined
                     -g)
-add_link_options(-fsanitize=address)
+add_link_options(-fsanitize=address -fsanitize=undefined)
 
 add_subdirectory(thirdparty/cpptoml)
 
