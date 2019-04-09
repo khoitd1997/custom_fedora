@@ -23,6 +23,18 @@ set(CMAKE_CXX_STANDARD 14)
 add_compile_options(-Wall
                     -Wextra
                     -Werror
+                    -Wnon-virtual-dtor
+                    -Wold-style-cast
+                    -Woverloaded-virtual
+                    -Wsign-conversion
+                    -Wconversion
+                    -Wduplicated-cond
+                    -Wduplicated-branches
+                    -Wlogical-op
+                    -Wnull-dereference
+                    -Wuseless-cast
+                    -Wformat=2
+                    -Wdouble-promotion
                     -fasynchronous-unwind-tables
                     -fstack-protector
                     -fstack-protector-strong
