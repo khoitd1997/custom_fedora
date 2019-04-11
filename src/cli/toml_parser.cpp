@@ -13,10 +13,6 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
-#include <libgen.h>
-#include <limits.h>
-#include <unistd.h>
-
 #include <cassert>
 #include <iostream>
 #include <stdexcept>
@@ -27,17 +23,6 @@
 #include "utils.hpp"
 
 #include "cpptoml.hpp"
-
-static std::string getExeDir(void) {
-    char buff[PATH_MAX];
-    auto len = readlink("/proc/self/exe", buff, sizeof(buff) - 1);
-    if (len != -1) {
-        buff[len] = '\0';
-        return std::string(dirname(buff));
-    }
-
-    return std::string("");
-}
 
 static void logInit(const std::string& buildDir) {
     auto logPath = buildDir + "/logs/" + "pre_build.log";
@@ -61,7 +46,7 @@ int main(int argc, char** argv) {
     }
 
     // std::cout << "Current path is " << getExeDir() << std::endl;
-    auto buildDir = getExeDir() + "/build";
+    auto buildDir = hatter::getExeDir() + "/build";
 
     try {
         logInit(buildDir);
