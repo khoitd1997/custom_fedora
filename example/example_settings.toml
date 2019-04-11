@@ -1,80 +1,93 @@
-# TODO(kd): Support including toml file
-# TODO(kd): Give more detailed errors for missing/invalid keys
-# TODO(kd): Add look customizations like greeter, plymouth
+# order of inclusion from left to right, may override or raise error depending on the options
+# NOTE: relative path will be relative to the main config file
+include_files=["file1.toml", "dir1/file2.toml"]
 
-# build options
-[build]
+# basic options
+[basic]
 mock_env_fedora_version = "29"
 mock_env_fedora_arch= "x86_64"
 image_fedora_version = "29"
 image_fedora_arch = "x86_64"
 base_kickstart_tag="latest" # can also be value like "0.29.2"
-os_name="fedora-kd" # also name of your main kickstart
-first_login_script_dir="first_login.sh"
-post_build_script_dir="post_script.sh"
-included_files=["path_to_dir1", "path_to_dir2"] # will be put in /usr/share/hatter_user_file
+os_name="fedora-kd" 
+first_login_script="first_login.sh" # put in profile.d to launch at first login
+post_build_script="post_script.sh" # post build script
+post_build_script_no_chroot="post_no_chroot_script.sh" # post build script in no chroot
+user_files=["path_to_dir1", "path_to_dir2"] # will be put in /usr/share/hatter_user_file
 
 # define list of repos
 # $releasever and $basearch will be replaced when doing build
-# TODO(kd): optimize for common case like rpmfusion, google-repo, nvidia
-[[repo_list]]
-name="rpmfusion-free-updates"
-display_name="RPM Fusion for Fedora $releasever - Free - Updates" 
-enabled=true
-metalink="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-updates-released-$releasever&arch=$basearch"
-baseurl="http://download1.rpmfusion.org/free/fedora/updates/$releasever/$basearch/"
-gpgcheck=true
-gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"
-install=true
+[repo]
+additional_repos="google-chrome, nvidia" # commonly used repos
 
-[[repo_list]]
-name="rpmfusion-free"
-display_name="RPM Fusion for Fedora $releasever - Free" 
-enabled=true
-metalink="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-$releasever&arch=$basearch"
-baseurl="http://download1.rpmfusion.org/free/fedora/releases/$releasever/Everything/$basearch/os/"
-gpgcheck=true
-gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"
-install=true
+    # start defining custom repos here
+    [[repo.repo_list]]
+    name="rpmfusion-free-updates"
+    display_name="RPM Fusion for Fedora $releasever - Free - Updates" 
+    enabled=true
+    metalink="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-updates-released-$releasever&arch=$basearch"
+    baseurl="http://download1.rpmfusion.org/free/fedora/updates/$releasever/$basearch/"
+    gpgcheck=true
+    gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"
+    install=true
+
+    [[repo.repo_list]]
+    name="rpmfusion-free"
+    display_name="RPM Fusion for Fedora $releasever - Free" 
+    enabled=true
+    metalink="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-$releasever&arch=$basearch"
+    baseurl="http://download1.rpmfusion.org/free/fedora/releases/$releasever/Everything/$basearch/os/"
+    gpgcheck=true
+    gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"
+    install=true
 
 # define multiple types of packages to be included
 [package]
+    [package.rpm.include]
+    packages=[
+    "moreutils",
+    "jq",
+    "ripgrep",
+    "gnome-terminal"
+    ]
 
-    [rpm]
-# TODO(kd): Make sure parsing is optional for this section
-        [rpm.include]
-        packages=[
-        "moreutils",
-        "jq",
-        "ripgrep",
-        "gnome-terminal"
-        ]
+    groups=[
+    "@multimedia",
+    "@sound-and-video"
+    ]
 
-        groups=[
-        "@multimedia",
-        "@sound-and-video"
-        ]
+    [package.rpm.exclude]
+    packages=[
+        "gnome-calculator"
+    ]
 
-        [rpm.exclude]
-        packages=[
-            "gnome-calculator"
-        ]
+    groups=[
+        "@virtualization"
+    ]
 
-        groups=[
-        ]
-    
-    [snap]
-    include=[
+    [package.snap]
+    include = [
+        "telegram-desktop"
+    ]
+
+    # packages that is installed with --classic flag
+    include_classic = [
+        "code"
     ]
 
     exclude=[
+        "notepad-plus-plus"
     ]
 
-    [flatpak]
-    include=[
+    [package.flatpak]
+    include = [
+        "com.spotify.Client",
+        "org.octave.Octave"
     ]
 
-    exclude=[
+    exclude = [
+        "org.libreoffice.LibreOffice",
+        "org.gimp.GIMP"
     ]
 
 [misc]
