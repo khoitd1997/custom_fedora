@@ -8,27 +8,27 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
-#include "cpptoml.hpp"
+#include "toml11/toml.hpp"
 
 namespace hatter {
 template <typename T>
-bool getTOMLVal(const cpptoml::table* t,
-                const std::string&    keyName,
-                T&                    storage,
-                const std::string&    section) {
-    auto value = t->get_as<T>(keyName);
-    if (!value) {
-        spdlog::error("[" + section + "] " + keyName + " is either undefined or has wrong type");
+bool getTOMLVal(const toml::table& t,
+                const std::string& keyName,
+                T&                 storage,
+                const std::string& section) {
+    try {
+        storage = toml::get<T>(t.at(keyName));
+    } catch (const toml::type_error& e) {
+        spdlog::error("[" + section + "] " + keyName + " has wrong type");
+        return false;
+    } catch (const std::out_of_range& e) {
+        spdlog::error("[" + section + "] " + keyName + " is undefined");
         return false;
     }
-    // spdlog::debug(keyName + " is parsed successfully");
-    storage = *value;
     return true;
 }
 
-bool getTOMLTable(const cpptoml::table*            inTable,
-                  const std::string&               tableName,
-                  std::shared_ptr<cpptoml::table>& outTable);
+bool getTOMLTable(const toml::table& inTable, const std::string& tableName, toml::table& outTable);
 
 void        writeFile(const std::string& s, const std::string& path);
 std::string getExeDir(void);

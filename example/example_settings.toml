@@ -9,6 +9,7 @@ mock_env_fedora_arch= "x86_64"
 image_fedora_version="29"
 image_fedora_arch="x86_64"
 base_kickstart_tag="latest" # can also be value like "0.29.2"
+base_spin="cinnamon"
 os_name="fedora-kd" 
 first_login_script="first_login.sh" # put in profile.d to launch at first login
 post_build_script="post_script.sh" # post build script

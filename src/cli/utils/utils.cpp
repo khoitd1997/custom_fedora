@@ -8,11 +8,10 @@
 #include <string>
 
 namespace hatter {
-bool getTOMLTable(const cpptoml::table*            inTable,
-                  const std::string&               tableName,
-                  std::shared_ptr<cpptoml::table>& outTable) {
-    outTable = inTable->get_table(tableName);
-    if (!outTable) {
+bool getTOMLTable(const toml::table& inTable, const std::string& tableName, toml::table& outTable) {
+    try {
+        outTable = toml::get<toml::Table>(inTable.at(tableName));
+    } catch (const std::out_of_range& e) {
         spdlog::error("Can't get table " + tableName);
         return false;
     }

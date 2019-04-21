@@ -7,10 +7,15 @@
 
 #include <iostream>
 
+#include "toml11/toml.hpp"
+
 #include "utils.hpp"
 
 namespace hatter {
-bool getBasicConfig(const cpptoml::table* rawBasicConfig, BasicConfig& basicConfig) {
+bool getBasicConfig(const toml::table& rawConfig, BasicConfig& basicConfig) {
+    toml::table rawBasicConfig;
+    getTOMLTable(rawConfig, "basic", rawBasicConfig);
+
     auto isValidConfig = true;
     isValidConfig &= getTOMLVal<std::string>(
         rawBasicConfig, "mock_env_fedora_version", basicConfig.mockEnvVersion, "BASIC");
@@ -21,7 +26,7 @@ bool getBasicConfig(const cpptoml::table* rawBasicConfig, BasicConfig& basicConf
     isValidConfig &=
         getTOMLVal<std::string>(rawBasicConfig, "os_name", basicConfig.osName, "BASIC");
     isValidConfig &= getTOMLVal<std::string>(
-        rawBasicConfig, "post_script_dir", basicConfig.postScriptDir, "BASIC");
+        rawBasicConfig, "post_build_script", basicConfig.postBuildScript, "BASIC");
     return isValidConfig;
 }
 }  // namespace hatter
