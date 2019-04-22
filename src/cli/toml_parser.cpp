@@ -26,21 +26,15 @@
 
 // #include "cpptoml.hpp"
 
-// static void logInit(const std::string& buildDir) {
-//     auto logPath = buildDir + "/logs/" + "pre_build.log";
+static void logInit() {
+    auto consoleLog = spdlog::stdout_color_mt("console");
 
-//     auto consoleLog = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-//     consoleLog->set_level(spdlog::level::warn);
-//     auto fileLog = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logPath, true);
-//     fileLog->set_level(spdlog::level::debug);
-//     std::vector<spdlog::sink_ptr> logs{consoleLog, fileLog};
-//     // TODO(kd): Change log format
-//     // TODO(kd): Route parser error to stdout and then to file
+    spdlog::set_default_logger(consoleLog);
+    spdlog::set_level(spdlog::level::info);
+    spdlog::set_pattern("[%^%l%$] %v");
 
-//     auto logger = std::make_shared<spdlog::logger>("pre_build_log", logs.begin(), logs.end());
-//     spdlog::set_default_logger(logger);
-//     spdlog::info("hatter log initialized");
-// }
+    spdlog::info("hatter log initialized");
+}
 
 int main(int argc, char** argv) {
     if (argc < 2) {
@@ -48,10 +42,14 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    logInit();
+
     auto data = toml::parse(argv[1]);
-    hatter::BasicConfig basicConfig;
-    hatter::getBasicConfig(data, basicConfig);
-    std::cout << basicConfig.osName << std::endl;
+
+    hatter::BuildEnvConfig buildEnvConfig(data);
+
+    hatter::BasicConfig basicConfig(data);
+    if (basicConfig.isValid) { std::cout << basicConfig.baseSpin << std::endl; }
 
     // const auto rawBasicConfig = toml::get<toml::Table>(data.at("basic"));
     // const auto title = toml::get<std::string>(rawBasicConfig.at("mock_env_fedora_version"));
@@ -70,7 +68,6 @@ int main(int argc, char** argv) {
     // }
     // std::cout << testVal << std::endl;
 
-    
     // const auto testStr   = toml::get<toml::string>(testTable.at("mock_env_fedora_version"));
     // if (testTable.is_ok()) {
     //     std::cout << "test table is valid" << std::endl;
@@ -89,7 +86,6 @@ int main(int argc, char** argv) {
     // auto buildDir = hatter::getExeDir() + "/build";
 
     // try {
-    //     logInit(buildDir);
     //     auto rawConfig     = cpptoml::parse_file(argv[1]);
     //     auto isValidConfig = true;
 
