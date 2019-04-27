@@ -43,4 +43,32 @@ BasicConfig::BasicConfig(const toml::table& rawConfig) : BaseConfig("basic", kCy
         isValid &= getTOMLVal<std::vector<std::string>>(rawBasicConfig, "user_files", userFiles);
     }
 }
+
+void Repo::from_toml(const toml::value& v) {
+    // TODO(kd): Handle optional value
+    this->name        = toml::find<std::string>(v, "name");
+    this->displayName = toml::find<std::string>(v, "display_name");
+    this->metaLink    = toml::find<std::string>(v, "metalink");
+    this->baseurl     = toml::find<std::string>(v, "baseurl");
+    this->gpgcheck    = toml::find<bool>(v, "gpgcheck");
+    this->gpgkey      = toml::find<std::string>(v, "gpgkey");
+
+    return;
+}
+
+RepoConfig::RepoConfig(const toml::table& rawConfig) : BaseConfig("repo", kGreenColorCode) {
+    toml::table rawRepoConfig;
+    isValid &= getTOMLTable(rawConfig, sectionName, rawRepoConfig);
+
+    if (isValid) {
+        isValid &= getTOMLVal<std::vector<std::string>>(
+            rawRepoConfig, "standard_repos", standardRepos, true);
+        isValid &=
+            getTOMLVal<std::vector<std::string>>(rawRepoConfig, "copr_repos", coprRepos, true);
+
+        // TODO(kd): More specific error message about which member has wrong type
+        isValid &= getTOMLVal<std::vector<Repo>>(rawRepoConfig, "custom_repos", customRepos, true);
+    }
+}
+
 }  // namespace hatter

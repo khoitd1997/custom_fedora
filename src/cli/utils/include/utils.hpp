@@ -11,15 +11,21 @@
 
 namespace hatter {
 template <typename T>
-bool getTOMLVal(const toml::table& t, const std::string& keyName, T& storage) {
+bool getTOMLVal(const toml::table& t,
+                const std::string& keyName,
+                T&                 storage,
+                const bool         isOptional = false) {
     try {
         storage = toml::get<T>(t.at(keyName));
     } catch (const toml::type_error& e) {
         spdlog::error(keyName + " has wrong type");
         return false;
     } catch (const std::out_of_range& e) {
-        spdlog::error(keyName + " is undefined");
-        return false;
+        if (!isOptional) {
+            spdlog::error(keyName + " is undefined");
+            return false;
+        }
+        return true;
     }
     return true;
 }

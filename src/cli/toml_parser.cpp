@@ -46,13 +46,12 @@ int main(int argc, char** argv) {
 
     auto data = toml::parse(argv[1]);
 
-    // hatter::BuildEnvConfig buildEnvConfig(data);
+    // hatter::BasicConfig basicConfig(data);
+    // auto buildDir = hatter::getExeDir() + "/build";
+    // hatter::buildMockConfig(basicConfig, buildDir);
 
-    hatter::BasicConfig basicConfig(data);
-    // if (basicConfig.isValid) { std::cout << basicConfig.baseSpin << std::endl; }
-
-    auto buildDir = hatter::getExeDir() + "/build";
-    hatter::buildMockConfig(basicConfig, buildDir);
+    hatter::RepoConfig repoConfig(data);
+    if (!repoConfig.isValid) { std::cout << "Failed to parse repo config" << std::endl; }
 
     // const auto rawBasicConfig = toml::get<toml::Table>(data.at("basic"));
     // const auto title = toml::get<std::string>(rawBasicConfig.at("mock_env_fedora_version"));
