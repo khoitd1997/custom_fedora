@@ -1,7 +1,6 @@
 **.iso
 build/*
 user_file/*
-
 **/.vscode/ipch
 
 # C++ objects and libs
