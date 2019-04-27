@@ -26,28 +26,17 @@ user_files=["path_to_dir1", "path_to_dir2"] # will be put in /usr/share/hatter_u
 # define list of repos
 # $releasever and $basearch will be replaced when doing build
 [repo]
-additional_repos="google-chrome, nvidia" # commonly used repos
+standard_repos=["google-chrome", "nvidia", "vscode"]
+copr_repos=["repo1, repo2"]
 
     # start defining custom repos here
-    [[repo.repo_list]]
-    name="rpmfusion-free-updates"
-    display_name="RPM Fusion for Fedora $releasever - Free - Updates" 
-    enabled=true
-    metalink="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-updates-released-$releasever&arch=$basearch"
-    baseurl="http://download1.rpmfusion.org/free/fedora/updates/$releasever/$basearch/"
-    gpgcheck=true
-    gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"
-    install=true
-
-    [[repo.repo_list]]
+    [[repo.custom_repos]]
     name="rpmfusion-free"
     display_name="RPM Fusion for Fedora $releasever - Free" 
-    enabled=true
     metalink="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-$releasever&arch=$basearch"
     baseurl="http://download1.rpmfusion.org/free/fedora/releases/$releasever/Everything/$basearch/os/"
     gpgcheck=true
     gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"
-    install=true
 
 # define multiple types of packages to be included
 [package]
@@ -74,32 +63,8 @@ additional_repos="google-chrome, nvidia" # commonly used repos
         "virtualization"
     ]
 
-    [package.snap]
-    install=[
-        "telegram-desktop"
-    ]
-
-    # packages that is installed with --classic flag
-    install_classic=[
-        "code"
-    ]
-
-    remove=[
-        "notepad-plus-plus"
-    ]
-
-    [package.flatpak]
-    install=[
-        "com.spotify.Client",
-        "org.octave.Octave"
-    ]
-
-    remove=[
-        "org.libreoffice.LibreOffice",
-        "org.gimp.GIMP"
-    ]
-
 [misc]
+partition_size=7000
 lang="en_US.UTF-8" # locale -a
 keyboard="us" # localectl list-x11-keymap-layouts
 timezone="US/Pacific" # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
