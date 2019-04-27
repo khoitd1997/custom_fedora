@@ -13,15 +13,6 @@ struct BaseConfig {
     virtual ~BaseConfig() = 0;
 };
 
-struct BuildEnvConfig : public BaseConfig {
-    std::string mockEnvVersion;
-    std::string mockEnvArch;
-    std::string osName;
-    bool        enableCustomCache = false;
-
-    explicit BuildEnvConfig(const toml::table& rawConfig);
-};
-
 struct BasicConfig : public BaseConfig {
     std::string imageVersion;
     std::string imageArch;

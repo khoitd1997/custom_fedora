@@ -2,26 +2,18 @@
 # NOTE: relative path will be relative to the main config file
 include_files=["file1.toml", "dir1/file2.toml"]
 
-[build_env]
-# mock_env_fedora_version="29"
-mock_env_fedora_version=38
-mock_env_fedora_arch= "x86_64"
-# os_name="fedora-kd" 
-os_name=21
-enable_custom_package_cache=true
-
 # basic options
 [basic]
 image_fedora_version="29"
 image_fedora_arch="x86_64"
-base_kickstart_tag=49 # can also be value like "0.29.2"
-# base_kickstart_tag="latest" # can also be value like "0.29.2"
-# base_spin="cinnamon"
-base_spin=49
+base_kickstart_tag="latest" # can also be value like "0.29.2"
+os_name="fedora-kd" 
+base_spin="cinnamon"
 first_login_script="first_login.sh" # put in profile.d to launch at first login
 post_build_script="post_script.sh" # post build script
 post_build_script_no_chroot="post_no_chroot_script.sh" # post build script in no chroot
 user_files=["path_to_dir1", "path_to_dir2"] # will be put in /usr/share/hatter_user_file
+enable_custom_package_cache=true
 
 # define list of repos
 # $releasever and $basearch will be replaced when doing build

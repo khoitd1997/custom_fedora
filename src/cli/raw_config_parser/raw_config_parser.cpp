@@ -25,19 +25,6 @@ BaseConfig::BaseConfig(const std::string& sectionName, const std::string& colorC
 
 BaseConfig::~BaseConfig() {}
 
-BuildEnvConfig::BuildEnvConfig(const toml::table& rawConfig)
-    : BaseConfig("build_env", kGreenColorCode) {
-    toml::table rawEnvConfig;
-    isValid &= getTOMLTable(rawConfig, sectionName, rawEnvConfig);
-
-    if (isValid) {
-        isValid &= getTOMLVal<std::string>(rawEnvConfig, "mock_env_fedora_version", mockEnvVersion);
-        isValid &= getTOMLVal<std::string>(rawEnvConfig, "mock_env_fedora_arch", mockEnvArch);
-        isValid &= getTOMLVal<std::string>(rawEnvConfig, "os_name", osName);
-        isValid &= getTOMLVal<bool>(rawEnvConfig, "enable_custom_package_cache", enableCustomCache);
-    }
-}
-
 BasicConfig::BasicConfig(const toml::table& rawConfig) : BaseConfig("basic", kCyanColorCode) {
     toml::table rawBasicConfig;
     isValid &= getTOMLTable(rawConfig, sectionName, rawBasicConfig);
