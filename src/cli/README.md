@@ -22,7 +22,7 @@ Everything except dnf.conf(will be appended later by repo chosen by user)
 
 Maybe /libexec for all other files and just the main one in /usr/bin
 
-Maybe additional features that rely on editing lorax template at /usr/share/lorax
+Support classic kickstart file but with additional settings through the TOML file like caching.
 
 ## Dependency list
 
