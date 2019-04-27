@@ -4,8 +4,8 @@
 #include <limits.h>
 #include <unistd.h>
 
-#include <algorithm>
 #include <iostream>
+#include <regex>
 #include <string>
 
 namespace hatter {
@@ -23,6 +23,29 @@ void writeFile(const std::string& s, const std::string& path) {
     std::ofstream file(path, std::ofstream::trunc);
     file << s;
     file.close();
+}
+
+void writeFile(const std::vector<std::string>& lines, const std::string& path) {
+    std::ofstream file(path, std::ofstream::trunc);
+    for (const auto line : lines) { file << line << std::endl; }
+    file.close();
+}
+
+bool readFile(std::vector<std::string>& lines, const std::string& path) {
+    std::ifstream inFile(path);
+    if (inFile.fail()) { return false; }
+
+    std::string line;
+    while (std::getline(inFile, line)) { lines.push_back(line); }
+
+    return true;
+}
+
+void replacePattern(std::vector<std::string>& lines,
+                    const std::string&        regexPattern,
+                    const std::string&        replaceStr) {
+    std::regex e(regexPattern);
+    for (auto& line : lines) { line = std::regex_replace(line, e, replaceStr); }
 }
 
 std::string getExeDir(void) {

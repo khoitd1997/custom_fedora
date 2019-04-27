@@ -4,7 +4,6 @@
 #include <string>
 
 #include <spdlog/logger.h>
-#include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
@@ -27,7 +26,13 @@ bool getTOMLVal(const toml::table& t, const std::string& keyName, T& storage) {
 
 bool getTOMLTable(const toml::table& inTable, const std::string& tableName, toml::table& outTable);
 
-void        writeFile(const std::string& s, const std::string& path);
+void writeFile(const std::string& s, const std::string& path);
+void writeFile(const std::vector<std::string>& lines, const std::string& path);
+bool readFile(std::vector<std::string>& lines, const std::string& path);
+void replacePattern(std::vector<std::string>& lines,
+                    const std::string&        regexPattern,
+                    const std::string&        replaceStr);
+
 std::string getExeDir(void);
 
 std::string toUpper(const std::string& str);

@@ -48,11 +48,14 @@ add_link_options(-fsanitize=address -fsanitize=undefined)
 
 add_subdirectory(thirdparty/toml11)
 
-# add_subdirectory(config_builder)
+add_subdirectory(config_builder)
 add_subdirectory(raw_config_parser)
 add_subdirectory(utils)
 
 add_executable(tomlparser toml_parser.cpp ${PROJECT_SOURCES})
-# target_link_libraries(tomlparser PRIVATE utils raw_config_parser
-# config_builder)
-target_link_libraries(tomlparser PRIVATE toml11 utils raw_config_parser)
+target_link_libraries(tomlparser
+                      PRIVATE toml11
+                              utils
+                              raw_config_parser
+                              config_builder)
+# target_link_libraries(tomlparser PRIVATE toml11 utils raw_config_parser)

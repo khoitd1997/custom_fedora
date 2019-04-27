@@ -1,29 +1,38 @@
 #include "config_builder.hpp"
 
+#include <spdlog/spdlog.h>
+#include <cstdlib>
+#include <iostream>
+
 #include "utils.hpp"
 
 namespace hatter {
-void buildMockConfig(const BasicConfig& basicConfig, const std::string& buildDir) {
-    auto config = std::string{R"(
-# build dir
-config_opts['root'] = 'hatter-mock'
+bool buildMockConfig(const BasicConfig& basicConfig, const std::string& buildDir) {
+    spdlog::info("Building mock cfg file");
 
-# architecture and fedora version
-config_opts['target_arch'] = 'x86_64'
-config_opts['legal_host_arches'] = ('x86_64',)
-)"};
-    config.append("config_opts['dist'] = 'fc" + basicConfig.imageVersion + "'\n");
-    config.append("config_opts['releasever'] = '" + basicConfig.imageVersion + "'\n");
+    // get default cfg file for the fedora version
+    const auto mockCfgPath = buildDir + "/mock.cfg";
+    const auto baseCfgName =
+        "fedora-" + basicConfig.imageVersion + "-" + basicConfig.imageArch + ".cfg";
+    const auto copyCommand = "cp /etc/mock/" + baseCfgName + " " + mockCfgPath + " 2>/dev/null";
+    auto       ret         = system(copyCommand.c_str());
+    if (0 != ret) {
+        spdlog::error("Failed to copy base cfg file");
+        return false;
+    }
 
-    config.append(R"(
-# plugins
-config_opts['extra_chroot_dirs'] = [ '/run/lock', ]
-config_opts['plugin_conf']['ccache_enable'] = True
+    std::vector<std::string> lines;
+    if (readFile(lines, mockCfgPath)) {
+        replacePattern(
+            lines, "\\bconfig_opts\\['root'\\].*", "config_opts['root'] = 'hatter_mock'");
+        lines.push_back("config_opts['rpmbuild_networking'] = True");
+        lines.push_back("config_opts['plugin_conf']['ccache_enable'] = True");
 
-# packages and chroot setup
-config_opts['package_manager'] = 'dnf'
-)");
-
-    writeFile(config, buildDir + "/mock.cfg");
+        writeFile(lines, mockCfgPath);
+    } else {
+        spdlog::error("Failed to read cfg file");
+        return false;
+    }
+    return true;
 }
 }  // namespace hatter

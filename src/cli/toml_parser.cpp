@@ -20,7 +20,7 @@
 
 #include "toml11/toml.hpp"
 
-// #include "config_builder.hpp"
+#include "config_builder.hpp"
 #include "raw_config_parser.hpp"
 #include "utils.hpp"
 
@@ -46,10 +46,13 @@ int main(int argc, char** argv) {
 
     auto data = toml::parse(argv[1]);
 
-    hatter::BuildEnvConfig buildEnvConfig(data);
+    // hatter::BuildEnvConfig buildEnvConfig(data);
 
     hatter::BasicConfig basicConfig(data);
-    if (basicConfig.isValid) { std::cout << basicConfig.baseSpin << std::endl; }
+    // if (basicConfig.isValid) { std::cout << basicConfig.baseSpin << std::endl; }
+
+    auto buildDir = hatter::getExeDir() + "/build";
+    hatter::buildMockConfig(basicConfig, buildDir);
 
     // const auto rawBasicConfig = toml::get<toml::Table>(data.at("basic"));
     // const auto title = toml::get<std::string>(rawBasicConfig.at("mock_env_fedora_version"));
@@ -83,7 +86,6 @@ int main(int argc, char** argv) {
     // std::cout << "the length of `nums` is" << nums.size() << std::endl;
 
     // std::cout << "Current path is " << getExeDir() << std::endl;
-    // auto buildDir = hatter::getExeDir() + "/build";
 
     // try {
     //     auto rawConfig     = cpptoml::parse_file(argv[1]);
@@ -102,7 +104,6 @@ int main(int argc, char** argv) {
     //         return 1;
     //     }
 
-    //     hatter::buildMockConfig(basicConfig, buildDir);
     // } catch (const cpptoml::parse_exception& e) {
     //     std::cerr << "Failed to parse setting file: " << argv[1] << ": " << e.what() <<
     //     std::endl; return 1;
