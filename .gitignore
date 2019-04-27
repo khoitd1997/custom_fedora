@@ -1,3 +1,4 @@
 **.iso
 build/*
 user_file/*
+.vscode/ipch/*
