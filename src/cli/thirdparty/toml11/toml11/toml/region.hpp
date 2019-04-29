@@ -52,6 +52,14 @@ struct region_base
     virtual std::size_t before()   const noexcept {return 0;}
     // number of characters in the line after the region
     virtual std::size_t after()    const noexcept {return 0;}
+
+    virtual std::string comment_before() const {return "";} // just before
+    virtual std::string comment_inline() const {return "";} // in the same line
+    virtual std::string comment()        const {return "";} // concatenate
+    // ```toml
+    // # comment_before
+    // key = "value" # comment_inline
+    // ```
 };
 
 // location represents a position in a container, which contains a file content.
@@ -62,12 +70,16 @@ struct region_base
 template<typename Container>
 struct location final : public region_base
 {
-    static_assert(std::is_same<char, typename Container::value_type>::value,"");
     using const_iterator = typename Container::const_iterator;
     using source_ptr     = std::shared_ptr<const Container>;
 
+    static_assert(std::is_same<char, typename Container::value_type>::value,"");
+    static_assert(std::is_same<std::random_access_iterator_tag,
+        typename std::iterator_traits<const_iterator>::iterator_category>::value,
+        "container should be randomly accessible");
+
     location(std::string name, Container cont)
-      : source_(std::make_shared<Container>(std::move(cont))),
+      : source_(std::make_shared<Container>(std::move(cont))), line_number_(1),
         source_name_(std::move(name)), iter_(source_->cbegin())
     {}
     location(const location&) = default;
@@ -78,18 +90,54 @@ struct location final : public region_base
 
     bool is_ok() const noexcept override {return static_cast<bool>(source_);}
 
-    const_iterator& iter()       noexcept {return iter_;}
-    const_iterator  iter() const noexcept {return iter_;}
+    // this const prohibits codes like `++(loc.iter())`.
+    const const_iterator iter()  const noexcept {return iter_;}
 
-    const_iterator  begin() const noexcept {return source_->cbegin();}
-    const_iterator  end()   const noexcept {return source_->cend();}
+    const_iterator begin() const noexcept {return source_->cbegin();}
+    const_iterator end()   const noexcept {return source_->cend();}
+
+    // XXX `location::line_num()` used to be implemented using `std::count` to
+    // count a number of '\n'. But with a long toml file (typically, 10k lines),
+    // it becomes intolerably slow because each time it generates error messages,
+    // it counts '\n' from thousands of characters. To workaround it, I decided
+    // to introduce `location::line_number_` member variable and synchronize it
+    // to the location changes the point to look. So an overload of `iter()`
+    // which returns mutable reference is removed and `advance()`, `retrace()`
+    // and `reset()` is added.
+    void advance(std::size_t n = 1) noexcept
+    {
+        this->line_number_ += std::count(this->iter_, this->iter_ + n, '\n');
+        this->iter_ += n;
+        return;
+    }
+    void retrace(std::size_t n = 1) noexcept
+    {
+        this->line_number_ -= std::count(this->iter_ - n, this->iter_, '\n');
+        this->iter_ -= n;
+        return;
+    }
+    void reset(const_iterator rollback) noexcept
+    {
+        // since c++11, std::distance works in both ways for random-access
+        // iterators and returns a negative value if `first > last`.
+        if(0 <= std::distance(rollback, this->iter_)) // rollback < iter
+        {
+            this->line_number_ -= std::count(rollback, this->iter_, '\n');
+        }
+        else // iter < rollback [[unlikely]]
+        {
+            this->line_number_ += std::count(this->iter_, rollback, '\n');
+        }
+        this->iter_ = rollback;
+        return;
+    }
 
     std::string str()  const override {return make_string(1, *this->iter());}
     std::string name() const override {return source_name_;}
 
     std::string line_num() const override
     {
-        return std::to_string(1+std::count(this->begin(), this->iter(), '\n'));
+        return std::to_string(this->line_number_);
     }
 
     std::string line() const override
@@ -128,6 +176,7 @@ struct location final : public region_base
   private:
 
     source_ptr     source_;
+    std::size_t    line_number_;
     std::string    source_name_;
     const_iterator iter_;
 };
@@ -139,9 +188,13 @@ struct location final : public region_base
 template<typename Container>
 struct region final : public region_base
 {
-    static_assert(std::is_same<char, typename Container::value_type>::value,"");
     using const_iterator = typename Container::const_iterator;
     using source_ptr     = std::shared_ptr<const Container>;
+
+    static_assert(std::is_same<char, typename Container::value_type>::value,"");
+    static_assert(std::is_same<std::random_access_iterator_tag,
+        typename std::iterator_traits<const_iterator>::iterator_category>::value,
+        "container should be randomly accessible");
 
     // delete default constructor. source_ never be null.
     region() = delete;
@@ -235,6 +288,92 @@ struct region final : public region_base
 
     std::string name() const override {return source_name_;}
 
+    std::string comment_before() const override
+    {
+        auto iter = this->line_begin(); // points the first element
+        std::vector<std::pair<decltype(iter), decltype(iter)>> comments;
+        while(iter != this->begin())
+        {
+            iter = std::prev(iter);
+            using rev_iter = std::reverse_iterator<decltype(iter)>;
+            auto line_before = std::find(rev_iter(iter), rev_iter(this->begin()),
+                                         '\n').base();
+            // range [line_before, iter) represents the previous line
+
+            auto comment_found = std::find(line_before, iter, '#');
+            if(iter != comment_found && std::all_of(line_before, comment_found,
+                    [](const char c) noexcept -> bool {
+                        return c == ' ' || c == '\t';
+                    }))
+            {
+                // the line before this range contains only a comment.
+                comments.push_back(std::make_pair(comment_found, iter));
+            }
+            else
+            {
+                break;
+            }
+            iter = line_before;
+        }
+
+        std::string com;
+        for(auto i = comments.crbegin(), e = comments.crend(); i!=e; ++i)
+        {
+            if(i != comments.crbegin()) {com += '\n';}
+            com += std::string(i->first, i->second);
+        }
+        return com;
+    }
+
+    std::string comment_inline() const override
+    {
+        if(this->contain_newline())
+        {
+            std::string com;
+            // check both the first and the last line.
+            const auto first_line_end =
+                std::find(this->line_begin(), this->last(), '\n');
+            const auto first_comment_found =
+                std::find(this->line_begin(), first_line_end, '#');
+
+            if(first_comment_found != first_line_end)
+            {
+                com += std::string(first_comment_found, first_line_end);
+            }
+
+            const auto last_comment_found =
+                std::find(this->last(), this->line_end(), '#');
+            if(last_comment_found != this->line_end())
+            {
+                if(!com.empty()){com += '\n';}
+                com += std::string(last_comment_found, this->line_end());
+            }
+            return com;
+        }
+        const auto comment_found =
+            std::find(this->line_begin(), this->line_end(), '#');
+        return std::string(comment_found, this->line_end());
+    }
+
+    std::string comment() const override
+    {
+        std::string com_bef = this->comment_before();
+        std::string com_inl = this->comment_inline();
+        if(!com_bef.empty() && !com_inl.empty())
+        {
+            com_bef += '\n';
+            return com_bef + com_inl;
+        }
+        else if(com_bef.empty())
+        {
+            return com_inl;
+        }
+        else
+        {
+            return com_bef;
+        }
+    }
+
   private:
 
     source_ptr     source_;
@@ -298,7 +437,8 @@ inline std::string format_underline(const std::string& message,
         {
             // invalid
             // ~~~~~~~
-            retval << make_string(reg->size(), '~');
+            const auto underline_len = std::min(reg->size(), reg->line().size());
+            retval << make_string(underline_len, '~');
         }
 
         retval << ' ';
