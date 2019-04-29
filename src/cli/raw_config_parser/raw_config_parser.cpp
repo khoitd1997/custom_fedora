@@ -9,6 +9,7 @@
 
 #include "toml11/toml.hpp"
 
+#include "toml_utils.hpp"
 #include "utils.hpp"
 
 static const char kResetColorCode[]  = "\033[0m";
@@ -27,7 +28,7 @@ BaseConfig::~BaseConfig() {}
 
 BasicConfig::BasicConfig(const toml::table& rawConfig) : BaseConfig("basic", kCyanColorCode) {
     toml::table rawBasicConfig;
-    isValid &= getTOMLTable(rawConfig, sectionName, rawBasicConfig);
+    isValid &= getTOMLVal<toml::table>(rawConfig, sectionName, rawBasicConfig);
 
     if (isValid) {
         isValid &= getTOMLVal<std::string>(rawBasicConfig, "image_fedora_version", imageVersion);
@@ -45,20 +46,45 @@ BasicConfig::BasicConfig(const toml::table& rawConfig) : BaseConfig("basic", kCy
 }
 
 void Repo::from_toml(const toml::value& v) {
-    // TODO(kd): Handle optional value
-    this->name        = toml::find<std::string>(v, "name");
-    this->displayName = toml::find<std::string>(v, "display_name");
-    this->metaLink    = toml::find<std::string>(v, "metalink");
-    this->baseurl     = toml::find<std::string>(v, "baseurl");
-    this->gpgcheck    = toml::find<bool>(v, "gpgcheck");
-    this->gpgkey      = toml::find<std::string>(v, "gpgkey");
+    auto table   = v.as_table();
+    auto isValid = true;
 
-    return;
+    isValid &= getTOMLVal<std::string>(table,
+                                       "name",
+                                       name,
+                                       false,
+                                       "repo's name needs to have type string, moving to next repo",
+                                       "repo's name(string) is undefined, moving to next repo");
+    if (isValid) {
+        spdlog::info("parsing repo: " + name);
+        isValid &= getTOMLVal<std::string>(table, "display_name", displayName, false);
+
+        isValid &= getTOMLVal<std::string>(table, "metalink", metaLink, true);
+        isValid &= getTOMLVal<std::string>(table, "baseurl", baseurl, true);
+
+        if (metaLink.empty() && baseurl.empty()) {
+            spdlog::error("repo has neither metalink or baseurl");
+            isValid = false;
+        }
+
+        isValid &= getTOMLVal<bool>(table, "gpgcheck", gpgcheck, false);
+        if (gpgcheck) {
+            isValid &=
+                getTOMLVal<std::string>(table,
+                                        "gpgkey",
+                                        gpgkey,
+                                        false,
+                                        "gpgkey needs to have type string when gpgcheck is true",
+                                        "gpgkey(string) needs to be defined when gpgcheck is true");
+        }
+
+        if (!isValid) { throw std::out_of_range("failed to parse repo table"); }
+    }
 }
 
 RepoConfig::RepoConfig(const toml::table& rawConfig) : BaseConfig("repo", kGreenColorCode) {
     toml::table rawRepoConfig;
-    isValid &= getTOMLTable(rawConfig, sectionName, rawRepoConfig);
+    isValid &= getTOMLVal<toml::table>(rawConfig, sectionName, rawRepoConfig);
 
     if (isValid) {
         isValid &= getTOMLVal<std::vector<std::string>>(
@@ -66,9 +92,7 @@ RepoConfig::RepoConfig(const toml::table& rawConfig) : BaseConfig("repo", kGreen
         isValid &=
             getTOMLVal<std::vector<std::string>>(rawRepoConfig, "copr_repos", coprRepos, true);
 
-        // TODO(kd): More specific error message about which member has wrong type
         isValid &= getTOMLVal<std::vector<Repo>>(rawRepoConfig, "custom_repos", customRepos, true);
     }
 }
-
 }  // namespace hatter

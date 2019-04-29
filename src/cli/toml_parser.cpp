@@ -44,6 +44,7 @@ int main(int argc, char** argv) {
 
     logInit();
 
+    // TODO(kd): error handling here
     auto data = toml::parse(argv[1]);
 
     // hatter::BasicConfig basicConfig(data);
@@ -52,6 +53,13 @@ int main(int argc, char** argv) {
 
     hatter::RepoConfig repoConfig(data);
     if (!repoConfig.isValid) { std::cout << "Failed to parse repo config" << std::endl; }
+    if (!repoConfig.customRepos.empty()) {
+        std::cout << repoConfig.customRepos.at(0).name << std::endl;
+        std::cout << repoConfig.customRepos.at(0).metaLink << std::endl;
+        std::cout << repoConfig.customRepos.at(0).baseurl << std::endl;
+        std::cout << repoConfig.customRepos.at(0).gpgcheck << std::endl;
+        std::cout << repoConfig.customRepos.at(0).gpgkey << std::endl;
+    }
 
     // const auto rawBasicConfig = toml::get<toml::Table>(data.at("basic"));
     // const auto title = toml::get<std::string>(rawBasicConfig.at("mock_env_fedora_version"));
@@ -60,7 +68,7 @@ int main(int argc, char** argv) {
 
     // auto& testTable = toml::get<toml::Table>(data.at("basic"));
     // toml::table testTable;
-    // auto        res = hatter::getTOMLTable(data, "basic", testTable);
+    // auto        res = hatter::getTOMLVal(data, "basic", testTable);
 
     // std::string testVal;
     // res &= hatter::getTOMLVal<std::string>(testTable, "base_spin", testVal, "BASIC");
@@ -93,7 +101,7 @@ int main(int argc, char** argv) {
     //     std::shared_ptr<cpptoml::table> rawBasicConfig;
     //     hatter::BasicConfig             basicConfig;
 
-    //     isValidConfig &= hatter::getTOMLTable(rawConfig.get(), "basic", rawBasicConfig);
+    //     isValidConfig &= hatter::getTOMLVal(rawConfig.get(), "basic", rawBasicConfig);
     //     if (rawBasicConfig) {
     //         isValidConfig &= hatter::getBasicConfig(rawBasicConfig.get(), basicConfig);
     //     }
