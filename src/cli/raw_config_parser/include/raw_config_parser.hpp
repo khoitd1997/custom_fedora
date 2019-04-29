@@ -27,5 +27,26 @@ struct BasicConfig : public BaseConfig {
 
     explicit BasicConfig(const toml::table& rawConfig);
 };
+
+struct Repo {
+    std::string name;
+    std::string displayName;
+
+    std::string metaLink;
+    std::string baseurl;
+
+    bool        gpgcheck;
+    std::string gpgkey;
+
+    void from_toml(const toml::value& v);
+};
+
+struct RepoConfig : public BaseConfig {
+    std::vector<std::string> standardRepos;
+    std::vector<std::string> coprRepos;
+    std::vector<Repo>        customRepos;
+
+    explicit RepoConfig(const toml::table& rawConfig);
+};
 }  // namespace hatter
 #endif

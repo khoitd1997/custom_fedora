@@ -9,16 +9,6 @@
 #include <string>
 
 namespace hatter {
-bool getTOMLTable(const toml::table& inTable, const std::string& tableName, toml::table& outTable) {
-    try {
-        outTable = toml::get<toml::Table>(inTable.at(tableName));
-    } catch (const std::out_of_range& e) {
-        spdlog::error("Can't get table " + tableName);
-        return false;
-    }
-    return true;
-}
-
 void writeFile(const std::string& s, const std::string& path) {
     std::ofstream file(path, std::ofstream::trunc);
     file << s;

@@ -14,6 +14,9 @@
 #include <unordered_map>
 #include <cassert>
 #include <cstdint>
+#if __cplusplus >= 201703L
+#include <string_view>
+#endif
 
 namespace toml
 {
@@ -292,6 +295,29 @@ class value
     {
         assigner(this->string_, toml::string(std::string(s), kind));
     }
+
+#if __cplusplus >= 201703L
+    value(std::string_view s)
+        : type_(value_t::String),
+          region_info_(std::make_shared<region_base>(region_base{}))
+    {
+        assigner(this->string_, toml::string(s));
+    }
+    value& operator=(std::string_view s)
+    {
+        this->cleanup();
+        this->type_ = value_t::String;
+        this->region_info_ = std::make_shared<region_base>(region_base{});
+        assigner(this->string_, toml::string(s));
+        return *this;
+    }
+    value(std::string_view s, string_t kind)
+        : type_(value_t::String),
+          region_info_(std::make_shared<region_base>(region_base{}))
+    {
+        assigner(this->string_, toml::string(s, kind));
+    }
+#endif
 
     // local date ===========================================================
 
@@ -572,6 +598,14 @@ class value
         return *this;
     }
 
+    // for internal use ------------------------------------------------------
+
+    template<typename T, typename Container, typename std::enable_if<
+        detail::is_exact_toml_type<T>::value, std::nullptr_t>::type = nullptr>
+    value(std::pair<T, detail::region<Container>> parse_result)
+        : value(std::move(parse_result.first), std::move(parse_result.second))
+    {}
+
     // type checking and casting ============================================
 
     template<typename T>
@@ -598,6 +632,41 @@ class value
     typename detail::toml_default_type<T>::type const& cast() const&;
     template<value_t T>
     typename detail::toml_default_type<T>::type&&      cast() &&;
+
+    boolean         const& as_boolean()         const {return this->cast<value_t::Boolean       >();}
+    integer         const& as_integer()         const {return this->cast<value_t::Integer       >();}
+    floating        const& as_float()           const {return this->cast<value_t::Float         >();}
+    string          const& as_string()          const {return this->cast<value_t::String        >();}
+    offset_datetime const& as_offset_datetime() const {return this->cast<value_t::OffsetDatetime>();}
+    local_datetime  const& as_local_datetime()  const {return this->cast<value_t::LocalDatetime >();}
+    local_date      const& as_local_date()      const {return this->cast<value_t::LocalDate     >();}
+    local_time      const& as_local_time()      const {return this->cast<value_t::LocalTime     >();}
+    array           const& as_array()           const {return this->cast<value_t::Array         >();}
+    table           const& as_table()           const {return this->cast<value_t::Table         >();}
+
+    boolean&          as_boolean()         {return this->cast<value_t::Boolean       >();}
+    integer&          as_integer()         {return this->cast<value_t::Integer       >();}
+    floating&         as_float()           {return this->cast<value_t::Float         >();}
+    string&           as_string()          {return this->cast<value_t::String        >();}
+    offset_datetime&  as_offset_datetime() {return this->cast<value_t::OffsetDatetime>();}
+    local_datetime&   as_local_datetime()  {return this->cast<value_t::LocalDatetime >();}
+    local_date&       as_local_date()      {return this->cast<value_t::LocalDate     >();}
+    local_time&       as_local_time()      {return this->cast<value_t::LocalTime     >();}
+    array&            as_array()           {return this->cast<value_t::Array         >();}
+    table&            as_table()           {return this->cast<value_t::Table         >();}
+
+    std::string comment() const
+    {
+        return this->region_info_->comment();
+    }
+    std::string comment_before() const
+    {
+        return this->region_info_->comment_before();
+    }
+    std::string comment_inline() const
+    {
+        return this->region_info_->comment_inline();
+    }
 
   private:
 
