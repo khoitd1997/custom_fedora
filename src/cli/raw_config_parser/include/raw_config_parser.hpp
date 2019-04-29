@@ -9,7 +9,8 @@ struct BaseConfig {
     bool              isValid = true;
     const std::string sectionName;
 
-    BaseConfig(const std::string& sectionName, const std::string& colorCode);
+    void printSection(const std::string& colorCode);
+    BaseConfig(const std::string& sectionName);
     virtual ~BaseConfig() = 0;
 };
 
@@ -47,6 +48,20 @@ struct RepoConfig : public BaseConfig {
     std::vector<Repo>        customRepos;
 
     explicit RepoConfig(const toml::table& rawConfig);
+};
+
+struct PackageSet {
+    std::vector<std::string> installList;
+    std::vector<std::string> removeList;
+
+    bool parse(const toml::table& rawPackageConfig, const std::string& tableName);
+};
+
+struct PackageConfig : public BaseConfig {
+    PackageSet rpm;
+    PackageSet rpmGroup;
+
+    explicit PackageConfig(const toml::table& rawConfig);
 };
 }  // namespace hatter
 #endif

@@ -47,18 +47,39 @@ int main(int argc, char** argv) {
     // TODO(kd): error handling here
     auto data = toml::parse(argv[1]);
 
-    // hatter::BasicConfig basicConfig(data);
-    // auto buildDir = hatter::getExeDir() + "/build";
+    hatter::BasicConfig basicConfig(data);
+    // auto                buildDir = hatter::getExeDir() + "/build";
     // hatter::buildMockConfig(basicConfig, buildDir);
 
     hatter::RepoConfig repoConfig(data);
     if (!repoConfig.isValid) { std::cout << "Failed to parse repo config" << std::endl; }
-    if (!repoConfig.customRepos.empty()) {
-        std::cout << repoConfig.customRepos.at(0).name << std::endl;
-        std::cout << repoConfig.customRepos.at(0).metaLink << std::endl;
-        std::cout << repoConfig.customRepos.at(0).baseurl << std::endl;
-        std::cout << repoConfig.customRepos.at(0).gpgcheck << std::endl;
-        std::cout << repoConfig.customRepos.at(0).gpgkey << std::endl;
+    // if (!repoConfig.customRepos.empty()) {
+    //     std::cout << repoConfig.customRepos.at(0).name << std::endl;
+    //     std::cout << repoConfig.customRepos.at(0).metaLink << std::endl;
+    //     std::cout << repoConfig.customRepos.at(0).baseurl << std::endl;
+    //     std::cout << repoConfig.customRepos.at(0).gpgcheck << std::endl;
+    //     std::cout << repoConfig.customRepos.at(0).gpgkey << std::endl;
+    // }
+
+    hatter::PackageConfig packageConfig(data);
+    if (!packageConfig.isValid) {
+        std::cout << "Failed to parse repo config" << std::endl;
+    } else {
+        std::cout << "rpm: " << std::endl;
+        if (packageConfig.rpm.installList.size() > 0) {
+            std::cout << "install: " << packageConfig.rpm.installList.at(0) << std::endl;
+        }
+        if (packageConfig.rpm.removeList.size() > 0) {
+            std::cout << "remove: " << packageConfig.rpm.removeList.at(0) << std::endl;
+        }
+
+        std::cout << "rpm_group: " << std::endl;
+        if (packageConfig.rpmGroup.installList.size() > 0) {
+            std::cout << "install: " << packageConfig.rpmGroup.installList.at(0) << std::endl;
+        }
+        if (packageConfig.rpmGroup.removeList.size() > 0) {
+            std::cout << "remove: " << packageConfig.rpmGroup.removeList.at(0) << std::endl;
+        }
     }
 
     // const auto rawBasicConfig = toml::get<toml::Table>(data.at("basic"));

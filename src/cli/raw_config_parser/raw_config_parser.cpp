@@ -18,15 +18,16 @@ static const char kYellowColorCode[] = "\033[38;5;226m";
 static const char kGreenColorCode[]  = "\033[38;5;154m";
 
 namespace hatter {
-BaseConfig::BaseConfig(const std::string& sectionName, const std::string& colorCode)
-    : sectionName(sectionName) {
+BaseConfig::BaseConfig(const std::string& sectionName) : sectionName(sectionName) {}
+BaseConfig::~BaseConfig() {}
+
+void BaseConfig::printSection(const std::string& colorCode) {
     spdlog::info("----------------------------------------");
     spdlog::info("parsing section: " + colorCode + toUpper(sectionName) + kResetColorCode);
 }
 
-BaseConfig::~BaseConfig() {}
-
-BasicConfig::BasicConfig(const toml::table& rawConfig) : BaseConfig("basic", kCyanColorCode) {
+BasicConfig::BasicConfig(const toml::table& rawConfig) : BaseConfig("basic") {
+    printSection(kCyanColorCode);
     toml::table rawBasicConfig;
     isValid &= getTOMLVal<toml::table>(rawConfig, sectionName, rawBasicConfig);
 
@@ -82,7 +83,8 @@ void Repo::from_toml(const toml::value& v) {
     }
 }
 
-RepoConfig::RepoConfig(const toml::table& rawConfig) : BaseConfig("repo", kGreenColorCode) {
+RepoConfig::RepoConfig(const toml::table& rawConfig) : BaseConfig("repo") {
+    printSection(kGreenColorCode);
     toml::table rawRepoConfig;
     isValid &= getTOMLVal<toml::table>(rawConfig, sectionName, rawRepoConfig);
 
@@ -93,6 +95,29 @@ RepoConfig::RepoConfig(const toml::table& rawConfig) : BaseConfig("repo", kGreen
             getTOMLVal<std::vector<std::string>>(rawRepoConfig, "copr_repos", coprRepos, true);
 
         isValid &= getTOMLVal<std::vector<Repo>>(rawRepoConfig, "custom_repos", customRepos, true);
+    }
+}
+
+bool PackageSet::parse(const toml::table& rawPackageConfig, const std::string& tableName) {
+    toml::table setConfig;
+    auto        isValid = getTOMLVal<toml::table>(rawPackageConfig, tableName, setConfig, true);
+
+    if (isValid && (setConfig.size() > 0)) {
+        spdlog::info("parsing package set: " + tableName);
+        isValid &= getTOMLVal<std::vector<std::string>>(setConfig, "install", installList, true);
+        isValid &= getTOMLVal<std::vector<std::string>>(setConfig, "remove", removeList, true);
+    }
+    return isValid;
+}
+
+PackageConfig::PackageConfig(const toml::table& rawConfig) : BaseConfig("package") {
+    toml::table rawPackageConfig;
+    isValid &= getTOMLVal<toml::table>(rawConfig, sectionName, rawPackageConfig, true);
+
+    if (isValid && rawPackageConfig.size() > 0) {
+        printSection(kYellowColorCode);
+        isValid &= rpm.parse(rawPackageConfig, "rpm");
+        isValid &= rpmGroup.parse(rawPackageConfig, "rpm_group");
     }
 }
 }  // namespace hatter
