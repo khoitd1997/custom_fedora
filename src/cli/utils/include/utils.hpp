@@ -2,6 +2,7 @@
 #define _HATTER_UTILS_HPP
 #include <memory>
 #include <string>
+#include <string_view>
 
 #include <spdlog/logger.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -19,6 +20,6 @@ void replacePattern(std::vector<std::string>& lines,
 
 std::string getExeDir(void);
 
-std::string toUpper(const std::string& str);
+std::string toUpper(std::string_view str);
 }  // namespace hatter
 #endif

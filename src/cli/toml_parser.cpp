@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
     // hatter::buildMockConfig(basicConfig, buildDir);
 
     hatter::RepoConfig repoConfig(data);
-    if (!repoConfig) { std::cout << "Failed to parse repo config" << std::endl; }
+    // if (!repoConfig) { std::cout << "Failed to parse repo config" << std::endl; }
     // if (!repoConfig.customRepos.empty()) {
     //     std::cout << repoConfig.customRepos.at(0).name << std::endl;
     //     std::cout << repoConfig.customRepos.at(0).metaLink << std::endl;

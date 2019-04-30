@@ -7,16 +7,12 @@
 namespace hatter {
 struct BaseConfig {
    public:
-    const std::string sectionName;
-
-    BaseConfig(const std::string& sectionName);
     virtual ~BaseConfig() = 0;
 
     explicit operator bool() const { return isValid_; }
 
    protected:
     bool isValid_ = true;
-    void printSection_(const std::string& colorCode);
 };
 
 struct BasicConfig : public BaseConfig {
@@ -34,14 +30,14 @@ struct BasicConfig : public BaseConfig {
     explicit BasicConfig(const toml::table& rawConfig);
 };
 
-struct Repo {
+struct Repo : public BaseConfig {
     std::string name;
     std::string displayName;
 
     std::string metaLink;
     std::string baseurl;
 
-    bool        gpgcheck;
+    bool        gpgcheck = false;
     std::string gpgkey;
 
     void from_toml(const toml::value& v);
@@ -55,11 +51,12 @@ struct RepoConfig : public BaseConfig {
     explicit RepoConfig(const toml::table& rawConfig);
 };
 
-struct PackageSet {
+struct PackageSet : public BaseConfig {
     std::vector<std::string> installList;
     std::vector<std::string> removeList;
 
-    bool parse(const toml::table& rawPackageConfig, const std::string& tableName);
+    PackageSet();
+    PackageSet(const toml::table& rawPackageConfig, const std::string& tableName);
 };
 
 struct PackageConfig : public BaseConfig {
