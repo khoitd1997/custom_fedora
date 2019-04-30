@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
     // hatter::buildMockConfig(basicConfig, buildDir);
 
     hatter::RepoConfig repoConfig(data);
-    if (!repoConfig.isValid) { std::cout << "Failed to parse repo config" << std::endl; }
+    if (!repoConfig) { std::cout << "Failed to parse repo config" << std::endl; }
     // if (!repoConfig.customRepos.empty()) {
     //     std::cout << repoConfig.customRepos.at(0).name << std::endl;
     //     std::cout << repoConfig.customRepos.at(0).metaLink << std::endl;
@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
     // }
 
     hatter::PackageConfig packageConfig(data);
-    if (!packageConfig.isValid) {
+    if (!packageConfig) {
         std::cout << "Failed to parse repo config" << std::endl;
     } else {
         std::cout << "rpm: " << std::endl;
@@ -117,17 +117,17 @@ int main(int argc, char** argv) {
 
     // try {
     //     auto rawConfig     = cpptoml::parse_file(argv[1]);
-    //     auto isValidConfig = true;
+    //     auto isValid_Config = true;
 
     //     std::shared_ptr<cpptoml::table> rawBasicConfig;
     //     hatter::BasicConfig             basicConfig;
 
-    //     isValidConfig &= hatter::getTOMLVal(rawConfig.get(), "basic", rawBasicConfig);
+    //     isValid_Config &= hatter::getTOMLVal(rawConfig.get(), "basic", rawBasicConfig);
     //     if (rawBasicConfig) {
-    //         isValidConfig &= hatter::getBasicConfig(rawBasicConfig.get(), basicConfig);
+    //         isValid_Config &= hatter::getBasicConfig(rawBasicConfig.get(), basicConfig);
     //     }
 
-    //     if (!isValidConfig) {
+    //     if (!isValid_Config) {
     //         spdlog::error("Invalid configuration, exitting");
     //         return 1;
     //     }

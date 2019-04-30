@@ -6,12 +6,17 @@
 #include "toml11/toml.hpp"
 namespace hatter {
 struct BaseConfig {
-    bool              isValid = true;
+   public:
     const std::string sectionName;
 
-    void printSection(const std::string& colorCode);
     BaseConfig(const std::string& sectionName);
     virtual ~BaseConfig() = 0;
+
+    explicit operator bool() const { return isValid_; }
+
+   protected:
+    bool isValid_ = true;
+    void printSection_(const std::string& colorCode);
 };
 
 struct BasicConfig : public BaseConfig {
