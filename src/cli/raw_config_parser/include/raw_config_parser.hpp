@@ -35,13 +35,19 @@ struct DistroInfo : public BaseConfig {
 };
 
 struct ImageInfo : public BaseConfig {
-    int         partitionSize;
-    std::string firstLoginScript;
-    std::string postBuildScript;
-    std::string postBuildNoRootScript;
+    int                      partitionSize;
+    std::string              firstLoginScript;
+    std::string              postBuildScript;
+    std::string              postBuildNoRootScript;
     std::vector<std::string> userFiles;
 
     explicit ImageInfo(const toml::table& rawConfig);
+};
+
+struct BuildProcessConfig : public BaseConfig {
+    bool enableCustomCache = kDefaultEnableCustomCache;
+
+    explicit BuildProcessConfig(const toml::table& rawConfig);
 };
 
 struct Repo : public BaseConfig {

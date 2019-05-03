@@ -18,13 +18,14 @@ static const auto kResetColorCode      = "\033[0m";
 static const auto kCyanColorCode       = "\033[38;5;087m";
 static const auto kYellowColorCode     = "\033[38;5;226m";
 static const auto kDarkYellowColorCode = "\033[38;5;220m";
+static const auto kDarkGreenColorCode  = "\033[38;5;34m";
 static const auto kGreenColorCode      = "\033[38;5;154m";
 
 namespace hatter {
 namespace {
 // TODO(kd): Refactor this into a log formatting module if needed
 void printSection(const std::string& colorCode, const std::string& sectionName) {
-    spdlog::info("----------------------------------------");
+    spdlog::info("");
     spdlog::info("parsing section: " + colorCode + hatter::toUpper(sectionName) + kResetColorCode);
 }
 }  // namespace
@@ -69,10 +70,19 @@ ImageInfo::ImageInfo(const toml::table& rawConfig) {
 
     if (isPresent_) {
         isValid_ &= getTOMLVal(rawImageInfo, "partition_size", partitionSize);
-        isValid_ &= getTOMLVal(rawImageInfo, "first_login_script", firstLoginScript);
-        isValid_ &= getTOMLVal(rawImageInfo, "post_build_script", postBuildScript);
-        isValid_ &= getTOMLVal(rawImageInfo, "post_build_script_no_chroot", postBuildNoRootScript);
-        isValid_ &= getTOMLVal(rawImageInfo, "user_files", userFiles);
+        isValid_ &= getTOMLVal(rawImageInfo, "first_login_script", firstLoginScript, true);
+        isValid_ &= getTOMLVal(rawImageInfo, "post_build_script", postBuildScript, true);
+        isValid_ &=
+            getTOMLVal(rawImageInfo, "post_build_script_no_chroot", postBuildNoRootScript, true);
+        isValid_ &= getTOMLVal(rawImageInfo, "user_files", userFiles, true);
+    }
+}
+
+BuildProcessConfig::BuildProcessConfig(const toml::table& rawConfig) {
+    auto rawBuildConfig = getBaseTable_(rawConfig, "build_process", kDarkGreenColorCode);
+
+    if (isPresent_) {
+        isValid_ &= getTOMLVal(rawBuildConfig, "enable_custom_cache", enableCustomCache, true);
     }
 }
 

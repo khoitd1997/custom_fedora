@@ -49,10 +49,12 @@ int main(int argc, char** argv) {
 
     hatter::DistroInfo distroInfo(data);
     if (!distroInfo) { std::cout << "Failed to parse basic config" << std::endl; }
-    std::cout << "image arch: " << distroInfo.imageArch << std::endl;
+    // std::cout << "image arch: " << distroInfo.imageArch << std::endl;
     // auto                buildDir = hatter::getExeDir() + "/build";
     // hatter::buildMockConfig(distroInfo, buildDir);
     hatter::ImageInfo imageInfo(data);
+
+    hatter::BuildProcessConfig buildProcessConfig(data);
 
     hatter::RepoConfig repoConfig(data);
     // if (!repoConfig) { std::cout << "Failed to parse repo config" << std::endl; }
