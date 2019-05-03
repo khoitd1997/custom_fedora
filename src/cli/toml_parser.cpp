@@ -47,11 +47,12 @@ int main(int argc, char** argv) {
     // TODO(kd): error handling here
     auto data = toml::parse(argv[1]);
 
-    hatter::BasicConfig basicConfig(data);
-    if (!basicConfig) { std::cout << "Failed to parse basic config" << std::endl; }
-    std::cout << "image arch: " << basicConfig.imageArch << std::endl;
+    hatter::DistroInfo distroInfo(data);
+    if (!distroInfo) { std::cout << "Failed to parse basic config" << std::endl; }
+    std::cout << "image arch: " << distroInfo.imageArch << std::endl;
     // auto                buildDir = hatter::getExeDir() + "/build";
-    // hatter::buildMockConfig(basicConfig, buildDir);
+    // hatter::buildMockConfig(distroInfo, buildDir);
+    hatter::ImageInfo imageInfo(data);
 
     hatter::RepoConfig repoConfig(data);
     // if (!repoConfig) { std::cout << "Failed to parse repo config" << std::endl; }
@@ -84,9 +85,9 @@ int main(int argc, char** argv) {
         }
     }
 
-    // const auto rawBasicConfig = toml::get<toml::Table>(data.at("basic"));
-    // const auto title = toml::get<std::string>(rawBasicConfig.at("mock_env_fedora_version"));
-    // std::cout << rawBasicConfig << std::endl;
+    // const auto rawDistroInfo = toml::get<toml::Table>(data.at("basic"));
+    // const auto title = toml::get<std::string>(rawDistroInfo.at("mock_env_fedora_version"));
+    // std::cout << rawDistroInfo << std::endl;
     // std::cout << "the mock env version is " << title << std::endl;
 
     // auto& testTable = toml::get<toml::Table>(data.at("basic"));
@@ -121,12 +122,12 @@ int main(int argc, char** argv) {
     //     auto rawConfig     = cpptoml::parse_file(argv[1]);
     //     auto isValid_Config = true;
 
-    //     std::shared_ptr<cpptoml::table> rawBasicConfig;
-    //     hatter::BasicConfig             basicConfig;
+    //     std::shared_ptr<cpptoml::table> rawDistroInfo;
+    //     hatter::DistroInfo             distroInfo;
 
-    //     isValid_Config &= hatter::getTOMLVal(rawConfig.get(), "basic", rawBasicConfig);
-    //     if (rawBasicConfig) {
-    //         isValid_Config &= hatter::getBasicConfig(rawBasicConfig.get(), basicConfig);
+    //     isValid_Config &= hatter::getTOMLVal(rawConfig.get(), "basic", rawDistroInfo);
+    //     if (rawDistroInfo) {
+    //         isValid_Config &= hatter::getDistroInfo(rawDistroInfo.get(), distroInfo);
     //     }
 
     //     if (!isValid_Config) {

@@ -7,13 +7,14 @@
 #include "utils.hpp"
 
 namespace hatter {
-bool buildMockConfig(const BasicConfig& basicConfig, const std::string& buildDir) {
+bool buildMockConfig(const DistroInfo& distroInfo, const std::string& buildDir) {
     spdlog::info("Building mock cfg file");
 
     // get default cfg file for the fedora version
     const auto mockCfgPath = buildDir + "/mock.cfg";
     const auto baseCfgName =
-        "fedora-" + basicConfig.imageVersion + "-" + basicConfig.imageArch + ".cfg";
+        "fedora-" + distroInfo.imageVersion + "-" + distroInfo.imageArch + ".cfg";
+    // TODO(kd): Replace with std file_system
     const auto copyCommand = "cp /etc/mock/" + baseCfgName + " " + mockCfgPath + " 2>/dev/null";
     auto       ret         = system(copyCommand.c_str());
     if (0 != ret) {

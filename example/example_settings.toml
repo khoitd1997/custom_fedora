@@ -21,8 +21,8 @@ include_files=["file1.toml", "dir1/file2.toml"]
 image_fedora_version="29"
 image_fedora_arch="x86_64" 
 base_kickstart_tag="latest" 
-os_name="fedora-kd" 
 base_spin="cinnamon"
+os_name="fedora-kd" 
 
 [image_info]
 partition_size=7000

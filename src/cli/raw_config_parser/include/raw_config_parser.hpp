@@ -24,19 +24,24 @@ struct BaseConfig {
                               const std::string& colorCode = "");
 };
 
-struct BasicConfig : public BaseConfig {
+struct DistroInfo : public BaseConfig {
     std::string imageVersion;
     std::string imageArch    = kDefaultImageArch;
     std::string kickstartTag = kDefaultKickstartTag;
     std::string baseSpin;
+    std::string osName;
 
+    explicit DistroInfo(const toml::table& rawConfig);
+};
+
+struct ImageInfo : public BaseConfig {
+    int         partitionSize;
     std::string firstLoginScript;
     std::string postBuildScript;
     std::string postBuildNoRootScript;
-
     std::vector<std::string> userFiles;
 
-    explicit BasicConfig(const toml::table& rawConfig);
+    explicit ImageInfo(const toml::table& rawConfig);
 };
 
 struct Repo : public BaseConfig {
