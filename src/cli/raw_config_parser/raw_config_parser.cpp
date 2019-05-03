@@ -30,13 +30,31 @@ void printSection(const std::string& colorCode, const std::string& sectionName) 
 
 BaseConfig::~BaseConfig() {}
 
-BasicConfig::BasicConfig(const toml::table& rawConfig) {
-    const auto sectionName = "basic";
-    printSection(kCyanColorCode, sectionName);
-    toml::table rawBasicConfig;
-    isValid_ &= getTOMLVal<toml::table>(rawConfig, sectionName, rawBasicConfig);
+toml::table BaseConfig::getBaseTable_(const toml::table& rawConfig,
+                                      const std::string& tableName,
+                                      const std::string& colorCode) {
+    toml::table ret;
+    std::string errorMessage = "";
 
-    if (isValid_) {
+    try {
+        ret = toml::get<toml::table>(rawConfig.at(tableName));
+        if (ret.size() > 0) { isPresent_ = true; }
+    } catch (const toml::type_error& e) {
+        errorMessage = "table " + tableName + " has wrong type";
+        isValid_     = false;
+    } catch (const std::out_of_range& e) {
+        // the base table is always optional
+    }
+
+    if ((isPresent_ || !isValid_) && (!colorCode.empty())) { printSection(colorCode, tableName); }
+    if (!isValid_) { spdlog::error(errorMessage); }
+    return ret;
+}
+
+BasicConfig::BasicConfig(const toml::table& rawConfig) {
+    auto rawBasicConfig = getBaseTable_(rawConfig, "basic", kCyanColorCode);
+
+    if (isPresent_) {
         isValid_ &= getTOMLVal<std::string>(rawBasicConfig, "image_fedora_version", imageVersion);
         isValid_ &= getTOMLVal<std::string>(rawBasicConfig, "image_fedora_arch", imageArch);
         isValid_ &= getTOMLVal<std::string>(rawBasicConfig, "base_kickstart_tag", kickstartTag);
@@ -88,12 +106,9 @@ void Repo::from_toml(const toml::value& v) {
 }
 
 RepoConfig::RepoConfig(const toml::table& rawConfig) {
-    const auto sectionName = "repo";
-    printSection(kGreenColorCode, sectionName);
-    toml::table rawRepoConfig;
-    isValid_ &= getTOMLVal<toml::table>(rawConfig, sectionName, rawRepoConfig);
+    auto rawRepoConfig = getBaseTable_(rawConfig, "repo", kGreenColorCode);
 
-    if (isValid_) {
+    if (isPresent_) {
         isValid_ &= getTOMLVal<std::vector<std::string>>(
             rawRepoConfig, "standard_repos", standardRepos, true);
         isValid_ &=
@@ -110,10 +125,9 @@ RepoConfig::RepoConfig(const toml::table& rawConfig) {
 PackageSet::PackageSet() {}
 
 PackageSet::PackageSet(const toml::table& rawPackageConfig, const std::string& tableName) {
-    toml::table setConfig;
-    isValid_ = getTOMLVal<toml::table>(rawPackageConfig, tableName, setConfig, true);
+    auto setConfig = getBaseTable_(rawPackageConfig, tableName);
 
-    if (isValid_ && (setConfig.size() > 0)) {
+    if (isPresent_) {
         spdlog::info("parsing package set: " + tableName);
         isValid_ &= getTOMLVal<std::vector<std::string>>(setConfig, "install", installList, true);
         isValid_ &= getTOMLVal<std::vector<std::string>>(setConfig, "remove", removeList, true);
@@ -121,12 +135,9 @@ PackageSet::PackageSet(const toml::table& rawPackageConfig, const std::string& t
 }
 
 PackageConfig::PackageConfig(const toml::table& rawConfig) {
-    const auto  sectionName = "package";
-    toml::table rawPackageConfig;
-    isValid_ &= getTOMLVal<toml::table>(rawConfig, sectionName, rawPackageConfig, true);
+    auto rawPackageConfig = getBaseTable_(rawConfig, "package", kYellowColorCode);
 
-    if (isValid_ && rawPackageConfig.size() > 0) {
-        printSection(kYellowColorCode, sectionName);
+    if (isPresent_) {
         rpm      = PackageSet(rawPackageConfig, "rpm");
         rpmGroup = PackageSet(rawPackageConfig, "rpm_group");
         isValid_ &= rpm && rpmGroup;

@@ -10,9 +10,15 @@ struct BaseConfig {
     virtual ~BaseConfig() = 0;
 
     explicit operator bool() const { return isValid_; }
+    bool     isPresent_() const { return isPresent_; }
 
    protected:
-    bool isValid_ = true;
+    bool isValid_   = true;
+    bool isPresent_ = false;
+
+    toml::table getBaseTable_(const toml::table& rawConfig,
+                              const std::string& tableName,
+                              const std::string& colorCode = "");
 };
 
 struct BasicConfig : public BaseConfig {
