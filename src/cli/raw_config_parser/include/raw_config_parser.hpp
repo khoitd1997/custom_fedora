@@ -45,7 +45,8 @@ struct ImageInfo : public BaseConfig {
 };
 
 struct BuildProcessConfig : public BaseConfig {
-    bool enableCustomCache = kDefaultEnableCustomCache;
+    bool        enableCustomCache = kDefaultEnableCustomCache;
+    std::string mockScript;
 
     explicit BuildProcessConfig(const toml::table& rawConfig);
 };

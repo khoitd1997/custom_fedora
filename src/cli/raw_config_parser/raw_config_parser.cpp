@@ -115,10 +115,9 @@ BuildProcessConfig::BuildProcessConfig(const toml::table& rawConfig) {
 
     if (isPresent_) {
         isValid_ &= getTOMLVal(rawBuildConfig, "enable_custom_cache", enableCustomCache, true);
+        isValid_ &= getTOMLVal(rawBuildConfig, "custom_mock_script", mockScript, true);
 
-        const std::vector<std::string> validOptions = {
-            "enable_custom_cache",
-        };
+        const std::vector<std::string> validOptions = {"enable_custom_cache", "custom_mock_script"};
         isValid_ &= checkUnknownOptions(rawBuildConfig, validOptions);
     }
 }
