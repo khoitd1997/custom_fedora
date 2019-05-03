@@ -24,19 +24,30 @@ struct BaseConfig {
                               const std::string& colorCode = "");
 };
 
-struct BasicConfig : public BaseConfig {
+struct DistroInfo : public BaseConfig {
     std::string imageVersion;
     std::string imageArch    = kDefaultImageArch;
     std::string kickstartTag = kDefaultKickstartTag;
     std::string baseSpin;
+    std::string osName;
 
-    std::string firstLoginScript;
-    std::string postBuildScript;
-    std::string postBuildNoRootScript;
+    explicit DistroInfo(const toml::table& rawConfig);
+};
 
+struct ImageInfo : public BaseConfig {
+    int                      partitionSize;
+    std::string              firstLoginScript;
+    std::string              postBuildScript;
+    std::string              postBuildNoRootScript;
     std::vector<std::string> userFiles;
 
-    explicit BasicConfig(const toml::table& rawConfig);
+    explicit ImageInfo(const toml::table& rawConfig);
+};
+
+struct BuildProcessConfig : public BaseConfig {
+    bool enableCustomCache = kDefaultEnableCustomCache;
+
+    explicit BuildProcessConfig(const toml::table& rawConfig);
 };
 
 struct Repo : public BaseConfig {
@@ -73,6 +84,14 @@ struct PackageConfig : public BaseConfig {
     PackageSet rpmGroup;
 
     explicit PackageConfig(const toml::table& rawConfig);
+};
+
+struct MiscConfig : public BaseConfig {
+    std::string language = kDefaultLanguage;
+    std::string keyboard;
+    std::string timezone;
+
+    explicit MiscConfig(const toml::table& rawConfig);
 };
 }  // namespace hatter
 #endif
