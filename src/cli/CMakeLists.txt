@@ -19,7 +19,7 @@ list(APPEND CMAKE_CXX_CPPCHECK
             "--force"
             "--suppressions-list=${CMAKE_SOURCE_DIR}/cppcheck_suppression.txt")
 # set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE "iwyu")
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 add_compile_options(-Wall
                     -Wextra
                     -Werror

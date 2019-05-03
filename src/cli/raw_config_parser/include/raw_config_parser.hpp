@@ -4,19 +4,30 @@
 #include <vector>
 
 #include "toml11/toml.hpp"
+
+#include "default_config.hpp"
+
 namespace hatter {
 struct BaseConfig {
-    bool              isValid = true;
-    const std::string sectionName;
-
-    BaseConfig(const std::string& sectionName, const std::string& colorCode);
+   public:
     virtual ~BaseConfig() = 0;
+
+    explicit operator bool() const { return isValid_; }
+    bool     isPresent() const { return isPresent_; }
+
+   protected:
+    bool isValid_   = true;
+    bool isPresent_ = false;
+
+    toml::table getBaseTable_(const toml::table& rawConfig,
+                              const std::string& tableName,
+                              const std::string& colorCode = "");
 };
 
 struct BasicConfig : public BaseConfig {
     std::string imageVersion;
-    std::string imageArch;
-    std::string kickstartTag;
+    std::string imageArch    = kDefaultImageArch;
+    std::string kickstartTag = kDefaultKickstartTag;
     std::string baseSpin;
 
     std::string firstLoginScript;
@@ -28,14 +39,14 @@ struct BasicConfig : public BaseConfig {
     explicit BasicConfig(const toml::table& rawConfig);
 };
 
-struct Repo {
+struct Repo : public BaseConfig {
     std::string name;
     std::string displayName;
 
     std::string metaLink;
     std::string baseurl;
 
-    bool        gpgcheck;
+    bool        gpgcheck = false;
     std::string gpgkey;
 
     void from_toml(const toml::value& v);
@@ -47,6 +58,21 @@ struct RepoConfig : public BaseConfig {
     std::vector<Repo>        customRepos;
 
     explicit RepoConfig(const toml::table& rawConfig);
+};
+
+struct PackageSet : public BaseConfig {
+    std::vector<std::string> installList;
+    std::vector<std::string> removeList;
+
+    PackageSet();
+    PackageSet(const toml::table& rawPackageConfig, const std::string& tableName);
+};
+
+struct PackageConfig : public BaseConfig {
+    PackageSet rpm;
+    PackageSet rpmGroup;
+
+    explicit PackageConfig(const toml::table& rawConfig);
 };
 }  // namespace hatter
 #endif

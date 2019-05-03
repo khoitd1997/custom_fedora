@@ -5,71 +5,97 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
+#include <functional>
 #include <iostream>
+#include <numeric>
 
 #include "toml11/toml.hpp"
 
 #include "toml_utils.hpp"
 #include "utils.hpp"
 
-static const char kResetColorCode[]  = "\033[0m";
-static const char kCyanColorCode[]   = "\033[38;5;087m";
-static const char kYellowColorCode[] = "\033[38;5;226m";
-static const char kGreenColorCode[]  = "\033[38;5;154m";
+static const auto kResetColorCode  = "\033[0m";
+static const auto kCyanColorCode   = "\033[38;5;087m";
+static const auto kYellowColorCode = "\033[38;5;226m";
+static const auto kGreenColorCode  = "\033[38;5;154m";
 
 namespace hatter {
-BaseConfig::BaseConfig(const std::string& sectionName, const std::string& colorCode)
-    : sectionName(sectionName) {
+namespace {
+// TODO(kd): Refactor this into a log formatting module if needed
+void printSection(const std::string& colorCode, const std::string& sectionName) {
     spdlog::info("----------------------------------------");
-    spdlog::info("parsing section: " + colorCode + toUpper(sectionName) + kResetColorCode);
+    spdlog::info("parsing section: " + colorCode + hatter::toUpper(sectionName) + kResetColorCode);
 }
+}  // namespace
 
 BaseConfig::~BaseConfig() {}
 
-BasicConfig::BasicConfig(const toml::table& rawConfig) : BaseConfig("basic", kCyanColorCode) {
-    toml::table rawBasicConfig;
-    isValid &= getTOMLVal<toml::table>(rawConfig, sectionName, rawBasicConfig);
+toml::table BaseConfig::getBaseTable_(const toml::table& rawConfig,
+                                      const std::string& tableName,
+                                      const std::string& colorCode) {
+    toml::table ret;
+    std::string errorMessage = "";
 
-    if (isValid) {
-        isValid &= getTOMLVal<std::string>(rawBasicConfig, "image_fedora_version", imageVersion);
-        isValid &= getTOMLVal<std::string>(rawBasicConfig, "image_fedora_arch", imageArch);
-        isValid &= getTOMLVal<std::string>(rawBasicConfig, "base_kickstart_tag", kickstartTag);
-        isValid &= getTOMLVal<std::string>(rawBasicConfig, "base_spin", baseSpin);
+    try {
+        ret = toml::get<toml::table>(rawConfig.at(tableName));
+        if (ret.size() > 0) { isPresent_ = true; }
+    } catch (const toml::type_error& e) {
+        errorMessage = "table " + tableName + " has wrong type";
+        isValid_     = false;
+    } catch (const std::out_of_range& e) {
+        // the base table is always optional
+    }
 
-        isValid &= getTOMLVal<std::string>(rawBasicConfig, "first_login_script", firstLoginScript);
-        isValid &= getTOMLVal<std::string>(rawBasicConfig, "post_build_script", postBuildScript);
-        isValid &= getTOMLVal<std::string>(
+    if ((isPresent_ || !isValid_) && (!colorCode.empty())) { printSection(colorCode, tableName); }
+    if (!isValid_) { spdlog::error(errorMessage); }
+    return ret;
+}
+
+BasicConfig::BasicConfig(const toml::table& rawConfig) {
+    auto rawBasicConfig = getBaseTable_(rawConfig, "basic", kCyanColorCode);
+
+    if (isPresent_) {
+        isValid_ &= getTOMLVal<std::string>(rawBasicConfig, "image_fedora_version", imageVersion);
+        isValid_ &= getTOMLVal<std::string>(rawBasicConfig, "image_fedora_arch", imageArch, true);
+        isValid_ &=
+            getTOMLVal<std::string>(rawBasicConfig, "base_kickstart_tag", kickstartTag, true);
+        isValid_ &= getTOMLVal<std::string>(rawBasicConfig, "base_spin", baseSpin);
+
+        isValid_ &= getTOMLVal<std::string>(rawBasicConfig, "first_login_script", firstLoginScript);
+        isValid_ &= getTOMLVal<std::string>(rawBasicConfig, "post_build_script", postBuildScript);
+        isValid_ &= getTOMLVal<std::string>(
             rawBasicConfig, "post_build_script_no_chroot", postBuildNoRootScript);
 
-        isValid &= getTOMLVal<std::vector<std::string>>(rawBasicConfig, "user_files", userFiles);
+        isValid_ &= getTOMLVal<std::vector<std::string>>(rawBasicConfig, "user_files", userFiles);
     }
 }
 
 void Repo::from_toml(const toml::value& v) {
-    auto table   = v.as_table();
-    auto isValid = true;
+    auto table = v.as_table();
 
-    isValid &= getTOMLVal<std::string>(table,
-                                       "name",
-                                       name,
-                                       false,
-                                       "repo's name needs to have type string, moving to next repo",
-                                       "repo's name(string) is undefined, moving to next repo");
-    if (isValid) {
+    isValid_ &=
+        getTOMLVal<std::string>(table,
+                                "name",
+                                name,
+                                false,
+                                "repo's name needs to have type string, moving to next repo",
+                                "repo's name(string) is undefined, moving to next repo");
+    if (isValid_) {
         spdlog::info("parsing repo: " + name);
-        isValid &= getTOMLVal<std::string>(table, "display_name", displayName, false);
+        isValid_ &= getTOMLVal<std::string>(table, "display_name", displayName, false);
 
-        isValid &= getTOMLVal<std::string>(table, "metalink", metaLink, true);
-        isValid &= getTOMLVal<std::string>(table, "baseurl", baseurl, true);
+        isValid_ &= getTOMLVal<std::string>(table, "metalink", metaLink, true);
+        isValid_ &= getTOMLVal<std::string>(table, "baseurl", baseurl, true);
 
         if (metaLink.empty() && baseurl.empty()) {
             spdlog::error("repo has neither metalink or baseurl");
-            isValid = false;
+            isValid_ = false;
         }
 
-        isValid &= getTOMLVal<bool>(table, "gpgcheck", gpgcheck, false);
-        if (gpgcheck) {
-            isValid &=
+        auto gpgcheckValid = getTOMLVal<bool>(table, "gpgcheck", gpgcheck, false);
+        isValid_ &= gpgcheckValid;
+        if (gpgcheckValid && gpgcheck) {
+            isValid_ &=
                 getTOMLVal<std::string>(table,
                                         "gpgkey",
                                         gpgkey,
@@ -77,22 +103,45 @@ void Repo::from_toml(const toml::value& v) {
                                         "gpgkey needs to have type string when gpgcheck is true",
                                         "gpgkey(string) needs to be defined when gpgcheck is true");
         }
-
-        if (!isValid) { throw std::out_of_range("failed to parse repo table"); }
     }
 }
 
-RepoConfig::RepoConfig(const toml::table& rawConfig) : BaseConfig("repo", kGreenColorCode) {
-    toml::table rawRepoConfig;
-    isValid &= getTOMLVal<toml::table>(rawConfig, sectionName, rawRepoConfig);
+RepoConfig::RepoConfig(const toml::table& rawConfig) {
+    auto rawRepoConfig = getBaseTable_(rawConfig, "repo", kGreenColorCode);
 
-    if (isValid) {
-        isValid &= getTOMLVal<std::vector<std::string>>(
+    if (isPresent_) {
+        isValid_ &= getTOMLVal<std::vector<std::string>>(
             rawRepoConfig, "standard_repos", standardRepos, true);
-        isValid &=
+        isValid_ &=
             getTOMLVal<std::vector<std::string>>(rawRepoConfig, "copr_repos", coprRepos, true);
 
-        isValid &= getTOMLVal<std::vector<Repo>>(rawRepoConfig, "custom_repos", customRepos, true);
+        getTOMLVal<std::vector<Repo>>(rawRepoConfig, "custom_repos", customRepos, true);
+        isValid_ &= std::accumulate(
+            customRepos.begin(), customRepos.end(), true, [](bool isValid, Repo const& repo) {
+                return isValid && repo;
+            });
+    }
+}
+
+PackageSet::PackageSet() {}
+
+PackageSet::PackageSet(const toml::table& rawPackageConfig, const std::string& tableName) {
+    auto setConfig = getBaseTable_(rawPackageConfig, tableName);
+
+    if (isPresent_) {
+        spdlog::info("parsing package set: " + tableName);
+        isValid_ &= getTOMLVal<std::vector<std::string>>(setConfig, "install", installList, true);
+        isValid_ &= getTOMLVal<std::vector<std::string>>(setConfig, "remove", removeList, true);
+    }
+}
+
+PackageConfig::PackageConfig(const toml::table& rawConfig) {
+    auto rawPackageConfig = getBaseTable_(rawConfig, "package", kYellowColorCode);
+
+    if (isPresent_) {
+        rpm      = PackageSet(rawPackageConfig, "rpm");
+        rpmGroup = PackageSet(rawPackageConfig, "rpm_group");
+        isValid_ &= rpm && rpmGroup;
     }
 }
 }  // namespace hatter

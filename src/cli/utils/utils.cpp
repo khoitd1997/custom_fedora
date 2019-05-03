@@ -49,7 +49,7 @@ std::string getExeDir(void) {
     return std::string("");
 }
 
-std::string toUpper(const std::string& str) {
+std::string toUpper(std::string_view str) {
     std::string ret(str);
     std::transform(ret.begin(), ret.end(), ret.begin(), ::toupper);
     return ret;
