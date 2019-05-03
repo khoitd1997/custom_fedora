@@ -56,8 +56,9 @@ BasicConfig::BasicConfig(const toml::table& rawConfig) {
 
     if (isPresent_) {
         isValid_ &= getTOMLVal<std::string>(rawBasicConfig, "image_fedora_version", imageVersion);
-        isValid_ &= getTOMLVal<std::string>(rawBasicConfig, "image_fedora_arch", imageArch);
-        isValid_ &= getTOMLVal<std::string>(rawBasicConfig, "base_kickstart_tag", kickstartTag);
+        isValid_ &= getTOMLVal<std::string>(rawBasicConfig, "image_fedora_arch", imageArch, true);
+        isValid_ &=
+            getTOMLVal<std::string>(rawBasicConfig, "base_kickstart_tag", kickstartTag, true);
         isValid_ &= getTOMLVal<std::string>(rawBasicConfig, "base_spin", baseSpin);
 
         isValid_ &= getTOMLVal<std::string>(rawBasicConfig, "first_login_script", firstLoginScript);

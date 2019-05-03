@@ -48,7 +48,8 @@ int main(int argc, char** argv) {
     auto data = toml::parse(argv[1]);
 
     hatter::BasicConfig basicConfig(data);
-    std::cout << "image version: " << basicConfig.imageVersion << std::endl;
+    if (!basicConfig) { std::cout << "Failed to parse basic config" << std::endl; }
+    std::cout << "image arch: " << basicConfig.imageArch << std::endl;
     // auto                buildDir = hatter::getExeDir() + "/build";
     // hatter::buildMockConfig(basicConfig, buildDir);
 

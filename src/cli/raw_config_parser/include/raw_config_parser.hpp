@@ -4,13 +4,16 @@
 #include <vector>
 
 #include "toml11/toml.hpp"
+
+#include "default_config.hpp"
+
 namespace hatter {
 struct BaseConfig {
    public:
     virtual ~BaseConfig() = 0;
 
     explicit operator bool() const { return isValid_; }
-    bool     isPresent_() const { return isPresent_; }
+    bool     isPresent() const { return isPresent_; }
 
    protected:
     bool isValid_   = true;
@@ -23,8 +26,8 @@ struct BaseConfig {
 
 struct BasicConfig : public BaseConfig {
     std::string imageVersion;
-    std::string imageArch;
-    std::string kickstartTag;
+    std::string imageArch    = kDefaultImageArch;
+    std::string kickstartTag = kDefaultKickstartTag;
     std::string baseSpin;
 
     std::string firstLoginScript;
