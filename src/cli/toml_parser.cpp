@@ -36,7 +36,7 @@ static void logInit() {
     spdlog::info("hatter log initialized");
 }
 
-bool parseInputTomlFile(const std::string& filePath, toml::table& out) {
+bool parseInputTOMLFile(const std::string& filePath, toml::table& out) {
     // TODO(kd): Investigate cleaner error message
     try {
         out = toml::parse(filePath);
@@ -58,9 +58,10 @@ int main(int argc, char** argv) {
     logInit();
 
     toml::table data;
-    auto        isValid = parseInputTomlFile(argv[1], data);
+    auto        isValid  = parseInputTOMLFile(argv[1], data);
+    auto        notEmpty = !data.empty();
 
-    if (isValid) {
+    if (isValid && notEmpty) {
         hatter::DistroInfo distroInfo(data);
         if (!distroInfo) { std::cout << "Failed to parse basic config" << std::endl; }
         // std::cout << "image arch: " << distroInfo.imageArch << std::endl;
