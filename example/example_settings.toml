@@ -2,7 +2,6 @@
 # top level and then left to right high to low priority
 # NOTE: relative path will be relative to the main config file
 include_files=["file1.toml", "dir1/file2.toml"]
-
 # [basic]
 # image_fedora_version="29"
 # image_fedora_arch="x86_64" 

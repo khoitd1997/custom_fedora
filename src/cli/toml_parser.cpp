@@ -36,6 +36,19 @@ static void logInit() {
     spdlog::info("hatter log initialized");
 }
 
+bool parseInputTomlFile(const std::string& filePath, toml::table& out) {
+    // TODO(kd): Investigate cleaner error message
+    try {
+        out = toml::parse(filePath);
+        return true;
+    } catch (const std::runtime_error& e) {
+        spdlog::error("failed to parse file " + filePath + " with error: " + e.what());
+    } catch (const toml::syntax_error& e) {
+        spdlog::error("syntax error in file " + filePath + " with error:\n" + e.what());
+    }
+    return false;
+}
+
 int main(int argc, char** argv) {
     if (argc < 2) {
         std::cout << "Usage: " << argv[0] << " filename" << std::endl;
@@ -44,47 +57,49 @@ int main(int argc, char** argv) {
 
     logInit();
 
-    // TODO(kd): error handling here
-    auto data = toml::parse(argv[1]);
+    toml::table data;
+    auto        isValid = parseInputTomlFile(argv[1], data);
 
-    hatter::DistroInfo distroInfo(data);
-    if (!distroInfo) { std::cout << "Failed to parse basic config" << std::endl; }
-    // std::cout << "image arch: " << distroInfo.imageArch << std::endl;
-    // auto                buildDir = hatter::getExeDir() + "/build";
-    // hatter::buildMockConfig(distroInfo, buildDir);
-    hatter::ImageInfo imageInfo(data);
+    if (isValid) {
+        hatter::DistroInfo distroInfo(data);
+        if (!distroInfo) { std::cout << "Failed to parse basic config" << std::endl; }
+        // std::cout << "image arch: " << distroInfo.imageArch << std::endl;
+        // auto                buildDir = hatter::getExeDir() + "/build";
+        // hatter::buildMockConfig(distroInfo, buildDir);
+        hatter::ImageInfo imageInfo(data);
 
-    hatter::BuildProcessConfig buildProcessConfig(data);
+        hatter::BuildProcessConfig buildProcessConfig(data);
 
-    hatter::RepoConfig repoConfig(data);
-    // if (!repoConfig) { std::cout << "Failed to parse repo config" << std::endl; }
-    // if (!repoConfig.customRepos.empty()) {
-    //     std::cout << repoConfig.customRepos.at(0).name << std::endl;
-    //     std::cout << repoConfig.customRepos.at(0).metaLink << std::endl;
-    //     std::cout << repoConfig.customRepos.at(0).baseurl << std::endl;
-    //     std::cout << repoConfig.customRepos.at(0).gpgcheck << std::endl;
-    //     std::cout << repoConfig.customRepos.at(0).gpgkey << std::endl;
-    // }
-    hatter::MiscConfig miscConfig(data);
+        hatter::RepoConfig repoConfig(data);
+        // if (!repoConfig) { std::cout << "Failed to parse repo config" << std::endl; }
+        // if (!repoConfig.customRepos.empty()) {
+        //     std::cout << repoConfig.customRepos.at(0).name << std::endl;
+        //     std::cout << repoConfig.customRepos.at(0).metaLink << std::endl;
+        //     std::cout << repoConfig.customRepos.at(0).baseurl << std::endl;
+        //     std::cout << repoConfig.customRepos.at(0).gpgcheck << std::endl;
+        //     std::cout << repoConfig.customRepos.at(0).gpgkey << std::endl;
+        // }
+        hatter::MiscConfig miscConfig(data);
 
-    hatter::PackageConfig packageConfig(data);
-    if (!packageConfig) {
-        std::cout << "Failed to parse repo config" << std::endl;
-    } else {
-        std::cout << "rpm: " << std::endl;
-        if (packageConfig.rpm.installList.size() > 0) {
-            std::cout << "install: " << packageConfig.rpm.installList.at(0) << std::endl;
-        }
-        if (packageConfig.rpm.removeList.size() > 0) {
-            std::cout << "remove: " << packageConfig.rpm.removeList.at(0) << std::endl;
-        }
+        hatter::PackageConfig packageConfig(data);
+        if (!packageConfig) {
+            std::cout << "Failed to parse repo config" << std::endl;
+        } else {
+            std::cout << "rpm: " << std::endl;
+            if (packageConfig.rpm.installList.size() > 0) {
+                std::cout << "install: " << packageConfig.rpm.installList.at(0) << std::endl;
+            }
+            if (packageConfig.rpm.removeList.size() > 0) {
+                std::cout << "remove: " << packageConfig.rpm.removeList.at(0) << std::endl;
+            }
 
-        std::cout << "rpm_group: " << std::endl;
-        if (packageConfig.rpmGroup.installList.size() > 0) {
-            std::cout << "install: " << packageConfig.rpmGroup.installList.at(0) << std::endl;
-        }
-        if (packageConfig.rpmGroup.removeList.size() > 0) {
-            std::cout << "remove: " << packageConfig.rpmGroup.removeList.at(0) << std::endl;
+            std::cout << "rpm_group: " << std::endl;
+            if (packageConfig.rpmGroup.installList.size() > 0) {
+                std::cout << "install: " << packageConfig.rpmGroup.installList.at(0) << std::endl;
+            }
+            if (packageConfig.rpmGroup.removeList.size() > 0) {
+                std::cout << "remove: " << packageConfig.rpmGroup.removeList.at(0) << std::endl;
+            }
         }
     }
 
