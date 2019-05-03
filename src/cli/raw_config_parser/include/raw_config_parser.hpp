@@ -85,5 +85,13 @@ struct PackageConfig : public BaseConfig {
 
     explicit PackageConfig(const toml::table& rawConfig);
 };
+
+struct MiscConfig : public BaseConfig {
+    std::string language = kDefaultLanguage;
+    std::string keyboard;
+    std::string timezone;
+
+    explicit MiscConfig(const toml::table& rawConfig);
+};
 }  // namespace hatter
 #endif

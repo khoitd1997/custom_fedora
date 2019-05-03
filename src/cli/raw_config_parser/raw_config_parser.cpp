@@ -16,6 +16,7 @@
 
 static const auto kResetColorCode      = "\033[0m";
 static const auto kCyanColorCode       = "\033[38;5;087m";
+static const auto kBlueColorCode       = "\033[38;5;12m";
 static const auto kYellowColorCode     = "\033[38;5;226m";
 static const auto kDarkYellowColorCode = "\033[38;5;220m";
 static const auto kDarkGreenColorCode  = "\033[38;5;34m";
@@ -61,7 +62,7 @@ DistroInfo::DistroInfo(const toml::table& rawConfig) {
         isValid_ &= getTOMLVal(rawDistroInfo, "image_fedora_arch", imageArch, true);
         isValid_ &= getTOMLVal(rawDistroInfo, "base_kickstart_tag", kickstartTag, true);
         isValid_ &= getTOMLVal(rawDistroInfo, "base_spin", baseSpin);
-        isValid_ &= getTOMLVal(rawDistroInfo, "os_name", baseSpin);
+        isValid_ &= getTOMLVal(rawDistroInfo, "os_name", osName);
     }
 }
 
@@ -156,4 +157,15 @@ PackageConfig::PackageConfig(const toml::table& rawConfig) {
         isValid_ &= rpm && rpmGroup;
     }
 }
+
+MiscConfig::MiscConfig(const toml::table& rawConfig) {
+    auto rawMiscConfig = getBaseTable_(rawConfig, "misc", kBlueColorCode);
+
+    if (isPresent_) {
+        isValid_ &= getTOMLVal(rawMiscConfig, "language", language, true);
+        isValid_ &= getTOMLVal(rawMiscConfig, "keyboard", keyboard);
+        isValid_ &= getTOMLVal(rawMiscConfig, "timezone", timezone);
+    }
+}
+
 }  // namespace hatter

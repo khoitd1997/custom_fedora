@@ -65,6 +65,7 @@ int main(int argc, char** argv) {
     //     std::cout << repoConfig.customRepos.at(0).gpgcheck << std::endl;
     //     std::cout << repoConfig.customRepos.at(0).gpgkey << std::endl;
     // }
+    hatter::MiscConfig miscConfig(data);
 
     hatter::PackageConfig packageConfig(data);
     if (!packageConfig) {
