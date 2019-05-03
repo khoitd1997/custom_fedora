@@ -19,6 +19,7 @@ include_files=["file1.toml", "dir1/file2.toml"]
 
 [distro_info]
 image_fedora_version="29"
+random_stuffs="29"
 image_fedora_arch="x86_64" 
 base_kickstart_tag="latest" 
 base_spin="cinnamon"

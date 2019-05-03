@@ -5,6 +5,7 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
+#include <algorithm>
 #include <functional>
 #include <iostream>
 #include <numeric>
@@ -28,6 +29,22 @@ namespace {
 void printSection(const std::string& colorCode, const std::string& sectionName) {
     spdlog::info("");
     spdlog::info("parsing section: " + colorCode + hatter::toUpper(sectionName) + kResetColorCode);
+}
+
+bool listContain(const std::vector<std::string>& list, const std::string& value) {
+    return static_cast<bool>(std::count(list.begin(), list.end(), value));
+}
+
+bool checkUnknownOptions(const toml::table& table, const std::vector<std::string>& validOptions) {
+    auto isValid = true;
+    for (auto const& [key, val] : table) {
+        if (!listContain(validOptions, key)) {
+            spdlog::error("unknown option: " + key);
+            isValid = false;
+        }
+    }
+
+    return isValid;
 }
 }  // namespace
 
@@ -63,6 +80,13 @@ DistroInfo::DistroInfo(const toml::table& rawConfig) {
         isValid_ &= getTOMLVal(rawDistroInfo, "base_kickstart_tag", kickstartTag, true);
         isValid_ &= getTOMLVal(rawDistroInfo, "base_spin", baseSpin);
         isValid_ &= getTOMLVal(rawDistroInfo, "os_name", osName);
+
+        const std::vector<std::string> validOptions = {"image_fedora_version",
+                                                       "image_fedora_arch",
+                                                       "base_kickstart_tag",
+                                                       "base_spin",
+                                                       "os_name"};
+        isValid_ &= checkUnknownOptions(rawDistroInfo, validOptions);
     }
 }
 
@@ -76,6 +100,13 @@ ImageInfo::ImageInfo(const toml::table& rawConfig) {
         isValid_ &=
             getTOMLVal(rawImageInfo, "post_build_script_no_chroot", postBuildNoRootScript, true);
         isValid_ &= getTOMLVal(rawImageInfo, "user_files", userFiles, true);
+
+        const std::vector<std::string> validOptions = {"partition_size",
+                                                       "first_login_script",
+                                                       "post_build_script",
+                                                       "post_build_script_no_chroot",
+                                                       "user_files"};
+        isValid_ &= checkUnknownOptions(rawImageInfo, validOptions);
     }
 }
 
@@ -84,6 +115,11 @@ BuildProcessConfig::BuildProcessConfig(const toml::table& rawConfig) {
 
     if (isPresent_) {
         isValid_ &= getTOMLVal(rawBuildConfig, "enable_custom_cache", enableCustomCache, true);
+
+        const std::vector<std::string> validOptions = {
+            "enable_custom_cache",
+        };
+        isValid_ &= checkUnknownOptions(rawBuildConfig, validOptions);
     }
 }
 
@@ -118,6 +154,10 @@ void Repo::from_toml(const toml::value& v) {
                                    "gpgkey needs to have type string when gpgcheck is true",
                                    "gpgkey(string) needs to be defined when gpgcheck is true");
         }
+
+        const std::vector<std::string> validOptions = {
+            "name", "display_name", "metalink", "baseurl", "gpgcheck", "gpgkey"};
+        isValid_ &= checkUnknownOptions(table, validOptions);
     }
 }
 
@@ -133,6 +173,10 @@ RepoConfig::RepoConfig(const toml::table& rawConfig) {
             customRepos.begin(), customRepos.end(), true, [](bool isValid, Repo const& repo) {
                 return isValid && repo;
             });
+
+        const std::vector<std::string> validOptions = {
+            "standard_repos", "copr_repos", "custom_repos"};
+        isValid_ &= checkUnknownOptions(rawRepoConfig, validOptions);
     }
 }
 
@@ -145,6 +189,9 @@ PackageSet::PackageSet(const toml::table& rawPackageConfig, const std::string& t
         spdlog::info("parsing package set: " + tableName);
         isValid_ &= getTOMLVal(setConfig, "install", installList, true);
         isValid_ &= getTOMLVal(setConfig, "remove", removeList, true);
+
+        const std::vector<std::string> validOptions = {"install", "remove"};
+        isValid_ &= checkUnknownOptions(setConfig, validOptions);
     }
 }
 
@@ -155,6 +202,9 @@ PackageConfig::PackageConfig(const toml::table& rawConfig) {
         rpm      = PackageSet(rawPackageConfig, "rpm");
         rpmGroup = PackageSet(rawPackageConfig, "rpm_group");
         isValid_ &= rpm && rpmGroup;
+
+        const std::vector<std::string> validOptions = {"rpm", "rpm_group"};
+        isValid_ &= checkUnknownOptions(rawPackageConfig, validOptions);
     }
 }
 
@@ -165,6 +215,9 @@ MiscConfig::MiscConfig(const toml::table& rawConfig) {
         isValid_ &= getTOMLVal(rawMiscConfig, "language", language, true);
         isValid_ &= getTOMLVal(rawMiscConfig, "keyboard", keyboard);
         isValid_ &= getTOMLVal(rawMiscConfig, "timezone", timezone);
+
+        const std::vector<std::string> validOptions = {"language", "keyboard", "timezone"};
+        isValid_ &= checkUnknownOptions(rawMiscConfig, validOptions);
     }
 }
 
