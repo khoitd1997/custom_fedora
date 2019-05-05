@@ -43,7 +43,8 @@ add_compile_options(-Wall
                     -pipe
                     -fsanitize=address
                     -fsanitize=undefined
-                    -g)
+                    -g
+                    -fdiagnostics-color=always)
 add_link_options(-fsanitize=address -fsanitize=undefined)
 
 add_subdirectory(thirdparty/toml11)
