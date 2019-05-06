@@ -10,3 +10,4 @@ cd ${currDir}/build
 # cmake .. && make && ./bin/tomlparser ./bin/example_settings.toml
 # scan-build cmake -G Ninja .. && scan-build ninja && ./bin/tomlparser ./bin/settings.toml
 cmake -G Ninja .. && ninja && ./bin/tomlparser ./bin/example_settings.toml
+# cmake -G Ninja .. && ninja && ./bin/tomlparser ./bin/random.toml
