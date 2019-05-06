@@ -64,7 +64,7 @@ parser_mode=false
 function cleanup {
 sudo -i -u ${original_user} bash << EOF
 # copy logs even in failure case
-mock -r ${output_dir}/mock.cfg --copyout /builddir/fedora-kickstarts/*.log ${output_dir}/out
+mock -r ${output_dir}/mock.cfg --copyout /builddir/fedora-kickstarts/*.log ${output_dir}/out/log
 printf "Exitting Build\n"
 EOF
 sudo setenforce 1
@@ -178,10 +178,11 @@ if [ "${is_valid_cmd}" = false ]; then
     exit 1
 fi
 
-mkdir -p ${output_dir}/out
+mkdir -p ${output_dir}/out/log
 
 # create directory structure for input to mock env
 mock_in_dir=${output_dir}/in
+rm -rf ${mock_in_dir}
 mkdir -p ${mock_in_dir}
 mock_build_root=${mock_in_dir}/build_root
 mkdir -p ${mock_build_root}
@@ -198,7 +199,7 @@ EOF
 # create build root
 cp -r ${input_dir}/* ${mock_build_root}
 
-cat > ${mock_in_dir}/.env << EOF
+cat > ${mock_in_dir}/env << EOF
 input_config=${input_config}
 input_dir=${input_dir}
 
