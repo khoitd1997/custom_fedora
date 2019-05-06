@@ -71,7 +71,17 @@ toml::table BaseConfig::getBaseTable_(const toml::table& rawConfig,
     return ret;
 }
 
-DistroInfo::DistroInfo(const toml::table& rawConfig) {
+toml::table BaseConfig::getBaseTable_(const RawTOMLConfig& rawConfig,
+                                      const std::string&   tableName,
+                                      const std::string&   colorCode) {
+    if (rawConfig) { return getBaseTable_(rawConfig.config, tableName, colorCode); }
+
+    isPresent_ = false;
+    isValid_   = true;
+    return toml::table();
+}
+
+DistroInfo::DistroInfo(const RawTOMLConfig& rawConfig) {
     auto rawDistroInfo = getBaseTable_(rawConfig, "distro_info", kCyanColorCode);
 
     if (isPresent_) {
@@ -90,7 +100,7 @@ DistroInfo::DistroInfo(const toml::table& rawConfig) {
     }
 }
 
-ImageInfo::ImageInfo(const toml::table& rawConfig) {
+ImageInfo::ImageInfo(const RawTOMLConfig& rawConfig) {
     auto rawImageInfo = getBaseTable_(rawConfig, "image_info", kDarkYellowColorCode);
 
     if (isPresent_) {
@@ -110,7 +120,7 @@ ImageInfo::ImageInfo(const toml::table& rawConfig) {
     }
 }
 
-BuildProcessConfig::BuildProcessConfig(const toml::table& rawConfig) {
+BuildProcessConfig::BuildProcessConfig(const RawTOMLConfig& rawConfig) {
     auto rawBuildConfig = getBaseTable_(rawConfig, "build_process", kDarkGreenColorCode);
 
     if (isPresent_) {
@@ -160,7 +170,7 @@ void Repo::from_toml(const toml::value& v) {
     }
 }
 
-RepoConfig::RepoConfig(const toml::table& rawConfig) {
+RepoConfig::RepoConfig(const RawTOMLConfig& rawConfig) {
     auto rawRepoConfig = getBaseTable_(rawConfig, "repo", kGreenColorCode);
 
     if (isPresent_) {
@@ -194,7 +204,7 @@ PackageSet::PackageSet(const toml::table& rawPackageConfig, const std::string& t
     }
 }
 
-PackageConfig::PackageConfig(const toml::table& rawConfig) {
+PackageConfig::PackageConfig(const RawTOMLConfig& rawConfig) {
     auto rawPackageConfig = getBaseTable_(rawConfig, "package", kYellowColorCode);
 
     if (isPresent_) {
@@ -207,7 +217,7 @@ PackageConfig::PackageConfig(const toml::table& rawConfig) {
     }
 }
 
-MiscConfig::MiscConfig(const toml::table& rawConfig) {
+MiscConfig::MiscConfig(const RawTOMLConfig& rawConfig) {
     auto rawMiscConfig = getBaseTable_(rawConfig, "misc", kBlueColorCode);
 
     if (isPresent_) {
@@ -217,6 +227,36 @@ MiscConfig::MiscConfig(const toml::table& rawConfig) {
 
         const std::vector<std::string> validOptions = {"language", "keyboard", "timezone"};
         isValid_ &= checkUnknownOptions(rawMiscConfig, validOptions);
+    }
+}
+
+RawTOMLConfig::RawTOMLConfig(const std::string& filePath) {
+    try {
+        config   = toml::parse(filePath);
+        isValid_ = true;
+    } catch (const std::runtime_error& e) {
+        spdlog::error("failed to parse file " + filePath + " with error: " + e.what());
+    } catch (const toml::syntax_error& e) {
+        spdlog::error("syntax error in file " + filePath + " with error:\n" + e.what());
+    }
+}
+
+TOMLConfigFile::TOMLConfigFile(const std::string& filePath)
+    : TOMLConfigFile(RawTOMLConfig(filePath)) {}
+
+TOMLConfigFile::TOMLConfigFile(const RawTOMLConfig& rawConfig)
+    : distroInfo{rawConfig}, imageInfo{rawConfig} {
+    if (rawConfig) {
+        std::vector<std::string> includeFiles;
+        isValid_ &= getTOMLVal(rawConfig.config, "include_files", includeFiles, true);
+
+        if (!includeFiles.empty()) {
+            for (auto i = includeFiles.crbegin(); i != includeFiles.crend(); ++i) {
+                std::cout << "processing include file: " << *i << std::endl;
+            }
+        }
+    } else {
+        isValid_ = false;
     }
 }
 

@@ -36,18 +36,9 @@ static void logInit() {
     spdlog::info("hatter log initialized");
 }
 
-bool parseInputTOMLFile(const std::string& filePath, toml::table& out) {
-    // TODO(kd): Investigate cleaner error message
-    try {
-        out = toml::parse(filePath);
-        return true;
-    } catch (const std::runtime_error& e) {
-        spdlog::error("failed to parse file " + filePath + " with error: " + e.what());
-    } catch (const toml::syntax_error& e) {
-        spdlog::error("syntax error in file " + filePath + " with error:\n" + e.what());
-    }
-    return false;
-}
+// bool parseInputTOMLFile(const std::string& filePath, toml::table& out) {
+//     // TODO(kd): Investigate cleaner error message
+// }
 
 int main(int argc, char** argv) {
     if (argc < 2) {
@@ -57,52 +48,57 @@ int main(int argc, char** argv) {
 
     logInit();
 
-    toml::table data;
-    auto        isValid  = parseInputTOMLFile(argv[1], data);
-    auto        notEmpty = !data.empty();
+    const auto             fileName = std::string(argv[1]);
+    hatter::TOMLConfigFile conf(fileName);
 
-    if (isValid && notEmpty) {
-        hatter::DistroInfo distroInfo(data);
-        if (!distroInfo) { std::cout << "Failed to parse basic config" << std::endl; }
-        // std::cout << "image arch: " << distroInfo.imageArch << std::endl;
-        // auto                buildDir = hatter::getExeDir() + "/build";
-        // hatter::buildMockConfig(distroInfo, buildDir);
-        hatter::ImageInfo imageInfo(data);
+    if (!conf) { std::cout << "Failed to get conf file" << std::endl; }
+    // toml::table data;
+    // auto        isValid  = parseInputTOMLFile(argv[1], data);
+    // auto        notEmpty = !data.empty();
 
-        hatter::BuildProcessConfig buildProcessConfig(data);
+    // if (isValid && notEmpty) {
+    //     hatter::DistroInfo distroInfo(data);
+    //     if (!distroInfo) { std::cout << "Failed to parse basic config" << std::endl; }
+    //     // std::cout << "image arch: " << distroInfo.imageArch << std::endl;
+    //     // auto                buildDir = hatter::getExeDir() + "/build";
+    //     // hatter::buildMockConfig(distroInfo, buildDir);
+    //     hatter::ImageInfo imageInfo(data);
 
-        hatter::RepoConfig repoConfig(data);
-        // if (!repoConfig) { std::cout << "Failed to parse repo config" << std::endl; }
-        // if (!repoConfig.customRepos.empty()) {
-        //     std::cout << repoConfig.customRepos.at(0).name << std::endl;
-        //     std::cout << repoConfig.customRepos.at(0).metaLink << std::endl;
-        //     std::cout << repoConfig.customRepos.at(0).baseurl << std::endl;
-        //     std::cout << repoConfig.customRepos.at(0).gpgcheck << std::endl;
-        //     std::cout << repoConfig.customRepos.at(0).gpgkey << std::endl;
-        // }
-        hatter::MiscConfig miscConfig(data);
+    //     hatter::BuildProcessConfig buildProcessConfig(data);
 
-        hatter::PackageConfig packageConfig(data);
-        if (!packageConfig) {
-            std::cout << "Failed to parse repo config" << std::endl;
-        } else {
-            std::cout << "rpm: " << std::endl;
-            if (packageConfig.rpm.installList.size() > 0) {
-                std::cout << "install: " << packageConfig.rpm.installList.at(0) << std::endl;
-            }
-            if (packageConfig.rpm.removeList.size() > 0) {
-                std::cout << "remove: " << packageConfig.rpm.removeList.at(0) << std::endl;
-            }
+    //     hatter::RepoConfig repoConfig(data);
+    //     // if (!repoConfig) { std::cout << "Failed to parse repo config" << std::endl; }
+    //     // if (!repoConfig.customRepos.empty()) {
+    //     //     std::cout << repoConfig.customRepos.at(0).name << std::endl;
+    //     //     std::cout << repoConfig.customRepos.at(0).metaLink << std::endl;
+    //     //     std::cout << repoConfig.customRepos.at(0).baseurl << std::endl;
+    //     //     std::cout << repoConfig.customRepos.at(0).gpgcheck << std::endl;
+    //     //     std::cout << repoConfig.customRepos.at(0).gpgkey << std::endl;
+    //     // }
+    //     hatter::MiscConfig miscConfig(data);
 
-            std::cout << "rpm_group: " << std::endl;
-            if (packageConfig.rpmGroup.installList.size() > 0) {
-                std::cout << "install: " << packageConfig.rpmGroup.installList.at(0) << std::endl;
-            }
-            if (packageConfig.rpmGroup.removeList.size() > 0) {
-                std::cout << "remove: " << packageConfig.rpmGroup.removeList.at(0) << std::endl;
-            }
-        }
-    }
+    //     hatter::PackageConfig packageConfig(data);
+    //     if (!packageConfig) {
+    //         std::cout << "Failed to parse repo config" << std::endl;
+    //     } else {
+    //         std::cout << "rpm: " << std::endl;
+    //         if (packageConfig.rpm.installList.size() > 0) {
+    //             std::cout << "install: " << packageConfig.rpm.installList.at(0) << std::endl;
+    //         }
+    //         if (packageConfig.rpm.removeList.size() > 0) {
+    //             std::cout << "remove: " << packageConfig.rpm.removeList.at(0) << std::endl;
+    //         }
+
+    //         std::cout << "rpm_group: " << std::endl;
+    //         if (packageConfig.rpmGroup.installList.size() > 0) {
+    //             std::cout << "install: " << packageConfig.rpmGroup.installList.at(0) <<
+    //             std::endl;
+    //         }
+    //         if (packageConfig.rpmGroup.removeList.size() > 0) {
+    //             std::cout << "remove: " << packageConfig.rpmGroup.removeList.at(0) << std::endl;
+    //         }
+    //     }
+    // }
 
     // const auto rawDistroInfo = toml::get<toml::Table>(data.at("basic"));
     // const auto title = toml::get<std::string>(rawDistroInfo.at("mock_env_fedora_version"));

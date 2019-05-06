@@ -8,6 +8,16 @@
 #include "default_config.hpp"
 
 namespace hatter {
+struct RawTOMLConfig {
+    toml::table config;
+    explicit    operator bool() const { return isValid_; }
+
+    explicit RawTOMLConfig(const std::string& filePath);
+
+   private:
+    bool isValid_ = false;
+};
+
 struct BaseConfig {
    public:
     virtual ~BaseConfig() = 0;
@@ -19,6 +29,9 @@ struct BaseConfig {
     bool isValid_   = true;
     bool isPresent_ = false;
 
+    toml::table getBaseTable_(const RawTOMLConfig& rawConfig,
+                              const std::string&   tableName,
+                              const std::string&   colorCode = "");
     toml::table getBaseTable_(const toml::table& rawConfig,
                               const std::string& tableName,
                               const std::string& colorCode = "");
@@ -31,7 +44,7 @@ struct DistroInfo : public BaseConfig {
     std::string baseSpin;
     std::string osName;
 
-    explicit DistroInfo(const toml::table& rawConfig);
+    explicit DistroInfo(const RawTOMLConfig& rawConfig);
 };
 
 struct ImageInfo : public BaseConfig {
@@ -41,14 +54,14 @@ struct ImageInfo : public BaseConfig {
     std::string              postBuildNoRootScript;
     std::vector<std::string> userFiles;
 
-    explicit ImageInfo(const toml::table& rawConfig);
+    explicit ImageInfo(const RawTOMLConfig& rawConfig);
 };
 
 struct BuildProcessConfig : public BaseConfig {
     bool        enableCustomCache = kDefaultEnableCustomCache;
     std::string mockScript;
 
-    explicit BuildProcessConfig(const toml::table& rawConfig);
+    explicit BuildProcessConfig(const RawTOMLConfig& rawConfig);
 };
 
 struct Repo : public BaseConfig {
@@ -69,7 +82,7 @@ struct RepoConfig : public BaseConfig {
     std::vector<std::string> coprRepos;
     std::vector<Repo>        customRepos;
 
-    explicit RepoConfig(const toml::table& rawConfig);
+    explicit RepoConfig(const RawTOMLConfig& rawConfig);
 };
 
 struct PackageSet : public BaseConfig {
@@ -84,7 +97,7 @@ struct PackageConfig : public BaseConfig {
     PackageSet rpm;
     PackageSet rpmGroup;
 
-    explicit PackageConfig(const toml::table& rawConfig);
+    explicit PackageConfig(const RawTOMLConfig& rawConfig);
 };
 
 struct MiscConfig : public BaseConfig {
@@ -92,7 +105,21 @@ struct MiscConfig : public BaseConfig {
     std::string keyboard;
     std::string timezone;
 
-    explicit MiscConfig(const toml::table& rawConfig);
+    explicit MiscConfig(const RawTOMLConfig& rawConfig);
 };
+
+struct TOMLConfigFile {
+    DistroInfo distroInfo;
+    ImageInfo  imageInfo;
+
+    explicit operator bool() const { return isValid_; }
+
+    explicit TOMLConfigFile(const std::string& filePath);
+
+   private:
+    explicit TOMLConfigFile(const RawTOMLConfig& rawConfig);
+    bool isValid_ = true;
+};
+
 }  // namespace hatter
 #endif
