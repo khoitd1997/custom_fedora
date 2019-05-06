@@ -23,3 +23,11 @@ sudo dnf install spdlog
 - Second stage: Inside mock
   - Sanitize packages, repo
   - Control build scripts, enable caching, etc
+- Commandline argument:
+  - Rebuild flag
+  - Clear cache flag
+  - Parse/Sanitize only
+  - Build output dir
+  - Config file/dir
+  - Fedora version(default current system)
+  - Fedora arch(default current arch)
