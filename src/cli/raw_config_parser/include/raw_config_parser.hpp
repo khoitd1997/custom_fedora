@@ -44,6 +44,8 @@ struct DistroInfo : public BaseConfig {
     std::string baseSpin;
     std::string osName;
 
+    bool merge(const DistroInfo& target);
+
     explicit DistroInfo(const RawTOMLConfig& rawConfig);
 };
 
@@ -54,6 +56,7 @@ struct ImageInfo : public BaseConfig {
     std::string              postBuildNoRootScript;
     std::vector<std::string> userFiles;
 
+    bool merge(const ImageInfo& target);
     explicit ImageInfo(const RawTOMLConfig& rawConfig);
 };
 
@@ -115,6 +118,7 @@ struct TOMLConfigFile {
     explicit operator bool() const { return isValid_; }
 
     explicit TOMLConfigFile(const std::string& filePath);
+    bool merge(const TOMLConfigFile& configFile);
 
    private:
     explicit TOMLConfigFile(const RawTOMLConfig& rawConfig);

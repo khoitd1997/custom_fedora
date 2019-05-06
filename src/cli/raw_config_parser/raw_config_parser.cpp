@@ -46,6 +46,15 @@ bool checkUnknownOptions(const toml::table& table, const std::vector<std::string
 
     return isValid;
 }
+
+template <typename T>
+bool checkConfigSame(const std::string& configName, const T& conf1, const T& conf2) {
+    if (conf1 != conf2) {
+        spdlog::error("conflicting {0}: {1} vs {2}", configName, conf1, conf2);
+        return false;
+    }
+    return true;
+}
 }  // namespace
 
 BaseConfig::~BaseConfig() {}
@@ -100,6 +109,18 @@ DistroInfo::DistroInfo(const RawTOMLConfig& rawConfig) {
     }
 }
 
+bool DistroInfo::merge(const DistroInfo& target) {
+    auto isValid = true;
+    if (target.isPresent_) {
+        isValid &= checkConfigSame("image_fedora_version", this->imageVersion, target.imageVersion);
+        isValid &= checkConfigSame("image_fedora_arch", this->imageArch, target.imageArch);
+        isValid &= checkConfigSame("base_kickstart_tag", this->kickstartTag, target.kickstartTag);
+        isValid &= checkConfigSame("base_spin", this->baseSpin, target.baseSpin);
+    }
+
+    return isValid;
+}
+
 ImageInfo::ImageInfo(const RawTOMLConfig& rawConfig) {
     auto rawImageInfo = getBaseTable_(rawConfig, "image_info", kDarkYellowColorCode);
 
@@ -118,6 +139,19 @@ ImageInfo::ImageInfo(const RawTOMLConfig& rawConfig) {
                                                        "user_files"};
         isValid_ &= checkUnknownOptions(rawImageInfo, validOptions);
     }
+}
+
+bool ImageInfo::merge(const ImageInfo& target) {
+    auto isValid = true;
+    if (target.isPresent_) {
+        // TODO(kd): Finish
+        this->partitionSize = std::max(this->partitionSize, target.partitionSize);
+
+        this->userFiles.insert(
+            this->userFiles.end(), target.userFiles.begin(), target.userFiles.end());
+    }
+
+    return isValid;
 }
 
 BuildProcessConfig::BuildProcessConfig(const RawTOMLConfig& rawConfig) {
@@ -250,14 +284,29 @@ TOMLConfigFile::TOMLConfigFile(const RawTOMLConfig& rawConfig)
         std::vector<std::string> includeFiles;
         isValid_ &= getTOMLVal(rawConfig.config, "include_files", includeFiles, true);
 
-        if (!includeFiles.empty()) {
+        if (isValid_) {
             for (auto i = includeFiles.crbegin(); i != includeFiles.crend(); ++i) {
                 std::cout << "processing include file: " << *i << std::endl;
+                TOMLConfigFile childConf(*i);
+                if (!childConf) {
+                    isValid_ = false;
+                    std::cout << "child config invalid: " << *i << std::endl;
+                } else {
+                    isValid_ &= this->merge(childConf);
+                }
             }
         }
     } else {
         isValid_ = false;
     }
+}
+
+bool TOMLConfigFile::merge(const TOMLConfigFile& configFile) {
+    auto isValid = true;
+
+    isValid &= this->distroInfo.merge(configFile.distroInfo);
+
+    return isValid;
 }
 
 }  // namespace hatter
