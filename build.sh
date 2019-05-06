@@ -6,7 +6,9 @@ set -x
 source settings.sh
 original_user=$(logname)
 currDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-cfg_file=${currDir}/${1}.cfg
+cd ${currDir}
+
+mock_software_list=" lorax-lmc-novirt nano pykickstart git bash genisoimage squashfs-tools nano vim dnf-plugins-core dnf createrepo cpp "
 
 function cleanup {
 sudo -i -u ${original_user} bash << EOF
@@ -22,12 +24,17 @@ trap cleanup EXIT
 [ "$UID" -eq 0 ] || exec sudo "$0" "$@" # request root access if not already
 sudo setenforce 0
 
-# sudo ln -sfv ${currDir}/${1}.cfg /etc/mock
-
 sudo -i -u ${original_user} bash << EOF
-mock -r ${cfg_file} --chroot "rm -rf /builddir/"
-mock -r ${cfg_file} --chroot "mkdir -p /builddir/"
-mock -r ${cfg_file} --copyin ${currDir}/build_fedora.sh ${currDir}/settings.sh ${currDir}/fedora-kickstarts /builddir
+if [ ! -f ${currDir}/build/.mock_bootstrapped_done ]; then
+    mock -r fedora-${env_fedora_ver}-x86_64 --init 
+    mock -r fedora-${env_fedora_ver}-x86_64 --install ${mock_software_list}
+
+    touch ${currDir}/build/.mock_bootstrapped_done
+fi
+
+mock -r fedora-"${env_fedora_ver}"-x86_64 --chroot "rm -rf /builddir/"
+mock -r fedora-"${env_fedora_ver}"-x86_64 --chroot "mkdir -p /builddir/"
+mock -r fedora-"${env_fedora_ver}"-x86_64 --copyin ${currDir}/build_fedora.sh ${currDir}/settings.sh ${currDir}/fedora-kickstarts /builddir
 mkdir -p ${currDir}/build
 mock -r fedora-${env_fedora_ver}-x86_64 --old-chroot --chroot /builddir/build_fedora.sh ${1}
 

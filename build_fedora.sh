@@ -1,7 +1,43 @@
 #!/bin/bash
 # script to be used to build fedora inside mock env
 
+cat > /etc/dnf/dnf.conf << 'EOF'
+[main]
+keepcache=1
+debuglevel=2
+reposdir=/etc/yum.repos.d/
+logfile=/var/log/yum.log
+retries=20
+obsoletes=1
+gpgcheck=1
+assumeyes=1
+syslog_ident=mock
+syslog_device=
+install_weak_deps=0
+best=1
+max_parallel_downloads=10
+clean_requirements_on_remove=True
+module_platform_id=platform:f30
+EOF
+
+# has a chance of failure and need return code so execute before set -e
+# sed -i 's|^reposdir=.*|reposdir=/etc/yum.repos.d/|g' /etc/dnf/dnf.conf
+dnf check-update -y -q
+dnf_status=$?
+total_try=0
+while [ "$dnf_status" -eq 1 ] && [ "$total_try" -lt 5 ] ; do
+    dnf check-update -y -q
+    dnf_status=$?
+    let "total_try++"
+done
+
+if [ "$total_try" -eq 5 ] ; then 
+    # TODO(kd): Error logging
+    exit 1
+fi
+
 set -e
+# set -x
 cd /builddir
 mkdir -p /package_cache
 kickstart_name=${1}
@@ -13,22 +49,23 @@ rm -rf /var/lmc # delete old output if there is any
 cd fedora-kickstarts
 ksflatten --config ${kickstart_name}.ks -o flat-${kickstart_name}.ks --version F${build_fedora_ver}
 
-sed -i '/metadata_expire/d' /etc/dnf/dnf.conf
-printf "\nmetadata_expire=-1\n" >> /etc/dnf/dnf.conf
+# sed -i '/metadata_expire/d' /etc/dnf/dnf.conf
+# printf "\nmetadata_expire=-1\n" >> /etc/dnf/dnf.conf
 
-sed -i '/keepcache/d' /etc/dnf/dnf.conf
-printf "\nkeepcache=1\n" >> /etc/dnf/dnf.conf
+# sed -i '/keepcache/d' /etc/dnf/dnf.conf
+# printf "\nkeepcache=1\n" >> /etc/dnf/dnf.conf
 
-# TODO: Redo this later
-dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm -y
+# dnf install -y rpmfusion-free-release-tainted rpmfusion-free-release rpmfusion-nonfree-release rpmfusion-nonfree-release-tainted mock-rpmfusion-nonfree
 
+dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm -y -q
+# cat /etc/yum.repos.d/rpmfusion-* >> /etc/dnf/dnf.conf
 
-# package caching
-dnf check-update -y --refresh
+dnf copr enable khoitd1997/toml11 --setopt=reposdir=/etc/yum.repos.d/ -q
+
 package_list=""
 group_list=""
 raw_package_list=$(awk '/%packages/{flag=1;next}/%end/{flag=0}flag' flat-${kickstart_name}.ks)
-createrepo /package_cache/
+createrepo /package_cache/ -q
 while read -r ks_line; do
     # parse groups
     if [[ "$ks_line" =~ ^@.* ]]; then
@@ -46,9 +83,9 @@ while read -r ks_line; do
 done <<< "$raw_package_list"
 
 # printf ${package_list}
-dnf groupinstall --downloadonly --downloaddir=/package_cache/ ${group_list}
+dnf groupinstall --downloadonly --downloaddir=/package_cache/ ${group_list} 
 dnf --downloadonly --forcearch=x86_64 --allowerasing --best --downloaddir=/package_cache/ install ${package_list} 
-createrepo /package_cache/
+createrepo /package_cache/ -q
 
 livemedia-creator --ks flat-${kickstart_name}.ks --no-virt \
 --resultdir /var/lmc --project ${os_name} --make-iso --volid ${os_name} \
