@@ -38,8 +38,6 @@ struct BaseConfig {
 };
 
 struct DistroInfo : public BaseConfig {
-    std::string imageVersion;
-    std::string imageArch    = kDefaultImageArch;
     std::string kickstartTag = kDefaultKickstartTag;
     std::string baseSpin;
     std::string osName;

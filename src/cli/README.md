@@ -12,7 +12,13 @@ Support classic kickstart file but with additional settings through the TOML fil
 
 ## Dependency list
 
+```shell
+# library
 sudo dnf install spdlog
+
+# for build tool
+sudo dnf install cppcheck ninja-build
+```
 
 ## Build Stages
 

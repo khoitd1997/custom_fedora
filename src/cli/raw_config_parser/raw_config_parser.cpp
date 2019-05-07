@@ -94,17 +94,12 @@ DistroInfo::DistroInfo(const RawTOMLConfig& rawConfig) {
     auto rawDistroInfo = getBaseTable_(rawConfig, "distro_info", kCyanColorCode);
 
     if (isPresent_) {
-        isValid_ &= getTOMLVal(rawDistroInfo, "image_fedora_version", imageVersion);
-        isValid_ &= getTOMLVal(rawDistroInfo, "image_fedora_arch", imageArch, true);
         isValid_ &= getTOMLVal(rawDistroInfo, "base_kickstart_tag", kickstartTag, true);
         isValid_ &= getTOMLVal(rawDistroInfo, "base_spin", baseSpin);
         isValid_ &= getTOMLVal(rawDistroInfo, "os_name", osName);
 
-        const std::vector<std::string> validOptions = {"image_fedora_version",
-                                                       "image_fedora_arch",
-                                                       "base_kickstart_tag",
-                                                       "base_spin",
-                                                       "os_name"};
+        const std::vector<std::string> validOptions = {
+            "base_kickstart_tag", "base_spin", "os_name"};
         isValid_ &= checkUnknownOptions(rawDistroInfo, validOptions);
     }
 }
@@ -112,8 +107,6 @@ DistroInfo::DistroInfo(const RawTOMLConfig& rawConfig) {
 bool DistroInfo::merge(const DistroInfo& target) {
     auto isValid = true;
     if (target.isPresent_) {
-        isValid &= checkConfigSame("image_fedora_version", this->imageVersion, target.imageVersion);
-        isValid &= checkConfigSame("image_fedora_arch", this->imageArch, target.imageArch);
         isValid &= checkConfigSame("base_kickstart_tag", this->kickstartTag, target.kickstartTag);
         isValid &= checkConfigSame("base_spin", this->baseSpin, target.baseSpin);
     }
