@@ -28,11 +28,20 @@ print_error()
     return 0
 }
 
-contains() 
+contains()
 {
     [[ "$1" =~ "$2" ]] && return 0 || return 1
 }
 
+clear_mock_env()
+{
+sudo -i -u ${original_user} bash << EOF
+    if [ -f ${output_dir}/mock.cfg ]; then
+        mock -r ${output_dir}/mock.cfg --orphanskill
+        mock -r ${output_dir}/mock.cfg --clean
+    fi
+EOF
+}
 
 
 supported_arch="i386 x86_64 ppc ppc64 aarch64 arm riscv64"
@@ -45,19 +54,21 @@ case "$arch" in
     aarch64) arch="aarch64" ;;
     arm) arch="arm" ;;
     riscv64) arch="riscv64" ;;
-    *) 
-    print_error "Unknown architecture"
-    exit 1 
+    *)
+        print_error "Unknown architecture"
+        exit 1
     ;;
 esac
 
-output_dir=${PWD}/hatter_build
+output_dir=""
+generate_output_dir=false
 input_config=""
 input_dir=""
 is_valid_cmd=true
 releasever=$(lsb_release -r -s)
 
 clear_cache=false
+clean_build=false
 parser_mode=false
 
 # define call back when all variables have been defined
@@ -67,7 +78,7 @@ sudo -i -u ${original_user} bash << EOF
 mock -r ${output_dir}/mock.cfg --copyout /builddir/fedora-kickstarts/*.log ${output_dir}/out/log
 printf "Exitting Build\n"
 EOF
-sudo setenforce 1
+    sudo setenforce 1
 }
 # TODO(kd): Reenable later
 # trap cleanup EXIT
@@ -76,53 +87,48 @@ set -e
 set -x
 #------------------------------------------------------------------------------
 
+# TODO(kd): Enable when done
+# [ "$UID" -eq 0 ] || exec sudo "$0" "$@" # request root access if not already
+# sudo setenforce 0
+# sudo -i -u ${original_user} bash << EOF
+
 while (( "$#" )); do
     case "$1" in
         -o|--outputdir)
             output_dir=$2
             shift 2
         ;;
-
+        
         -i|--inputconfig)
             input_config=$2
-            if [ ! -f ${input_config} ]; then
-                print_error "Input config file doesn't exist"
-            else
-                if [[ ! ${input_config} =~ \.toml$ ]]; then
-                    print_error "Invalid input config file"
-                fi
-            fi
             shift 2
         ;;
-
-        --clear)
+        
+        --clearcache)
             clear_cache=true
             shift 1
         ;;
-
+        
+        --clean)
+            clean_build=true
+            shift 1
+        ;;
+        
         -p)
             parser_mode=true
             shift 1
         ;;
-
+        
         --releasever)
             releasever=$2
-            num_regex='^[0-9]+$'
-            if ! [[ $releasever =~ $num_regex ]] ; then
-                print_error "Releasever must be a number"
-            else
-                if [ "$releasever" -gt ${max_releasever} ] ; then
-                    print_error "Releasever only support up to ${max_releasever}"
-                fi
-            fi
             shift 2
         ;;
-
+        
         --arch)
             arch=$2
             shift 2
         ;;
-
+        
         --help)
 cat << EOF
 usage: hatter -i intomlfile [-o outputdir] [-p] [--help][--version]
@@ -130,11 +136,12 @@ Build custom fedora iso
 
 where:
     -i, --inputconfig    <intomlfile>       specify path to input toml file
-    -o, --outputdir      <outputdir>        specify directory where build result is, default is working_directory/hatter_build
+    -o, --outputdir      <outputdir>        specify directory where build result is, default is working_directory/<config_file_name>
     --releasever         <fedora_version>   fedora version of the image, default to current machine
     --arch               <arch>             architecture of the image, default to current machine
     -p                                      only generate config file but doens't build, good for checking if config is correct and seeing internal of hatter
-    --clear                                 clear all build cache
+    --clean                                 clean all build files
+    --clearcache                            clear all build cache
     --help                                  show this help text
     --version                               show program version
 
@@ -143,7 +150,7 @@ For bug reporting please go to:
 EOF
             exit 0
         ;;
-
+        
         --version)
 cat << EOF
 hatter 0.1
@@ -161,24 +168,58 @@ if ! contains "${supported_arch}" ${arch}; then
     print_error "Unsupported arch, possible values are: ${supported_arch}"
 fi
 
+num_regex='^[0-9]+$'
+if ! [[ $releasever =~ $num_regex ]] ; then
+    print_error "Releasever must be a number"
+else
+    if [ "$releasever" -gt ${max_releasever} ] ; then
+        print_error "Releasever only support up to ${max_releasever}"
+    fi
+fi
+
 if [ -z ${input_config} ]; then
     print_error "Input config must be supplied with -i toml_config_file"
 else
-    # get abs path of the top level toml config file as well as output dir
-    input_dir=$(dirname "${input_config}")
-    input_dir=$(cd ${input_dir} 2> /dev/null && pwd -P)
-    output_dir=$(cd ${output_dir} 2> /dev/null && pwd -P)
+    if [ ! -f ${input_config} ]; then
+        print_error "Input config file doesn't exist"
+        
+    elif [[ ! ${input_config} =~ \.toml$ ]]; then
+        print_error "Invalid input config file"
 
-    # strip path if any of the main toml config file
-    input_config=$(basename "${input_config}")
+    else 
+        # get abs path of the top level toml config file as well as output dir
+        input_dir=$(dirname "${input_config}")
+        input_dir=$(cd ${input_dir} 2> /dev/null && pwd -P)
+        
+        # strip path if any of the main toml config file
+        input_config=$(basename "${input_config}")
+        
+        if [ -z ${output_dir} ]; then
+            output_dir=${PWD}/${input_config}
+            generate_output_dir=true
+        elif [ ! -d ${output_dir} ]; then
+            print_error "Output directory doesn't exist"
+        fi
+    fi
 fi
-
 
 if [ "${is_valid_cmd}" = false ]; then
     exit 1
 fi
 
-mkdir -p ${output_dir}/out/log
+# remove relative path component of directory
+output_dir=$(cd ${output_dir} 2> /dev/null && pwd -P)
+
+if [ -d ${output_dir} ] && [ "${clean_build}" = true ] ; then
+    print_message "Clearing old mock env"
+    clear_mock_env
+    print_message "Removing old build at ${output_dir}"
+    rm -r ${output_dir}
+fi
+
+if [ "${generate_output_dir}" = true ]; then
+    mkdir -p ${output_dir}/out/log
+fi
 
 # create directory structure for input to mock env
 mock_in_dir=${output_dir}/in
@@ -211,9 +252,9 @@ parser_mode=${parser_mode}
 EOF
 
 if [ ! -f ${output_dir}/.mock_bootstrapped_done ]; then
-    mock -r ${output_dir}/mock.cfg --init 
+    mock -r ${output_dir}/mock.cfg --init
     mock -r ${output_dir}/mock.cfg --install ${mock_software_list}
-
+    
     touch ${output_dir}/.mock_bootstrapped_done
 fi
 
@@ -224,17 +265,9 @@ mock -r ${output_dir}/mock.cfg --copyin ${mock_in_dir}/* /builddir
 
 # copy out build result
 # mkdir -p ${output_dir}/out
-# TODO(kd): Consider changing iso name
-# mock -r ${output_dir}/mock.cfg --copyout /var/lmc/out.iso ${output_dir}/out
+# mock -r ${output_dir}/mock.cfg --copyout /var/lmc/*.iso ${output_dir}/out
 
 # for debugging only
 # mock -r ${output_dir}/mock.cfg --old-chroot --shell
-
-
-
-# [ "$UID" -eq 0 ] || exec sudo "$0" "$@" # request root access if not already
-# sudo setenforce 0
-
-# sudo -i -u ${original_user} bash << EOF
 
 # EOF
