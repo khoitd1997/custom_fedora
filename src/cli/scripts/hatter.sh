@@ -3,46 +3,14 @@
 # parse cmdline args and pass them in the form
 # of .env file to the program inside mock env
 
-# colors for pretty printing
-red='\33[38;5;0196m' # for error
-cyan='\033[38;5;087m' # for marking the being of a new sections
-green='\033[38;5;154m' # for general messages
-reset='\033[0m' # for resetting the color
+## importing functions and variables
+script_dir="$(dirname "$(readlink -f "$0")")"
+source ${script_dir}/general_utils.sh
+source ${script_dir}/exit_code.sh
 
-mock_software_list=" lorax-lmc-novirt nano pykickstart git bash genisoimage squashfs-tools nano vim dnf-plugins-core dnf createrepo cpp bat "
 original_user=$(logname)
 
 max_releasever=31
-
-print_message()
-{
-    printf "\n${1}"
-    return 0
-}
-
-
-print_error()
-{
-    >&2 printf "${red}\nError: ${1}${reset}"
-    is_valid_cmd=false
-    return 0
-}
-
-contains()
-{
-    [[ "$1" =~ "$2" ]] && return 0 || return 1
-}
-
-clear_mock_env()
-{
-sudo -i -u ${original_user} bash << EOF
-    if [ -f ${output_dir}/mock.cfg ]; then
-        mock -r ${output_dir}/mock.cfg --orphanskill
-        mock -r ${output_dir}/mock.cfg --clean
-    fi
-EOF
-}
-
 
 supported_arch="i386 x86_64 ppc ppc64 aarch64 arm riscv64"
 arch=`uname -m`
@@ -56,12 +24,12 @@ case "$arch" in
     riscv64) arch="riscv64" ;;
     *)
         print_error "Unknown architecture"
-        exit 1
+        exit ${error_parsing_failed}
     ;;
 esac
 
-output_dir=""
-generate_output_dir=false
+build_working_dir=""
+generate_build_working_dir=false
 input_config=""
 input_dir=""
 is_valid_cmd=true
@@ -71,19 +39,14 @@ clear_cache=false
 clean_build=false
 parser_mode=false
 
-# define call back when all variables have been defined
-function cleanup {
-sudo -i -u ${original_user} bash << EOF
-# copy logs even in failure case
-mock -r ${output_dir}/mock.cfg --copyout /builddir/fedora-kickstarts/*.log ${output_dir}/out/log
-printf "Exitting Build\n"
-EOF
+## callback, error handler functions
+function all_exit_callback {
     sudo setenforce 1
 }
 # TODO(kd): Reenable later
-# trap cleanup EXIT
+# trap all_exit_callback EXIT
 
-set -e
+set +e
 set -x
 #------------------------------------------------------------------------------
 
@@ -95,7 +58,7 @@ set -x
 while (( "$#" )); do
     case "$1" in
         -o|--outputdir)
-            output_dir=$2
+            build_working_dir=$2
             shift 2
         ;;
         
@@ -136,7 +99,7 @@ Build custom fedora iso
 
 where:
     -i, --inputconfig    <intomlfile>       specify path to input toml file
-    -o, --outputdir      <outputdir>        specify directory where build result is, default is working_directory/<config_file_name>
+    -o, --outputdir      <outputdir>        specify directory where build prepare/result is, default is working_directory/<config_file_name>
     --releasever         <fedora_version>   fedora version of the image, default to current machine
     --arch               <arch>             architecture of the image, default to current machine
     -p                                      only generate config file but doens't build, good for checking if config is correct and seeing internal of hatter
@@ -191,56 +154,51 @@ else
         input_dir=$(dirname "${input_config}")
         input_dir=$(cd ${input_dir} 2> /dev/null && pwd -P)
         
-        # strip path if any of the main toml config file
+        # strip to get only name of config file
         input_config=$(basename "${input_config}")
         
-        if [ -z ${output_dir} ]; then
-            output_dir=${PWD}/${input_config}
-            generate_output_dir=true
-        elif [ ! -d ${output_dir} ]; then
+        if [ -z ${build_working_dir} ]; then
+            build_working_dir=${PWD}/${input_config}
+            generate_build_working_dir=true
+        elif [ ! -d ${build_working_dir} ]; then
             print_error "Output directory doesn't exist"
         fi
     fi
 fi
 
 if [ "${is_valid_cmd}" = false ]; then
-    exit 1
+    exit ${error_parsing_failed}
 fi
 
 # remove relative path component of directory
-output_dir=$(cd ${output_dir} 2> /dev/null && pwd -P)
+build_working_dir=$(cd ${build_working_dir} 2> /dev/null && pwd -P)
 
-if [ -d ${output_dir} ] && [ "${clean_build}" = true ] ; then
-    print_message "Clearing old mock env"
+if [ -d ${build_working_dir} ] && [ "${clean_build}" = true ] ; then
+    print_message "Clearing old mock env\n"
     clear_mock_env
-    print_message "Removing old build at ${output_dir}"
-    rm -r ${output_dir}
+    print_message "Removing old build at ${build_working_dir}\n"
+    rm -r ${build_working_dir}
 fi
 
-if [ "${generate_output_dir}" = true ]; then
-    mkdir -p ${output_dir}/out/log
+if [ "${generate_build_working_dir}" = true ]; then
+    mkdir -p ${build_working_dir}
 fi
 
-# create directory structure for input to mock env
-mock_in_dir=${output_dir}/in
-rm -rf ${mock_in_dir}
-mkdir -p ${mock_in_dir}
-mock_build_root=${mock_in_dir}/build_root
-mkdir -p ${mock_build_root}
+# create directory for storing files necessary for mock build (except for user supplied file)
+mock_build_file_dir=${build_working_dir}/build_file
+rm -rf ${mock_build_file_dir}
+mkdir -p ${mock_build_file_dir}
 
 # generate mock cfg file
 base_cfg_name="fedora-${releasever}-${arch}.cfg"
-cp -v /etc/mock/${base_cfg_name} ${output_dir}/mock.cfg
-sed -i -r "/config_opts\['root'\]/c config_opts['root'] = 'hatter_mock'" ${output_dir}/mock.cfg
-cat >> ${output_dir}/mock.cfg << EOF
+cp -v /etc/mock/${base_cfg_name} ${build_working_dir}/mock.cfg
+sed -i -r "/config_opts\['root'\]/c config_opts['root'] = 'hatter_mock'" ${build_working_dir}/mock.cfg
+cat >> ${build_working_dir}/mock.cfg << EOF
 config_opts['rpmbuild_networking'] = True
 config_opts['plugin_conf']['ccache_enable'] = True
 EOF
 
-# create build root
-cp -r ${input_dir}/* ${mock_build_root}
-
-cat > ${mock_in_dir}/env << EOF
+cat > ${mock_build_file_dir}/env << EOF
 input_config=${input_config}
 input_dir=${input_dir}
 
@@ -251,23 +209,20 @@ clear_cache=${clear_cache}
 parser_mode=${parser_mode}
 EOF
 
-if [ ! -f ${output_dir}/.mock_bootstrapped_done ]; then
-    mock -r ${output_dir}/mock.cfg --init
-    mock -r ${output_dir}/mock.cfg --install ${mock_software_list}
-    
-    touch ${output_dir}/.mock_bootstrapped_done
+# source here once all variables have been set
+source ${script_dir}/mock_utils.sh
+
+if [ ! -f ${build_working_dir}/.mock_bootstrapped_done ]; then
+    bootstrap_mock_env
+
+    touch ${build_working_dir}/.mock_bootstrapped_done
 fi
 
-mock -r ${output_dir}/mock.cfg --chroot "rm -rf /builddir/"
-mock -r ${output_dir}/mock.cfg --chroot "mkdir -p /builddir/"
-mock -r ${output_dir}/mock.cfg --copyin ${mock_in_dir}/* /builddir
-# mock -r ${output_dir}/mock.cfg --old-chroot --chroot /builddir/build_fedora.sh ${1}
+prepare_mock_build
 
-# copy out build result
-# mkdir -p ${output_dir}/out
-# mock -r ${output_dir}/mock.cfg --copyout /var/lmc/*.iso ${output_dir}/out
+execute_mock_build
 
 # for debugging only
-# mock -r ${output_dir}/mock.cfg --old-chroot --shell
+# mock -r ${build_working_dir}/mock.cfg --old-chroot --shell
 
 # EOF
