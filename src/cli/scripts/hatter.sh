@@ -198,15 +198,16 @@ config_opts['rpmbuild_networking'] = True
 config_opts['plugin_conf']['ccache_enable'] = True
 EOF
 
+# generate env variable for build script inside mock
 cat > ${mock_build_file_dir}/env << EOF
-input_config=${input_config}
-input_dir=${input_dir}
+env_input_config=${input_config}
+env_input_dir=${input_dir}
 
-releasever=${releasever}
-arch=${arch}
+env_releasever=${releasever}
+env_arch=${arch}
 
-clear_cache=${clear_cache}
-parser_mode=${parser_mode}
+env_clear_cache=${clear_cache}
+env_parser_mode=${parser_mode}
 EOF
 
 # source here once all variables have been set

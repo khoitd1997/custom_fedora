@@ -23,7 +23,7 @@ bootstrap_mock_env() {
 }
 
 prepare_mock_build() {
-    # wipe previous build stuffs
+    # wipe previous build stuffs and generate directories
     mock -r ${mock_cfg_path} --chroot "rm -rf ${mock_env_build_dir}"
     mock -r ${mock_cfg_path} --chroot "mkdir ${mock_env_build_dir}"
     mock -r ${mock_cfg_path} --chroot "mkdir ${mock_env_build_dir}/user_supplied"
@@ -32,6 +32,7 @@ prepare_mock_build() {
     mock -r ${mock_cfg_path} --copyin ${script_dir}/exit_code.sh ${mock_env_build_dir}
     mock -r ${mock_cfg_path} --copyin ${script_dir}/build_mock.sh ${mock_env_build_dir}
     mock -r ${mock_cfg_path} --copyin ${script_dir}/general_utils.sh ${mock_env_build_dir}
+    # mock -r ${mock_cfg_path} --copyin ${script_dir}/hatter_parser ${mock_env_build_dir}
     
     # copy hatter generated files and files given by user
     mock -r ${mock_cfg_path} --copyin ${input_dir}/* ${mock_env_build_dir}/user_supplied
