@@ -5,6 +5,7 @@
 
 #include <spdlog/spdlog.h>
 
+#include <memory>
 #include <string>
 #include <type_traits>
 #include <typeinfo>
@@ -13,29 +14,30 @@
 #include "raw_config_parser.hpp"
 #include "toml11/toml.hpp"
 
-namespace internal {
-template <typename T>
-bool getTOMLBase(const toml::table& t,
-                 const std::string& keyName,
-                 T&                 storage,
-                 const bool         isOptional,
-                 const std::string& typeErrorMessage,
-                 const std::string& undefinedErrorMessage) {
-    try {
-        storage = toml::get<T>(t.at(keyName));
-    } catch (const toml::type_error& e) {
-        spdlog::error(typeErrorMessage);
-        return false;
-    } catch (const std::out_of_range& e) {
-        if (!isOptional) {
-            spdlog::error(undefinedErrorMessage);
-            return false;
-        }
-        return true;
-    }
-    return true;
-}
-}  // namespace internal
+struct TOMLError {
+    const std::string keyName;
+
+    virtual std::string what() = 0;
+
+    TOMLError(const std::string& keyName);
+    virtual ~TOMLError() = 0;
+};
+
+struct TOMLWrongTypeError : TOMLError {
+    const std::string correctType;
+
+    TOMLWrongTypeError();
+    TOMLWrongTypeError(const std::string& keyName, const std::string& correctType);
+
+    std::string what() override;
+};
+
+struct TOMLExistentError : TOMLError {
+    TOMLExistentError();
+    explicit TOMLExistentError(const std::string& keyName);
+
+    std::string what() override;
+};
 
 template <typename T>
 std::string getTypeName() {
@@ -73,27 +75,17 @@ std::string getTypeName(const T& variable) {
 }
 
 template <typename T>
-bool getTOMLVal(const toml::table& t,
-                const std::string& keyName,
-                T&                 storage,
-                const bool         isOptional = false) {
-    return internal::getTOMLBase<T>(t,
-                                    keyName,
-                                    storage,
-                                    isOptional,
-                                    keyName + " needs to have type " + getTypeName(storage),
-                                    keyName + "(" + getTypeName(storage) + ")" + " is undefined");
+std::shared_ptr<TOMLError> getTOMLVal(const toml::table& t,
+                                      const std::string& keyName,
+                                      T&                 storage,
+                                      const bool         isOptional = true) {
+    try {
+        storage = toml::get<T>(t.at(keyName));
+    } catch (const toml::type_error& e) {
+        return std::make_shared<TOMLWrongTypeError>(keyName, getTypeName(storage));
+    } catch (const std::out_of_range& e) {
+        if (!isOptional) { return std::make_shared<TOMLExistentError>(keyName); }
+    }
+    return std::make_shared<TOMLWrongTypeError>();
 }
-
-template <typename T>
-bool getTOMLVal(const toml::table& t,
-                const std::string& keyName,
-                T&                 storage,
-                const bool         isOptional,
-                const std::string& typeErrorMessage,
-                const std::string& undefinedErrorMessage) {
-    return internal::getTOMLBase<T>(
-        t, keyName, storage, isOptional, typeErrorMessage, undefinedErrorMessage);
-}
-
 #endif

@@ -48,11 +48,14 @@ int main(int argc, char** argv) {
 
     logInit();
 
-    const auto             fileName = std::string(argv[1]);
-    hatter::TOMLConfigFile conf(fileName);
+    const auto fileName = std::string(argv[1]);
+    auto       data     = toml::parse(fileName);
+    hatter::testGet(data);
 
-    if (!conf) { std::cout << "Failed to get conf file" << std::endl; }
-    // toml::table data;
+    // hatter::TOMLConfigFile conf(fileName);
+
+    // if (!conf) { std::cout << "Failed to get conf file" << std::endl; }
+
     // auto        isValid  = parseInputTOMLFile(argv[1], data);
     // auto        notEmpty = !data.empty();
 

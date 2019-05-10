@@ -20,9 +20,6 @@ include_files=["child_setting_1.toml", "child_path/child_setting_2.toml"]
 # user_files=["path_to_dir1", "path_to_dir2"] # will be put in /usr/share/hatter_user_file
 
 [distro_info]
-image_fedora_version="29"
-# random_stuffs="29"
-image_fedora_arch="x86_64" 
 base_kickstart_tag="latest" 
 base_spin="cinnamon"
 os_name="fedora-kd" 
@@ -41,8 +38,11 @@ enable_custom_cache=true
 # define list of repos
 # $releasever and $basearch will be replaced when doing build
 [repo]
-standard_repos=["google-chrome", "nvidia", "vscode"]
+# standard_repos=["google-chrome", "nvidia", "vscode"]
+standard_repos=32
 copr_repos=["repo1, repo2"]
+djkl=2
+dkas=2
 
     # start defining custom repos here
     [[repo.custom_repos]]
@@ -51,6 +51,9 @@ copr_repos=["repo1, repo2"]
     metalink="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-$releasever&arch=$basearch"
     baseurl="http://download1.rpmfusion.org/free/fedora/releases/$releasever/Everything/$basearch/os/"
     # gpgcheck=true
+    asdkfas=2
+    dkask=2
+    dkaf=2
     gpgcheck=1
     gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"
 
@@ -91,4 +94,3 @@ copr_repos=["repo1, repo2"]
 language="en_US.UTF-8" # locale -a
 keyboard="us" # localectl list-x11-keymap-layouts
 timezone="US/Pacific" # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-

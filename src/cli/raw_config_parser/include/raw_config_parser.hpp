@@ -8,64 +8,66 @@
 #include "default_config.hpp"
 
 namespace hatter {
-struct RawTOMLConfig {
-    toml::table config;
-    explicit    operator bool() const { return isValid_; }
+// struct RawTOMLConfig {
+//     toml::table config;
+//     explicit    operator bool() const { return isValid_; }
 
-    explicit RawTOMLConfig(const std::string& filePath);
+//     explicit RawTOMLConfig(const std::string& filePath);
 
-   private:
-    bool isValid_ = false;
-};
+//    private:
+//     bool isValid_ = false;
+// };
 
-struct BaseConfig {
-   public:
-    virtual ~BaseConfig() = 0;
+// struct BaseConfig {
+//    public:
+//     virtual ~BaseConfig() = 0;
 
-    explicit operator bool() const { return isValid_; }
-    bool     isPresent() const { return isPresent_; }
+//     explicit operator bool() const { return isValid_; }
+//     bool     isPresent() const { return isPresent_; }
 
-   protected:
-    bool isValid_   = true;
-    bool isPresent_ = false;
+//    protected:
+//     bool isValid_   = true;
+//     bool isPresent_ = false;
 
-    toml::table getBaseTable_(const RawTOMLConfig& rawConfig,
-                              const std::string&   tableName,
-                              const std::string&   colorCode = "");
-    toml::table getBaseTable_(const toml::table& rawConfig,
-                              const std::string& tableName,
-                              const std::string& colorCode = "");
-};
+bool testGet(const toml::table& t);
 
-struct DistroInfo : public BaseConfig {
-    std::string kickstartTag = kDefaultKickstartTag;
-    std::string baseSpin;
-    std::string osName;
+//     toml::table getBaseTable_(const RawTOMLConfig& rawConfig,
+//                               const std::string&   tableName,
+//                               const std::string&   colorCode = "");
+//     toml::table getBaseTable_(const toml::table& rawConfig,
+//                               const std::string& tableName,
+//                               const std::string& colorCode = "");
+// };
 
-    bool merge(const DistroInfo& target);
+// struct DistroInfo : public BaseConfig {
+//     std::string kickstartTag = kDefaultKickstartTag;
+//     std::string baseSpin;
+//     std::string osName;
 
-    explicit DistroInfo(const RawTOMLConfig& rawConfig);
-};
+//     bool merge(const DistroInfo& target);
 
-struct ImageInfo : public BaseConfig {
-    int                      partitionSize;
-    std::string              firstLoginScript;
-    std::string              postBuildScript;
-    std::string              postBuildNoRootScript;
-    std::vector<std::string> userFiles;
+//     explicit DistroInfo(const RawTOMLConfig& rawConfig);
+// };
 
-    bool merge(const ImageInfo& target);
-    explicit ImageInfo(const RawTOMLConfig& rawConfig);
-};
+// struct ImageInfo : public BaseConfig {
+//     int                      partitionSize;
+//     std::string              firstLoginScript;
+//     std::string              postBuildScript;
+//     std::string              postBuildNoRootScript;
+//     std::vector<std::string> userFiles;
 
-struct BuildProcessConfig : public BaseConfig {
-    bool        enableCustomCache = kDefaultEnableCustomCache;
-    std::string mockScript;
+//     bool merge(const ImageInfo& target);
+//     explicit ImageInfo(const RawTOMLConfig& rawConfig);
+// };
 
-    explicit BuildProcessConfig(const RawTOMLConfig& rawConfig);
-};
+// struct BuildProcessConfig : public BaseConfig {
+//     bool        enableCustomCache = kDefaultEnableCustomCache;
+//     std::string mockScript;
 
-struct Repo : public BaseConfig {
+//     explicit BuildProcessConfig(const RawTOMLConfig& rawConfig);
+// };
+
+struct Repo {
     std::string name;
     std::string displayName;
 
@@ -74,54 +76,50 @@ struct Repo : public BaseConfig {
 
     bool        gpgcheck = false;
     std::string gpgkey;
-
-    void from_toml(const toml::value& v);
 };
 
-struct RepoConfig : public BaseConfig {
+struct RepoConfig {
     std::vector<std::string> standardRepos;
     std::vector<std::string> coprRepos;
     std::vector<Repo>        customRepos;
-
-    explicit RepoConfig(const RawTOMLConfig& rawConfig);
 };
 
-struct PackageSet : public BaseConfig {
-    std::vector<std::string> installList;
-    std::vector<std::string> removeList;
+// struct PackageSet : public BaseConfig {
+//     std::vector<std::string> installList;
+//     std::vector<std::string> removeList;
 
-    PackageSet();
-    PackageSet(const toml::table& rawPackageConfig, const std::string& tableName);
-};
+//     PackageSet();
+//     PackageSet(const toml::table& rawPackageConfig, const std::string& tableName);
+// };
 
-struct PackageConfig : public BaseConfig {
-    PackageSet rpm;
-    PackageSet rpmGroup;
+// struct PackageConfig : public BaseConfig {
+//     PackageSet rpm;
+//     PackageSet rpmGroup;
 
-    explicit PackageConfig(const RawTOMLConfig& rawConfig);
-};
+//     explicit PackageConfig(const RawTOMLConfig& rawConfig);
+// };
 
-struct MiscConfig : public BaseConfig {
-    std::string language = kDefaultLanguage;
-    std::string keyboard;
-    std::string timezone;
+// struct MiscConfig : public BaseConfig {
+//     std::string language = kDefaultLanguage;
+//     std::string keyboard;
+//     std::string timezone;
 
-    explicit MiscConfig(const RawTOMLConfig& rawConfig);
-};
+//     explicit MiscConfig(const RawTOMLConfig& rawConfig);
+// };
 
-struct TOMLConfigFile {
-    DistroInfo distroInfo;
-    ImageInfo  imageInfo;
+// struct TOMLConfigFile {
+//     DistroInfo distroInfo;
+//     ImageInfo  imageInfo;
 
-    explicit operator bool() const { return isValid_; }
+//     explicit operator bool() const { return isValid_; }
 
-    explicit TOMLConfigFile(const std::string& filePath);
-    bool merge(const TOMLConfigFile& configFile);
+//     explicit TOMLConfigFile(const std::string& filePath);
+//     bool merge(const TOMLConfigFile& configFile);
 
-   private:
-    explicit TOMLConfigFile(const RawTOMLConfig& rawConfig);
-    bool isValid_ = true;
-};
+//    private:
+//     explicit TOMLConfigFile(const RawTOMLConfig& rawConfig);
+//     bool isValid_ = true;
+// };
 
 }  // namespace hatter
 #endif
