@@ -9,12 +9,10 @@ mock_env_build_dir="/build_dir" # build directory once in mock env
 mock_cfg_path=${build_working_dir}/mock.cfg
 
 clear_mock_env() {
-sudo -i -u ${original_user} bash << EOF
     if [ -f ${mock_cfg_path} ]; then
         mock -r ${mock_cfg_path} --orphanskill
         mock -r ${mock_cfg_path} --clean
     fi
-EOF
 }
 
 bootstrap_mock_env() {
