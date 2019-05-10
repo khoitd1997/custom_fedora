@@ -33,7 +33,7 @@ bool testGet(const toml::table& t) {
     RepoConfig repoConf;
     auto       error = internal::getSection(t, repoConf);
 
-    if (error.hasError) {
+    if (error.hasError()) {
         std::cout << "Topsection name: " << error.sectionName << std::endl;
         for (const auto& err : error.subSectionErrors) {
             std::cout << "Subsection name: " << err.sectionName << std::endl;

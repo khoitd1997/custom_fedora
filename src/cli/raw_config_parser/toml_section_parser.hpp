@@ -11,9 +11,15 @@
 namespace hatter {
 namespace internal {
 struct SectionSanitizerError {
-    bool                hasError = false;
-    virtual std::string what()   = 0;
-    virtual ~SectionSanitizerError() {}
+   protected:
+    bool hasError_ = false;
+
+   public:
+    bool hasError() const;
+    void setError(const bool error);
+
+    virtual std::string what() = 0;
+    virtual ~SectionSanitizerError();
 };
 
 struct UnknownValueError : SectionSanitizerError {
@@ -22,14 +28,18 @@ struct UnknownValueError : SectionSanitizerError {
     std::string what() override;
 };
 
-// struct RepoNoLinkError : SectionSanitizerError {
-//     std::string what() override;
-// };
+struct RepoNoLinkError : SectionSanitizerError {
+    std::string what() override;
+};
 
 struct SubSectionErrorReport {
+   protected:
+    bool hasError_ = false;
+
+   public:
     std::vector<std::shared_ptr<TOMLError>>             tomlErrors;
     std::vector<std::shared_ptr<SectionSanitizerError>> sanitizerErrors;
-    bool                                                hasError = false;
+    bool                                                hasError() const;
 
     const std::string sectionName;
 
@@ -37,8 +47,8 @@ struct SubSectionErrorReport {
 
     template <typename T, std::enable_if_t<std::is_base_of<TOMLError, T>::value>* = nullptr>
     SubSectionErrorReport& operator+=(const std::shared_ptr<T>&& error) {
-        if (!(error->keyName.empty())) {
-            hasError = true;
+        if (error->hasError()) {
+            hasError_ = true;
             tomlErrors.push_back(error);
         }
         return *this;
@@ -47,8 +57,8 @@ struct SubSectionErrorReport {
     template <typename T,
               std::enable_if_t<std::is_base_of<SectionSanitizerError, T>::value>* = nullptr>
     SubSectionErrorReport& operator+=(const std::shared_ptr<T>&& error) {
-        if (error->hasError) {
-            hasError = true;
+        if (error->hasError()) {
+            hasError_ = true;
             sanitizerErrors.push_back(error);
         }
         return *this;
@@ -64,8 +74,8 @@ struct TopSectionErrorReport : SubSectionErrorReport {
 
     template <typename T, std::enable_if_t<std::is_base_of<TOMLError, T>::value>* = nullptr>
     TopSectionErrorReport& operator+=(const std::shared_ptr<T>&& error) {
-        if (!(error->keyName.empty())) {
-            hasError = true;
+        if (error->hasError()) {
+            hasError_ = true;
             tomlErrors.push_back(error);
         }
         return *this;
@@ -74,8 +84,8 @@ struct TopSectionErrorReport : SubSectionErrorReport {
     template <typename T,
               std::enable_if_t<std::is_base_of<SectionSanitizerError, T>::value>* = nullptr>
     TopSectionErrorReport& operator+=(const std::shared_ptr<T>&& error) {
-        if (error->hasError) {
-            hasError = true;
+        if (error->hasError()) {
+            hasError_ = true;
             sanitizerErrors.push_back(error);
         }
         return *this;

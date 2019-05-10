@@ -18,6 +18,7 @@ struct TOMLError {
     const std::string keyName;
 
     virtual std::string what() = 0;
+    bool                hasError() const;
 
     TOMLError(const std::string& keyName);
     virtual ~TOMLError() = 0;
@@ -35,6 +36,13 @@ struct TOMLWrongTypeError : TOMLError {
 struct TOMLExistentError : TOMLError {
     TOMLExistentError();
     explicit TOMLExistentError(const std::string& keyName);
+
+    std::string what() override;
+};
+
+struct TOMLEmptyStringError : TOMLError {
+    TOMLEmptyStringError();
+    explicit TOMLEmptyStringError(const std::string& keyName);
 
     std::string what() override;
 };
@@ -74,11 +82,12 @@ std::string getTypeName(const T& variable) {
     return getTypeName<T>();
 }
 
+namespace internal {
 template <typename T>
-std::shared_ptr<TOMLError> getTOMLVal(const toml::table& t,
-                                      const std::string& keyName,
-                                      T&                 storage,
-                                      const bool         isOptional = true) {
+std::shared_ptr<TOMLError> getTOMLValBase(const toml::table& t,
+                                          const std::string& keyName,
+                                          T&                 storage,
+                                          const bool         isOptional = true) {
     try {
         storage = toml::get<T>(t.at(keyName));
     } catch (const toml::type_error& e) {
@@ -88,4 +97,25 @@ std::shared_ptr<TOMLError> getTOMLVal(const toml::table& t,
     }
     return std::make_shared<TOMLWrongTypeError>();
 }
+};  // namespace internal
+
+template <typename T>
+std::shared_ptr<TOMLError> getTOMLVal(const toml::table& t,
+                                      const std::string& keyName,
+                                      T&                 storage,
+                                      const bool         isOptional = true) {
+    return internal::getTOMLValBase(t, keyName, storage, isOptional);
+}
+
+template <>
+std::shared_ptr<TOMLError> getTOMLVal(const toml::table& t,
+                                      const std::string& keyName,
+                                      std::string&       storage,
+                                      const bool         isOptional);
+
+template <>
+std::shared_ptr<TOMLError> getTOMLVal(const toml::table&        t,
+                                      const std::string&        keyName,
+                                      std::vector<std::string>& storage,
+                                      const bool                isOptional);
 #endif
