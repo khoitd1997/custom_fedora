@@ -40,7 +40,7 @@ enable_custom_cache=true
 [repo]
 # standard_repos=["google-chrome", "nvidia", "vscode"]
 standard_repos=32
-copr_repos=["", "repo2"]
+# copr_repos=["", "repo2"]
 djkl=2
 dkas=2
 
@@ -49,13 +49,13 @@ dkas=2
     # name="rpmfusion-free"
     name=""
     display_name="RPM Fusion for Fedora $releasever - Free" 
-    # metalink="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-$releasever&arch=$basearch"
+    metalink="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-$releasever&arch=$basearch"
     # baseurl="http://download1.rpmfusion.org/free/fedora/releases/$releasever/Everything/$basearch/os/"
     # gpgcheck=true
     asdkfas=2
     dkask=2
     dkaf=2
-    gpgcheck=1
+    # gpgcheck=1
     gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"
 
     [[repo.custom_repos]]

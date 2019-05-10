@@ -7,20 +7,16 @@
 
 namespace hatter {
 namespace internal {
-std::shared_ptr<UnknownValueError> checkUnknownValueError(
-    const toml::table& table, const std::vector<std::string>& validOptions) {
+std::shared_ptr<UnknownValueError> checkUnknownValueError(const toml::table& table) {
     UnknownValueError error;
-    auto listContain = [](const std::vector<std::string>& list, const std::string& value) {
-        return static_cast<bool>(std::count(list.begin(), list.end(), value));
-    };
+    // auto listContain = [](const std::vector<std::string>& list, const std::string& value) {
+    //     return static_cast<bool>(std::count(list.begin(), list.end(), value));
+    // };
 
-    for (auto const& [key, val] : table) {
-        if (!listContain(validOptions, key)) {
-            error.setError(true);
-            error.undefinedVals.push_back(key);
-        }
+    if (!table.empty()) {
+        for (auto const& [key, val] : table) { error.undefinedVals.push_back(key); }
+        error.setError(true);
     }
-
     return std::make_shared<UnknownValueError>(error);
 }
 
@@ -71,30 +67,28 @@ TopSectionErrorReport getSection(const toml::table& rawConfig, RepoConfig& repoC
     errorReport += getTOMLVal(rawRepoConfig, "custom_repos", rawCustomRepos);
     for (size_t i = 0; i < rawCustomRepos.size(); ++i) {
         SubSectionErrorReport customRepoError("custom_repo #" + std::to_string(i + 1));
+        auto                  tempTable = rawCustomRepos.at(i);
         Repo                  repo;
-        customRepoError += getTOMLVal(rawCustomRepos.at(i), "name", repo.name, false);
-        customRepoError +=
-            getTOMLVal(rawCustomRepos.at(i), "display_name", repo.displayName, false);
 
-        customRepoError += getTOMLVal(rawCustomRepos.at(i), "metalink", repo.metaLink);
-        customRepoError += getTOMLVal(rawCustomRepos.at(i), "baseurl", repo.baseurl);
+        customRepoError += getTOMLVal(tempTable, "name", repo.name, false);
+        customRepoError += getTOMLVal(tempTable, "display_name", repo.displayName, false);
 
-        customRepoError += getTOMLVal(rawCustomRepos.at(i), "gpgcheck", repo.gpgcheck, false);
-        customRepoError += getTOMLVal(rawCustomRepos.at(i), "gpgkey", repo.gpgkey);
+        customRepoError += getTOMLVal(tempTable, "metalink", repo.metaLink);
+        customRepoError += getTOMLVal(tempTable, "baseurl", repo.baseurl);
+
+        customRepoError += getTOMLVal(tempTable, "gpgcheck", repo.gpgcheck, false);
+        customRepoError += getTOMLVal(tempTable, "gpgkey", repo.gpgkey);
 
         repoConfig.customRepos.push_back(repo);
 
-        const std::vector<std::string> validOptions = {
-            "name", "display_name", "metalink", "baseurl", "gpgcheck", "gpgkey"};
-        customRepoError += checkUnknownValueError(rawCustomRepos.at(i), validOptions);
+        customRepoError += checkUnknownValueError(tempTable);
 
         customRepoError += checkRepoNoLinkError(repo);
 
         errorReport += customRepoError;
     }
 
-    const std::vector<std::string> validOptions = {"standard_repos", "copr_repos", "custom_repos"};
-    errorReport += checkUnknownValueError(rawRepoConfig, validOptions);
+    errorReport += checkUnknownValueError(rawRepoConfig);
 
     return errorReport;
 }

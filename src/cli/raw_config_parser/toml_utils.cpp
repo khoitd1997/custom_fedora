@@ -1,5 +1,7 @@
 #include "toml_utils.hpp"
 
+#include <algorithm>
+
 template <>
 std::string getTypeName<int>() {
     return "integer";
@@ -57,6 +59,14 @@ std::shared_ptr<TOMLError> getTOMLVal(toml::table&       t,
     return ret;
 }
 
+std::shared_ptr<TOMLError> getTOMLVal(const toml::table& t,
+                                      const std::string& keyName,
+                                      toml::table&       storage,
+                                      const bool         isOptional) {
+    const auto status = internal::getTOMLValHelper(t, keyName, storage);
+    return internal::getTOMLErrorPtr(status, keyName, storage, isOptional);
+}
+
 template <>
 std::shared_ptr<TOMLError> getTOMLVal(toml::table&              t,
                                       const std::string&        keyName,
@@ -64,8 +74,10 @@ std::shared_ptr<TOMLError> getTOMLVal(toml::table&              t,
                                       const bool                isOptional) {
     auto error = internal::getTOMLValBase(t, keyName, storage, isOptional);
     if (!(storage.empty())) {
-        for (const auto& str : storage) {
-            if (str.empty()) { return std::make_shared<TOMLEmptyStringError>(keyName); }
+        if (std::any_of(storage.cbegin(), storage.cend(), [](std::string str) -> bool {
+                return str.empty();
+            })) {
+            return std::make_shared<TOMLEmptyStringError>(keyName);
         }
     }
     return error;

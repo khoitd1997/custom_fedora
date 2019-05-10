@@ -46,7 +46,7 @@ struct TOMLEmptyStringError : TOMLError {
 
 struct TOMLNoError : TOMLError {
     bool isPresent;
-    TOMLNoError(const bool isPresent);
+    explicit TOMLNoError(const bool isPresent);
 
     std::string what() override;
 };
@@ -101,18 +101,18 @@ TOMLValStatus getTOMLValHelper(const toml::table& t, const std::string& keyName,
 
 template <typename T>
 TOMLValStatus getTOMLValHelper(toml::table& t, const std::string& keyName, T& storage) {
-    auto ret = getTOMLValHelper(t, keyName, storage);
+    const auto tempTable = t;
+    auto       ret       = getTOMLValHelper(tempTable, keyName, storage);
     t.erase(keyName);
     return ret;
 }
 
 template <typename T>
-std::shared_ptr<TOMLError> getTOMLValBase(toml::table&       t,
-                                          const std::string& keyName,
-                                          T&                 storage,
-                                          const bool         isOptional = true) {
-    auto ret = getTOMLValHelper(t, keyName, storage);
-    switch (ret) {
+std::shared_ptr<TOMLError> getTOMLErrorPtr(const TOMLValStatus status,
+                                           const std::string&  keyName,
+                                           const T&            storage,
+                                           const bool          isOptional = true) {
+    switch (status) {
         case TOMLValStatus::NOT_PRESENT:
             if (isOptional) { return std::make_shared<TOMLNoError>(false); }
             return std::make_shared<TOMLExistentError>(keyName);
@@ -121,9 +121,21 @@ std::shared_ptr<TOMLError> getTOMLValBase(toml::table&       t,
             return std::make_shared<TOMLNoError>(true);
             break;
         case TOMLValStatus::PRESENT_TYPE_ERROR:
-            return std::make_shared<TOMLTypeError>(keyName);
+            return std::make_shared<TOMLTypeError>(keyName, getTypeName(storage));
+            break;
+        default:
+            return std::make_shared<TOMLNoError>(true);
             break;
     }
+}
+
+template <typename T>
+std::shared_ptr<TOMLError> getTOMLValBase(toml::table&       t,
+                                          const std::string& keyName,
+                                          T&                 storage,
+                                          const bool         isOptional = true) {
+    auto status = getTOMLValHelper(t, keyName, storage);
+    return getTOMLErrorPtr(status, keyName, storage, isOptional);
 }
 };  // namespace internal
 
@@ -141,11 +153,10 @@ std::shared_ptr<TOMLError> getTOMLVal(toml::table&       t,
                                       std::string&       storage,
                                       const bool         isOptional);
 
-template <>
 std::shared_ptr<TOMLError> getTOMLVal(const toml::table& t,
                                       const std::string& keyName,
-                                      std::table&        storage,
-                                      const bool         isOptional);
+                                      toml::table&       storage,
+                                      const bool         isOptional = true);
 
 template <>
 std::shared_ptr<TOMLError> getTOMLVal(toml::table&              t,
