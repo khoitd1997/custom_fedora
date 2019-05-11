@@ -1,5 +1,6 @@
 #include "toml_section_parser.hpp"
 
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -25,13 +26,29 @@ HatterParserLogicalError::HatterParserLogicalError(const bool hasError) : hasErr
 HatterParserLogicalError::HatterParserLogicalError() {}
 HatterParserLogicalError::~HatterParserLogicalError() {}
 
+bool ErrorReport::hasError() const { return hasError_; }
+void ErrorReport::setError(const bool status) { hasError_ = status; }
+
 SubSectionErrorReport::SubSectionErrorReport(const std::string& sectionName)
     : sectionName{sectionName} {}
-bool SubSectionErrorReport::hasError() const { return hasError_; }
-void SubSectionErrorReport::setError(const bool status) { hasError_ = status; }
+void SubSectionErrorReport::what() const {
+    if (tomlErrors.size() > 0 || sanitizerErrors.size() > 0) {
+        std::cout << sectionName << ":" << std::endl;
+
+        for (const auto& tomlErr : tomlErrors) { std::cout << tomlErr->what() << std::endl; }
+        for (const auto& sanitizeErr : sanitizerErrors) {
+            std::cout << sanitizeErr->what() << std::endl;
+        }
+    }
+}
 
 TopSectionErrorReport::TopSectionErrorReport(const std::string& sectionName)
     : SubSectionErrorReport(sectionName) {}
+void TopSectionErrorReport::what() const {
+    std::cout << "top section " << sectionName << ":" << std::endl;
+
+    for (const auto& sectionErr : subSectionErrors) { sectionErr.what(); }
+}
 
 void processError(TopSectionErrorReport& errorReport, const SubSectionErrorReport& error) {
     if (error.hasError()) {
@@ -108,8 +125,12 @@ bool SectionMergeConflictError::hasError() const { return !keyName.empty(); }
 
 SectionMergeErrorReport::SectionMergeErrorReport(const std::string& sectionName)
     : sectionName(sectionName) {}
-bool SectionMergeErrorReport::hasError() const { return hasError_; }
-void SectionMergeErrorReport::setError(const bool status) { hasError_ = status; }
+void SectionMergeErrorReport::what() const {
+    std::cout << "merge error in section " << sectionName << ":" << std::endl;
+
+    for (const auto& mergeErr : errors) { std::cout << mergeErr.what() << std::endl; }
+}
+
 void processError(SectionMergeErrorReport& errorReport, const SectionMergeConflictError& error) {
     if (error.hasError()) {
         errorReport.setError(true);
@@ -145,6 +166,81 @@ SectionMergeErrorReport merge(RepoConfig& resultConf, const RepoConfig& targetCo
     }
 
     return errorReport;
+}
+
+FileErrorReport::FileErrorReport(const std::string& fileName, const std::string& parentFile)
+    : fileName(fileName), parentFile(parentFile) {}
+void FileErrorReport::what() const {
+    if (sectionErrors.size() > 0 || mergeErrors.size() > 0) {
+        std::string includeStr = (parentFile == "") ? ":" : "(included from):" + parentFile;
+        std::cout << fileName << includeStr << std::endl;
+
+        for (const auto& sectionError : sectionErrors) { sectionError.what(); }
+        for (const auto& mergeError : mergeErrors) { mergeError.what(); }
+    }
+}
+
+void processError(FileErrorReport& errorReport, const TopSectionErrorReport& error) {
+    if (error.hasError()) {
+        errorReport.setError(true);
+        errorReport.sectionErrors.push_back(error);
+    }
+}
+
+void processError(FileErrorReport& errorReport, const SectionMergeErrorReport& error) {
+    if (error.hasError()) {
+        errorReport.setError(true);
+        errorReport.mergeErrors.push_back(error);
+    }
+}
+
+// FileMergeErrorReport merge(FullConfig& resultConf, const FullConfig& targetConf) {}
+
+FileErrorReport getFile(const std::filesystem::path& filePath,
+                        const std::string&           parentFileName,
+                        FullConfig&                  fullConfig) {
+    auto currDirectory = filePath.parent_path().string();
+    auto currFileName  = filePath.filename().string();
+
+    // TODO(kd): error handling here
+    auto rawConfig = toml::parse(filePath);
+
+    // TODO(kd): error handling here
+    std::vector<std::string> includeFiles;
+    getTOMLVal(rawConfig, "include_files", includeFiles);
+    std::cout << "Include files:" << std::endl << std::endl;
+
+    FileErrorReport fileReport(currFileName, parentFileName);
+    processError(fileReport, getSection(rawConfig, fullConfig.repoConfig));
+
+    auto hasMergeError = false;
+    for (const auto& childFile : includeFiles) {
+        std::cout << "Parsing file:" << childFile << std::endl;
+
+        auto childPath  = (currDirectory == "") ? childFile : currDirectory + "/" + childFile;
+        auto childTable = toml::parse(childPath);
+
+        FullConfig childConf;
+        auto       childError = getFile(childPath, currFileName, childConf);
+
+        std::cout << "Standard Repos:" << std::endl;
+        for (const auto& stdRepo : childConf.repoConfig.standardRepos) {
+            std::cout << stdRepo << std::endl;
+        }
+
+        if (!hasMergeError && !childError.hasError()) {
+            auto mergeError = merge(fullConfig.repoConfig, childConf.repoConfig);
+            processError(fileReport, mergeError);
+
+            hasMergeError = mergeError.hasError();
+        }
+
+        std::cout << std::endl;
+    }
+
+    if (fileReport.hasError()) { fileReport.what(); }
+
+    return fileReport;
 }
 
 }  // namespace internal

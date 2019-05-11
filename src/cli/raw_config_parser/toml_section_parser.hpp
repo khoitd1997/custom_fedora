@@ -43,25 +43,36 @@ struct RepoNoGPGKeyError : public HatterParserLogicalError {
     explicit RepoNoGPGKeyError(const Repo& repo);
 };
 
-struct SubSectionErrorReport {
+struct ErrorReport {
    protected:
     bool hasError_ = false;
 
    public:
+    virtual ~ErrorReport() {}
+
+    bool hasError() const;
+    void setError(const bool status);
+
+    virtual void what() const = 0;
+};
+
+struct SubSectionErrorReport : public ErrorReport {
     std::vector<std::shared_ptr<TOMLError>>                tomlErrors;
     std::vector<std::shared_ptr<HatterParserLogicalError>> sanitizerErrors;
-    bool                                                   hasError() const;
-    void                                                   setError(const bool status);
 
     const std::string sectionName;
 
     explicit SubSectionErrorReport(const std::string& sectionName);
+
+    virtual void what() const override;
 };
 
 struct TopSectionErrorReport : public SubSectionErrorReport {
     std::vector<SubSectionErrorReport> subSectionErrors;
 
     explicit TopSectionErrorReport(const std::string& sectionName);
+
+    void what() const override;
 };
 
 template <typename T,
@@ -101,16 +112,11 @@ struct SectionMergeConflictError : public HatterParserLogicalError {
     std::string what() const override;
 };
 
-struct SectionMergeErrorReport {
-   private:
-    bool hasError_ = false;
-
-   public:
-    bool hasError() const;
-    void setError(const bool status);
-
+struct SectionMergeErrorReport : public ErrorReport {
     const std::string                      sectionName;
     std::vector<SectionMergeConflictError> errors;
+
+    void what() const override;
 
     explicit SectionMergeErrorReport(const std::string& sectionName);
 };
@@ -118,8 +124,22 @@ struct SectionMergeErrorReport {
 void processError(SectionMergeErrorReport& errorReport, const SectionMergeConflictError& error);
 SectionMergeErrorReport merge(RepoConfig& resultConf, const RepoConfig& targetConf);
 
-// struct FileMergeErrorReport
+struct FileErrorReport : public ErrorReport {
+    std::vector<TopSectionErrorReport>   sectionErrors;
+    std::vector<SectionMergeErrorReport> mergeErrors;
+
+    const std::string fileName;
+    const std::string parentFile;
+
+    FileErrorReport(const std::string& fileName, const std::string& parentFile);
+
+    void what() const override;
+};
 
 TopSectionErrorReport getSection(toml::table& rawConfig, RepoConfig& repoConfig);
+
+FileErrorReport getFile(const std::filesystem::path& filePath,
+                        const std::string&           parentFileName,
+                        FullConfig&                  fullConfig);
 }  // namespace internal
 }  // namespace hatter

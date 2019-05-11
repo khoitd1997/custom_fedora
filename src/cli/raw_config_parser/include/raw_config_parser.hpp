@@ -1,5 +1,6 @@
 #ifndef _RAW_CONFIG_PARSER_HPP
 #define _RAW_CONFIG_PARSER_HPP
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -28,8 +29,6 @@ namespace hatter {
 //    protected:
 //     bool isValid_   = true;
 //     bool isPresent_ = false;
-
-bool testGet(toml::table& t);
 
 //     toml::table getBaseTable_(const RawTOMLConfig& rawConfig,
 //                               const std::string&   tableName,
@@ -90,6 +89,14 @@ struct RepoConfig {
     std::vector<std::string> coprRepos;
     std::vector<Repo>        customRepos;
 };
+
+struct FullConfig {
+    RepoConfig repoConfig;
+};
+
+bool testGet(toml::table& t);
+
+bool testGetFile(std::filesystem::path& filePath, FullConfig& fullConfig);
 
 // struct PackageSet : public BaseConfig {
 //     std::vector<std::string> installList;

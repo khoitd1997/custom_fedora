@@ -14,6 +14,7 @@
 #include <spdlog/spdlog.h>
 
 #include <cassert>
+#include <filesystem>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -48,9 +49,9 @@ int main(int argc, char** argv) {
 
     logInit();
 
-    const auto fileName = std::string(argv[1]);
-    auto       data     = toml::parse(fileName);
-    hatter::testGet(data);
+    auto               filePath = std::filesystem::path(std::string(argv[1]));
+    hatter::FullConfig fullConfig;
+    hatter::testGetFile(filePath, fullConfig);
 
     // hatter::TOMLConfigFile conf(fileName);
 

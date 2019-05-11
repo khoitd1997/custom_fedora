@@ -15,6 +15,7 @@
 // #include "toml_utils.hpp"
 // #include "utils.hpp"
 
+#include <filesystem>
 #include <iostream>
 
 #include "toml_section_parser.hpp"
@@ -54,54 +55,62 @@ void printAllError(const internal::TopSectionErrorReport& error) {
     }
 }
 
-bool testGet(toml::table& t) {
-    RepoConfig repoConf;
-    auto       error = internal::getSection(t, repoConf);
+// bool testGet(toml::table& t) {
+//     RepoConfig repoConf;
+//     auto       error = internal::getSection(t, repoConf);
 
-    printAllError(error);
+//     printAllError(error);
 
-    auto                     tempTable = t;
-    std::vector<std::string> includeFiles;
-    getTOMLVal(tempTable, "include_files", includeFiles);
-    std::cout << "Include files:" << std::endl << std::endl;
-    auto hasMergeError = false;
-    for (const auto& file : includeFiles) {
-        std::cout << "Parsing file:" << file << std::endl;
-        auto childTable = toml::parse(file);
+//     auto                     tempTable = t;
+//     std::vector<std::string> includeFiles;
+//     getTOMLVal(tempTable, "include_files", includeFiles);
+//     std::cout << "Include files:" << std::endl << std::endl;
+//     auto hasMergeError = false;
+//     for (const auto& file : includeFiles) {
+//         std::cout << "Parsing file:" << file << std::endl;
+//         auto childTable = toml::parse(file);
 
-        RepoConfig childConf;
-        auto       childError = internal::getSection(childTable, childConf);
+//         RepoConfig childConf;
+//         auto       childError = internal::getSection(childTable, childConf);
 
-        std::cout << "Standard Repos:" << std::endl;
-        for (const auto& stdRepo : childConf.standardRepos) { std::cout << stdRepo << std::endl; }
+//         std::cout << "Standard Repos:" << std::endl;
+//         for (const auto& stdRepo : childConf.standardRepos) { std::cout << stdRepo << std::endl;
+//         }
 
-        printAllError(childError);
+//         printAllError(childError);
 
-        if (!hasMergeError && !childError.hasError()) {
-            auto mergeError = internal::merge(repoConf, childConf);
+//         if (!hasMergeError && !childError.hasError()) {
+//             auto mergeError = internal::merge(repoConf, childConf);
 
-            if (mergeError.hasError()) {
-                std::cout << "Merge error:" << std::endl;
-                for (const auto& mError : mergeError.errors) {
-                    std::cout << mError.what() << std::endl;
-                }
-            }
+//             if (mergeError.hasError()) {
+//                 std::cout << "Merge error:" << std::endl;
+//                 for (const auto& mError : mergeError.errors) {
+//                     std::cout << mError.what() << std::endl;
+//                 }
+//             }
 
-            hasMergeError = mergeError.hasError();
-        }
+//             hasMergeError = mergeError.hasError();
+//         }
 
-        std::cout << std::endl;
-    }
+//         std::cout << std::endl;
+//     }
 
-    // std::cout << "printing final repo list:" << std::endl;
-    // for (const auto& repo : repoConf.standardRepos) { std::cout << repo << std::endl; }
+//     // std::cout << "printing final repo list:" << std::endl;
+//     // for (const auto& repo : repoConf.standardRepos) { std::cout << repo << std::endl; }
 
-    std::cout << "printing final custom repo list:" << std::endl;
-    for (const auto& repo : repoConf.customRepos) { std::cout << repo.name << std::endl; }
+//     std::cout << "printing final custom repo list:" << std::endl;
+//     for (const auto& repo : repoConf.customRepos) { std::cout << repo.name << std::endl; }
 
-    // return error.hasError;
-    return false;
+//     // return error.hasError;
+//     return false;
+// }
+
+bool testGetFile(std::filesystem::path& filePath, FullConfig& fullConfig) {
+    auto error = internal::getFile(filePath, "", fullConfig);
+
+    return error.hasError();
 }
+
 // namespace {
 // // TODO(kd): Refactor this into a log formatting module if needed
 // void printSection(const std::string& colorCode, const std::string& sectionName) {
