@@ -7,27 +7,23 @@
 
 namespace hatter {
 namespace internal {
-std::shared_ptr<UnknownValueError> checkUnknownValueError(const toml::table& table) {
-    UnknownValueError error;
-    // auto listContain = [](const std::vector<std::string>& list, const std::string& value) {
-    //     return static_cast<bool>(std::count(list.begin(), list.end(), value));
-    // };
-
+UnknownValueError::UnknownValueError(const toml::table& table) {
     if (!table.empty()) {
-        for (auto const& [key, val] : table) { error.undefinedVals.push_back(key); }
-        error.setError(true);
+        for (auto const& [key, val] : table) { undefinedVals.push_back(key); }
+        hasError_ = true;
     }
-    return std::make_shared<UnknownValueError>(error);
 }
 
-std::shared_ptr<RepoNoLinkError> checkRepoNoLinkError(const Repo& repo) {
-    RepoNoLinkError repoError;
-    repoError.setError(repo.baseurl.empty() && repo.metaLink.empty());
-    return std::make_shared<RepoNoLinkError>(repoError);
-}
+RepoNoLinkError::RepoNoLinkError(const Repo& repo)
+    : SectionSanitizerError(repo.baseurl.empty() && repo.metaLink.empty()) {}
+
+RepoNoGPGKeyError::RepoNoGPGKeyError(const Repo& repo)
+    : SectionSanitizerError(repo.gpgcheck && repo.gpgkey.empty()) {}
 
 bool SectionSanitizerError::hasError() const { return hasError_; }
 void SectionSanitizerError::setError(const bool error) { hasError_ = error; }
+SectionSanitizerError::SectionSanitizerError(const bool hasError) : hasError_(hasError) {}
+SectionSanitizerError::SectionSanitizerError() {}
 SectionSanitizerError::~SectionSanitizerError() {}
 
 SubSectionErrorReport::SubSectionErrorReport(const std::string& sectionName)
@@ -51,6 +47,8 @@ std::string UnknownValueError::what() {
 }
 
 std::string RepoNoLinkError::what() { return "either baseurl or metalink needs to be defined"; }
+
+std::string RepoNoGPGKeyError::what() { return "gpgkey should be defined when gpgcheck is true"; }
 
 TopSectionErrorReport getSection(const toml::table& rawConfig, RepoConfig& repoConfig) {
     TopSectionErrorReport errorReport("repo");
@@ -81,14 +79,15 @@ TopSectionErrorReport getSection(const toml::table& rawConfig, RepoConfig& repoC
 
         repoConfig.customRepos.push_back(repo);
 
-        customRepoError += checkUnknownValueError(tempTable);
-
-        customRepoError += checkRepoNoLinkError(repo);
+        // logically sanitize the repo
+        customRepoError += UnknownValueError(tempTable);
+        customRepoError += RepoNoLinkError(repo);
+        customRepoError += RepoNoGPGKeyError(repo);
 
         errorReport += customRepoError;
     }
 
-    errorReport += checkUnknownValueError(rawRepoConfig);
+    errorReport += UnknownValueError(rawRepoConfig);
 
     return errorReport;
 }

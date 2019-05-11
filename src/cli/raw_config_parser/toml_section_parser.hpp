@@ -18,18 +18,30 @@ struct SectionSanitizerError {
     bool hasError() const;
     void setError(const bool error);
 
+    SectionSanitizerError(const bool hasError);
+    SectionSanitizerError();
     virtual std::string what() = 0;
     virtual ~SectionSanitizerError();
 };
 
-struct UnknownValueError : SectionSanitizerError {
+struct UnknownValueError : public SectionSanitizerError {
     std::vector<std::string> undefinedVals;
 
     std::string what() override;
+
+    explicit UnknownValueError(const toml::table& table);
 };
 
-struct RepoNoLinkError : SectionSanitizerError {
+struct RepoNoLinkError : public SectionSanitizerError {
     std::string what() override;
+
+    explicit RepoNoLinkError(const Repo& repo);
+};
+
+struct RepoNoGPGKeyError : public SectionSanitizerError {
+    std::string what() override;
+
+    explicit RepoNoGPGKeyError(const Repo& repo);
 };
 
 struct SubSectionErrorReport {
@@ -56,10 +68,10 @@ struct SubSectionErrorReport {
 
     template <typename T,
               std::enable_if_t<std::is_base_of<SectionSanitizerError, T>::value>* = nullptr>
-    SubSectionErrorReport& operator+=(const std::shared_ptr<T>&& error) {
-        if (error->hasError()) {
+    SubSectionErrorReport& operator+=(const T&& error) {
+        if (error.hasError()) {
             hasError_ = true;
-            sanitizerErrors.push_back(error);
+            sanitizerErrors.push_back(std::make_shared<T>(error));
         }
         return *this;
     }
@@ -83,10 +95,10 @@ struct TopSectionErrorReport : SubSectionErrorReport {
 
     template <typename T,
               std::enable_if_t<std::is_base_of<SectionSanitizerError, T>::value>* = nullptr>
-    TopSectionErrorReport& operator+=(const std::shared_ptr<T>&& error) {
-        if (error->hasError()) {
+    TopSectionErrorReport& operator+=(const T&& error) {
+        if (error.hasError()) {
             hasError_ = true;
-            sanitizerErrors.push_back(error);
+            sanitizerErrors.push_back(std::make_shared<T>(error));
         }
         return *this;
     }
