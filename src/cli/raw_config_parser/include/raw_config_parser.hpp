@@ -76,6 +76,13 @@ struct Repo {
 
     bool        gpgcheck = false;
     std::string gpgkey;
+
+    bool operator==(const Repo& r) const {
+        return (this->name == r.name) && (this->displayName == r.displayName) &&
+               (this->metaLink == r.metaLink) && (this->baseurl == r.baseurl) &&
+               (this->gpgcheck == r.gpgcheck) && (this->gpgkey == r.gpgkey);
+    }
+    bool operator!=(const Repo& r) const { return !(this->operator==(r)); }
 };
 
 struct RepoConfig {
@@ -122,4 +129,11 @@ struct RepoConfig {
 // };
 
 }  // namespace hatter
+
+namespace std {
+template <>
+struct hash<hatter::Repo> {
+    size_t operator()(const hatter::Repo& r) const { return hash<std::string>()(r.name); }
+};
+}  // namespace std
 #endif

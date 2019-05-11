@@ -64,6 +64,7 @@ bool testGet(const toml::table& t) {
     std::vector<std::string> includeFiles;
     getTOMLVal(tempTable, "include_files", includeFiles);
     std::cout << "Include files:" << std::endl << std::endl;
+    auto hasMergeError = false;
     for (const auto& file : includeFiles) {
         std::cout << "Parsing file:" << file << std::endl;
         auto childTable = toml::parse(file);
@@ -76,8 +77,27 @@ bool testGet(const toml::table& t) {
 
         printAllError(childError);
 
+        if (!hasMergeError && !childError.hasError()) {
+            auto mergeError = internal::merge(repoConf, childConf);
+
+            if (mergeError.hasError()) {
+                std::cout << "Merge error:" << std::endl;
+                for (const auto& mError : mergeError.errors) {
+                    std::cout << mError.what() << std::endl;
+                }
+            }
+
+            hasMergeError = mergeError.hasError();
+        }
+
         std::cout << std::endl;
     }
+
+    // std::cout << "printing final repo list:" << std::endl;
+    // for (const auto& repo : repoConf.standardRepos) { std::cout << repo << std::endl; }
+
+    std::cout << "printing final custom repo list:" << std::endl;
+    for (const auto& repo : repoConf.customRepos) { std::cout << repo.name << std::endl; }
 
     // return error.hasError;
     return false;

@@ -19,26 +19,26 @@ struct HatterParserLogicalError {
 
     HatterParserLogicalError(const bool hasError);
     HatterParserLogicalError();
-    virtual std::string what() = 0;
+    virtual std::string what() const = 0;
     virtual ~HatterParserLogicalError();
 };
 
 struct UnknownValueError : public HatterParserLogicalError {
     std::vector<std::string> undefinedVals;
 
-    std::string what() override;
+    std::string what() const override;
 
     explicit UnknownValueError(const toml::table& table);
 };
 
 struct RepoNoLinkError : public HatterParserLogicalError {
-    std::string what() override;
+    std::string what() const override;
 
     explicit RepoNoLinkError(const Repo& repo);
 };
 
 struct RepoNoGPGKeyError : public HatterParserLogicalError {
-    std::string what() override;
+    std::string what() const override;
 
     explicit RepoNoGPGKeyError(const Repo& repo);
 };
@@ -88,12 +88,35 @@ void processError(T& errorReport, const std::shared_ptr<V>&& error) {
 
 void processError(TopSectionErrorReport& errorReport, const SubSectionErrorReport& error);
 
-struct SectionMergeErrorReport {
-    const std::string                                      sectionName;
-    std::vector<std::shared_ptr<HatterParserLogicalError>> errors;
+struct SectionMergeConflictError : public HatterParserLogicalError {
+    const std::string keyName;
+    const std::string val1;
+    const std::string val2;
 
-    SectionMergeErrorReport(const std::string& sectionName);
+    SectionMergeConflictError(const std::string& keyName,
+                              const std::string& val1,
+                              const std::string& val2);
+    bool hasError() const;
+
+    std::string what() const override;
 };
+
+struct SectionMergeErrorReport {
+   private:
+    bool hasError_ = false;
+
+   public:
+    bool hasError() const;
+    void setError(const bool status);
+
+    const std::string                      sectionName;
+    std::vector<SectionMergeConflictError> errors;
+
+    explicit SectionMergeErrorReport(const std::string& sectionName);
+};
+
+void processError(SectionMergeErrorReport& errorReport, const SectionMergeConflictError& error);
+SectionMergeErrorReport merge(RepoConfig& resultConf, const RepoConfig& targetConf);
 
 // struct FileMergeErrorReport
 

@@ -40,14 +40,18 @@ void processError(TopSectionErrorReport& errorReport, const SubSectionErrorRepor
     }
 }
 
-std::string UnknownValueError::what() {
+std::string UnknownValueError::what() const {
     auto undefinedStr = strJoin(undefinedVals);
     return "unknown value(s): " + undefinedStr;
 }
 
-std::string RepoNoLinkError::what() { return "either baseurl or metalink needs to be defined"; }
+std::string RepoNoLinkError::what() const {
+    return "either baseurl or metalink needs to be defined";
+}
 
-std::string RepoNoGPGKeyError::what() { return "gpgkey should be defined when gpgcheck is true"; }
+std::string RepoNoGPGKeyError::what() const {
+    return "gpgkey should be defined when gpgcheck is true";
+}
 
 TopSectionErrorReport getSection(const toml::table& rawConfig, RepoConfig& repoConfig) {
     TopSectionErrorReport errorReport("repo");
@@ -93,8 +97,52 @@ TopSectionErrorReport getSection(const toml::table& rawConfig, RepoConfig& repoC
     return errorReport;
 }
 
-// SectionMergeErrorReport::SectionMergeErrorReport(const std::string& sectionName)
-// : sectionName(sectionName) {}
+SectionMergeConflictError::SectionMergeConflictError(const std::string& keyName,
+                                                     const std::string& val1,
+                                                     const std::string& val2)
+    : keyName(keyName), val1(val1), val2(val2) {}
+std::string SectionMergeConflictError::what() const {
+    return "conflict in " + keyName + ": " + val1 + " vs " + val2;
+}
+bool SectionMergeConflictError::hasError() const { return !keyName.empty(); }
+
+SectionMergeErrorReport::SectionMergeErrorReport(const std::string& sectionName)
+    : sectionName(sectionName) {}
+bool SectionMergeErrorReport::hasError() const { return hasError_; }
+void SectionMergeErrorReport::setError(const bool status) { hasError_ = status; }
+void processError(SectionMergeErrorReport& errorReport, const SectionMergeConflictError& error) {
+    if (error.hasError()) {
+        errorReport.setError(true);
+        errorReport.errors.push_back(error);
+    }
+}
+
+SectionMergeErrorReport merge(RepoConfig& resultConf, const RepoConfig& targetConf) {
+    SectionMergeErrorReport errorReport("repo");
+    appendUniqueVector(resultConf.standardRepos, targetConf.standardRepos);
+    appendUniqueVector(resultConf.coprRepos, targetConf.coprRepos);
+
+    auto resRepoCnt = 1;
+    for (const auto& resRepo : resultConf.customRepos) {
+        auto targetRepoCnt = 1;
+        for (const auto& targetRepo : targetConf.customRepos) {
+            if (resRepo.name == targetRepo.name) {
+                if (resRepo != targetRepo) {
+                    processError(
+                        errorReport,
+                        SectionMergeConflictError("custom_repo",
+                                                  "repo #" + std::to_string(resRepoCnt),
+                                                  "repo #" + std::to_string(targetRepoCnt)));
+                }
+            }
+            ++targetRepoCnt;
+        }
+        ++resRepoCnt;
+    }
+    appendUniqueVector(resultConf.customRepos, targetConf.customRepos);
+
+    return errorReport;
+}
 
 }  // namespace internal
 }  // namespace hatter
