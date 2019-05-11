@@ -10,21 +10,20 @@
 
 namespace hatter {
 namespace internal {
-struct SectionSanitizerError {
+struct HatterParserLogicalError {
    protected:
     bool hasError_ = false;
 
    public:
     bool hasError() const;
-    void setError(const bool error);
 
-    SectionSanitizerError(const bool hasError);
-    SectionSanitizerError();
+    HatterParserLogicalError(const bool hasError);
+    HatterParserLogicalError();
     virtual std::string what() = 0;
-    virtual ~SectionSanitizerError();
+    virtual ~HatterParserLogicalError();
 };
 
-struct UnknownValueError : public SectionSanitizerError {
+struct UnknownValueError : public HatterParserLogicalError {
     std::vector<std::string> undefinedVals;
 
     std::string what() override;
@@ -32,13 +31,13 @@ struct UnknownValueError : public SectionSanitizerError {
     explicit UnknownValueError(const toml::table& table);
 };
 
-struct RepoNoLinkError : public SectionSanitizerError {
+struct RepoNoLinkError : public HatterParserLogicalError {
     std::string what() override;
 
     explicit RepoNoLinkError(const Repo& repo);
 };
 
-struct RepoNoGPGKeyError : public SectionSanitizerError {
+struct RepoNoGPGKeyError : public HatterParserLogicalError {
     std::string what() override;
 
     explicit RepoNoGPGKeyError(const Repo& repo);
@@ -49,60 +48,54 @@ struct SubSectionErrorReport {
     bool hasError_ = false;
 
    public:
-    std::vector<std::shared_ptr<TOMLError>>             tomlErrors;
-    std::vector<std::shared_ptr<SectionSanitizerError>> sanitizerErrors;
-    bool                                                hasError() const;
+    std::vector<std::shared_ptr<TOMLError>>                tomlErrors;
+    std::vector<std::shared_ptr<HatterParserLogicalError>> sanitizerErrors;
+    bool                                                   hasError() const;
+    void                                                   setError(const bool status);
 
     const std::string sectionName;
 
     explicit SubSectionErrorReport(const std::string& sectionName);
-
-    template <typename T, std::enable_if_t<std::is_base_of<TOMLError, T>::value>* = nullptr>
-    SubSectionErrorReport& operator+=(const std::shared_ptr<T>&& error) {
-        if (error->hasError()) {
-            hasError_ = true;
-            tomlErrors.push_back(error);
-        }
-        return *this;
-    }
-
-    template <typename T,
-              std::enable_if_t<std::is_base_of<SectionSanitizerError, T>::value>* = nullptr>
-    SubSectionErrorReport& operator+=(const T&& error) {
-        if (error.hasError()) {
-            hasError_ = true;
-            sanitizerErrors.push_back(std::make_shared<T>(error));
-        }
-        return *this;
-    }
 };
 
-struct TopSectionErrorReport : SubSectionErrorReport {
+struct TopSectionErrorReport : public SubSectionErrorReport {
     std::vector<SubSectionErrorReport> subSectionErrors;
 
     explicit TopSectionErrorReport(const std::string& sectionName);
-
-    TopSectionErrorReport& operator+=(const SubSectionErrorReport& error);
-
-    template <typename T, std::enable_if_t<std::is_base_of<TOMLError, T>::value>* = nullptr>
-    TopSectionErrorReport& operator+=(const std::shared_ptr<T>&& error) {
-        if (error->hasError()) {
-            hasError_ = true;
-            tomlErrors.push_back(error);
-        }
-        return *this;
-    }
-
-    template <typename T,
-              std::enable_if_t<std::is_base_of<SectionSanitizerError, T>::value>* = nullptr>
-    TopSectionErrorReport& operator+=(const T&& error) {
-        if (error.hasError()) {
-            hasError_ = true;
-            sanitizerErrors.push_back(std::make_shared<T>(error));
-        }
-        return *this;
-    }
 };
+
+template <typename T,
+          typename V,
+          std::enable_if_t<std::is_base_of<SubSectionErrorReport, T>::value>*    = nullptr,
+          std::enable_if_t<std::is_base_of<HatterParserLogicalError, V>::value>* = nullptr>
+void processError(T& errorReport, const V&& error) {
+    if (error.hasError()) {
+        errorReport.setError(true);
+        errorReport.sanitizerErrors.push_back(std::make_shared<V>(error));
+    }
+}
+
+template <typename T,
+          typename V,
+          std::enable_if_t<std::is_base_of<SubSectionErrorReport, T>::value>* = nullptr,
+          std::enable_if_t<std::is_base_of<TOMLError, V>::value>*             = nullptr>
+void processError(T& errorReport, const std::shared_ptr<V>&& error) {
+    if (error->hasError()) {
+        errorReport.setError(true);
+        errorReport.tomlErrors.push_back(error);
+    }
+}
+
+void processError(TopSectionErrorReport& errorReport, const SubSectionErrorReport& error);
+
+struct SectionMergeErrorReport {
+    const std::string                                      sectionName;
+    std::vector<std::shared_ptr<HatterParserLogicalError>> errors;
+
+    SectionMergeErrorReport(const std::string& sectionName);
+};
+
+// struct FileMergeErrorReport
 
 TopSectionErrorReport getSection(const toml::table& rawConfig, RepoConfig& repoConfig);
 }  // namespace internal

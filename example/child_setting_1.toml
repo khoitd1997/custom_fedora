@@ -32,8 +32,7 @@ copr_repos=["repo1, repo2"]
     display_name="RPM Fusion for Fedora $releasever - Free" 
     metalink="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-$releasever&arch=$basearch"
     baseurl="http://download1.rpmfusion.org/free/fedora/releases/$releasever/Everything/$basearch/os/"
-    # gpgcheck=true
-    gpgcheck=1
+    gpgcheck=true
     gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"
 
     [[repo.custom_repos]]

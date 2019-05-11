@@ -18,6 +18,7 @@
 #include <iostream>
 
 #include "toml_section_parser.hpp"
+#include "toml_utils.hpp"
 
 // static const auto kResetColorCode      = "\033[0m";
 // static const auto kCyanColorCode       = "\033[38;5;087m";
@@ -29,10 +30,7 @@
 
 namespace hatter {
 
-bool testGet(const toml::table& t) {
-    RepoConfig repoConf;
-    auto       error = internal::getSection(t, repoConf);
-
+void printAllError(const internal::TopSectionErrorReport& error) {
     if (error.hasError()) {
         std::cout << "Topsection name: " << error.sectionName << std::endl;
         for (const auto& err : error.subSectionErrors) {
@@ -53,6 +51,32 @@ bool testGet(const toml::table& t) {
         for (const auto& sanitizerError : error.sanitizerErrors) {
             std::cout << sanitizerError->what() << std::endl;
         }
+    }
+}
+
+bool testGet(const toml::table& t) {
+    RepoConfig repoConf;
+    auto       error = internal::getSection(t, repoConf);
+
+    printAllError(error);
+
+    auto                     tempTable = t;
+    std::vector<std::string> includeFiles;
+    getTOMLVal(tempTable, "include_files", includeFiles);
+    std::cout << "Include files:" << std::endl << std::endl;
+    for (const auto& file : includeFiles) {
+        std::cout << "Parsing file:" << file << std::endl;
+        auto childTable = toml::parse(file);
+
+        RepoConfig childConf;
+        auto       childError = internal::getSection(childTable, childConf);
+
+        std::cout << "Standard Repos:" << std::endl;
+        for (const auto& stdRepo : childConf.standardRepos) { std::cout << stdRepo << std::endl; }
+
+        printAllError(childError);
+
+        std::cout << std::endl;
     }
 
     // return error.hasError;

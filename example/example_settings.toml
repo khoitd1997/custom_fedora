@@ -38,24 +38,15 @@ enable_custom_cache=true
 # define list of repos
 # $releasever and $basearch will be replaced when doing build
 [repo]
-# standard_repos=["google-chrome", "nvidia", "vscode"]
-standard_repos=32
-# copr_repos=["", "repo2"]
-djkl=2
-dkas=2
+standard_repos=["google-chrome", "nvidia", "vscode"]
 
     # start defining custom repos here
     [[repo.custom_repos]]
-    # name="rpmfusion-free"
-    name=""
+    name="rpmfusion-free"
     display_name="RPM Fusion for Fedora $releasever - Free" 
-    # metalink="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-$releasever&arch=$basearch"
-    # baseurl="http://download1.rpmfusion.org/free/fedora/releases/$releasever/Everything/$basearch/os/"
-    # gpgcheck=true
-    asdkfas=2
-    dkask=2
-    dkaf=2
-    # gpgcheck=1
+    metalink="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-$releasever&arch=$basearch"
+    baseurl="http://download1.rpmfusion.org/free/fedora/releases/$releasever/Everything/$basearch/os/"
+    gpgcheck=true
     gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"
 
     [[repo.custom_repos]]

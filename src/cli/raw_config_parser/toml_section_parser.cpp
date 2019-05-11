@@ -15,30 +15,29 @@ UnknownValueError::UnknownValueError(const toml::table& table) {
 }
 
 RepoNoLinkError::RepoNoLinkError(const Repo& repo)
-    : SectionSanitizerError(repo.baseurl.empty() && repo.metaLink.empty()) {}
+    : HatterParserLogicalError(repo.baseurl.empty() && repo.metaLink.empty()) {}
 
 RepoNoGPGKeyError::RepoNoGPGKeyError(const Repo& repo)
-    : SectionSanitizerError(repo.gpgcheck && repo.gpgkey.empty()) {}
+    : HatterParserLogicalError(repo.gpgcheck && repo.gpgkey.empty()) {}
 
-bool SectionSanitizerError::hasError() const { return hasError_; }
-void SectionSanitizerError::setError(const bool error) { hasError_ = error; }
-SectionSanitizerError::SectionSanitizerError(const bool hasError) : hasError_(hasError) {}
-SectionSanitizerError::SectionSanitizerError() {}
-SectionSanitizerError::~SectionSanitizerError() {}
+bool HatterParserLogicalError::hasError() const { return hasError_; }
+HatterParserLogicalError::HatterParserLogicalError(const bool hasError) : hasError_(hasError) {}
+HatterParserLogicalError::HatterParserLogicalError() {}
+HatterParserLogicalError::~HatterParserLogicalError() {}
 
 SubSectionErrorReport::SubSectionErrorReport(const std::string& sectionName)
     : sectionName{sectionName} {}
 bool SubSectionErrorReport::hasError() const { return hasError_; }
+void SubSectionErrorReport::setError(const bool status) { hasError_ = status; }
 
 TopSectionErrorReport::TopSectionErrorReport(const std::string& sectionName)
     : SubSectionErrorReport(sectionName) {}
 
-TopSectionErrorReport& TopSectionErrorReport::operator+=(const SubSectionErrorReport& error) {
+void processError(TopSectionErrorReport& errorReport, const SubSectionErrorReport& error) {
     if (error.hasError()) {
-        hasError_ = true;
-        subSectionErrors.push_back(error);
+        errorReport.setError(true);
+        errorReport.subSectionErrors.push_back(error);
     }
-    return *this;
 }
 
 std::string UnknownValueError::what() {
@@ -54,43 +53,48 @@ TopSectionErrorReport getSection(const toml::table& rawConfig, RepoConfig& repoC
     TopSectionErrorReport errorReport("repo");
 
     toml::table rawRepoConfig;
-    errorReport += getTOMLVal(rawConfig, "repo", rawRepoConfig);
+    processError(errorReport, getTOMLVal(rawConfig, "repo", rawRepoConfig));
     if (errorReport.hasError() || rawRepoConfig.empty()) { return errorReport; }
 
-    errorReport += getTOMLVal(rawRepoConfig, "standard_repos", repoConfig.standardRepos);
-    errorReport += getTOMLVal(rawRepoConfig, "copr_repos", repoConfig.coprRepos);
+    processError(errorReport,
+                 getTOMLVal(rawRepoConfig, "standard_repos", repoConfig.standardRepos));
+    processError(errorReport, getTOMLVal(rawRepoConfig, "copr_repos", repoConfig.coprRepos));
 
     // parse custom repos
     std::vector<toml::table> rawCustomRepos;
-    errorReport += getTOMLVal(rawRepoConfig, "custom_repos", rawCustomRepos);
+    processError(errorReport, getTOMLVal(rawRepoConfig, "custom_repos", rawCustomRepos));
     for (size_t i = 0; i < rawCustomRepos.size(); ++i) {
         SubSectionErrorReport customRepoError("custom_repo #" + std::to_string(i + 1));
         auto                  tempTable = rawCustomRepos.at(i);
         Repo                  repo;
 
-        customRepoError += getTOMLVal(tempTable, "name", repo.name, false);
-        customRepoError += getTOMLVal(tempTable, "display_name", repo.displayName, false);
+        processError(customRepoError, getTOMLVal(tempTable, "name", repo.name, false));
+        processError(customRepoError,
+                     getTOMLVal(tempTable, "display_name", repo.displayName, false));
 
-        customRepoError += getTOMLVal(tempTable, "metalink", repo.metaLink);
-        customRepoError += getTOMLVal(tempTable, "baseurl", repo.baseurl);
+        processError(customRepoError, getTOMLVal(tempTable, "metalink", repo.metaLink));
+        processError(customRepoError, getTOMLVal(tempTable, "baseurl", repo.baseurl));
 
-        customRepoError += getTOMLVal(tempTable, "gpgcheck", repo.gpgcheck, false);
-        customRepoError += getTOMLVal(tempTable, "gpgkey", repo.gpgkey);
+        processError(customRepoError, getTOMLVal(tempTable, "gpgcheck", repo.gpgcheck, false));
+        processError(customRepoError, getTOMLVal(tempTable, "gpgkey", repo.gpgkey));
 
         repoConfig.customRepos.push_back(repo);
 
         // logically sanitize the repo
-        customRepoError += UnknownValueError(tempTable);
-        customRepoError += RepoNoLinkError(repo);
-        customRepoError += RepoNoGPGKeyError(repo);
+        processError(customRepoError, UnknownValueError(tempTable));
+        processError(customRepoError, RepoNoLinkError(repo));
+        processError(customRepoError, RepoNoGPGKeyError(repo));
 
-        errorReport += customRepoError;
+        processError(errorReport, customRepoError);
     }
 
-    errorReport += UnknownValueError(rawRepoConfig);
+    processError(errorReport, UnknownValueError(rawRepoConfig));
 
     return errorReport;
 }
+
+// SectionMergeErrorReport::SectionMergeErrorReport(const std::string& sectionName)
+// : sectionName(sectionName) {}
 
 }  // namespace internal
 }  // namespace hatter
