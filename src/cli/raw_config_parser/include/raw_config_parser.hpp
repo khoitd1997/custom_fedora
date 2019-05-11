@@ -29,7 +29,7 @@ namespace hatter {
 //     bool isValid_   = true;
 //     bool isPresent_ = false;
 
-bool testGet(const toml::table& t);
+bool testGet(toml::table& t);
 
 //     toml::table getBaseTable_(const RawTOMLConfig& rawConfig,
 //                               const std::string&   tableName,

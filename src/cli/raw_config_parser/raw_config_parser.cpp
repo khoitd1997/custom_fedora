@@ -54,7 +54,7 @@ void printAllError(const internal::TopSectionErrorReport& error) {
     }
 }
 
-bool testGet(const toml::table& t) {
+bool testGet(toml::table& t) {
     RepoConfig repoConf;
     auto       error = internal::getSection(t, repoConf);
 

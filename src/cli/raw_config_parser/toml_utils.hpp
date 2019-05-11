@@ -89,20 +89,13 @@ std::string getTypeName(const T& variable) {
 namespace internal {
 enum class TOMLValStatus { NOT_PRESENT, PRESENT, PRESENT_TYPE_ERROR };
 template <typename T>
-TOMLValStatus getTOMLValHelper(const toml::table& t, const std::string& keyName, T& storage) {
+TOMLValStatus getTOMLValHelper(toml::table& t, const std::string& keyName, T& storage) {
     auto ret = TOMLValStatus::PRESENT;
     try {
         storage = toml::get<T>(t.at(keyName));
     } catch (const toml::type_error& e) {
         ret = TOMLValStatus::PRESENT_TYPE_ERROR;
     } catch (const std::out_of_range& e) { ret = TOMLValStatus::NOT_PRESENT; }
-    return ret;
-}
-
-template <typename T>
-TOMLValStatus getTOMLValHelper(toml::table& t, const std::string& keyName, T& storage) {
-    const auto tempTable = t;
-    auto       ret       = getTOMLValHelper(tempTable, keyName, storage);
     t.erase(keyName);
     return ret;
 }
@@ -152,11 +145,6 @@ std::shared_ptr<TOMLError> getTOMLVal(toml::table&       t,
                                       const std::string& keyName,
                                       std::string&       storage,
                                       const bool         isOptional);
-
-std::shared_ptr<TOMLError> getTOMLVal(const toml::table& t,
-                                      const std::string& keyName,
-                                      toml::table&       storage,
-                                      const bool         isOptional = true);
 
 template <>
 std::shared_ptr<TOMLError> getTOMLVal(toml::table&              t,

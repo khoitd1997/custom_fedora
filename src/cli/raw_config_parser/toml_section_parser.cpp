@@ -53,7 +53,7 @@ std::string RepoNoGPGKeyError::what() const {
     return "gpgkey should be defined when gpgcheck is true";
 }
 
-TopSectionErrorReport getSection(const toml::table& rawConfig, RepoConfig& repoConfig) {
+TopSectionErrorReport getSection(toml::table& rawConfig, RepoConfig& repoConfig) {
     TopSectionErrorReport errorReport("repo");
 
     toml::table rawRepoConfig;
@@ -69,7 +69,7 @@ TopSectionErrorReport getSection(const toml::table& rawConfig, RepoConfig& repoC
     processError(errorReport, getTOMLVal(rawRepoConfig, "custom_repos", rawCustomRepos));
     for (size_t i = 0; i < rawCustomRepos.size(); ++i) {
         SubSectionErrorReport customRepoError("custom_repo #" + std::to_string(i + 1));
-        auto                  tempTable = rawCustomRepos.at(i);
+        auto&                 tempTable = rawCustomRepos.at(i);
         Repo                  repo;
 
         processError(customRepoError, getTOMLVal(tempTable, "name", repo.name, false));
@@ -139,7 +139,10 @@ SectionMergeErrorReport merge(RepoConfig& resultConf, const RepoConfig& targetCo
         }
         ++resRepoCnt;
     }
-    appendUniqueVector(resultConf.customRepos, targetConf.customRepos);
+
+    if (!(errorReport.hasError())) {
+        appendUniqueVector(resultConf.customRepos, targetConf.customRepos);
+    }
 
     return errorReport;
 }

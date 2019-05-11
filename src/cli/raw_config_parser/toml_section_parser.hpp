@@ -120,6 +120,6 @@ SectionMergeErrorReport merge(RepoConfig& resultConf, const RepoConfig& targetCo
 
 // struct FileMergeErrorReport
 
-TopSectionErrorReport getSection(const toml::table& rawConfig, RepoConfig& repoConfig);
+TopSectionErrorReport getSection(toml::table& rawConfig, RepoConfig& repoConfig);
 }  // namespace internal
 }  // namespace hatter

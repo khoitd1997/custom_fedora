@@ -59,14 +59,6 @@ std::shared_ptr<TOMLError> getTOMLVal(toml::table&       t,
     return ret;
 }
 
-std::shared_ptr<TOMLError> getTOMLVal(const toml::table& t,
-                                      const std::string& keyName,
-                                      toml::table&       storage,
-                                      const bool         isOptional) {
-    const auto status = internal::getTOMLValHelper(t, keyName, storage);
-    return internal::getTOMLErrorPtr(status, keyName, storage, isOptional);
-}
-
 template <>
 std::shared_ptr<TOMLError> getTOMLVal(toml::table&              t,
                                       const std::string&        keyName,
