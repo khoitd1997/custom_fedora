@@ -47,6 +47,7 @@ TopSectionErrorReport::TopSectionErrorReport(const std::string& sectionName)
 void TopSectionErrorReport::what() const {
     std::cout << "top section " << sectionName << ":" << std::endl;
 
+    SubSectionErrorReport::what();
     for (const auto& sectionErr : subSectionErrors) { sectionErr.what(); }
 }
 
@@ -172,7 +173,7 @@ FileErrorReport::FileErrorReport(const std::string& fileName, const std::string&
     : fileName(fileName), parentFile(parentFile) {}
 void FileErrorReport::what() const {
     if (sectionErrors.size() > 0 || mergeErrors.size() > 0) {
-        std::string includeStr = (parentFile == "") ? ":" : "(included from):" + parentFile;
+        std::string includeStr = (parentFile == "") ? ":" : "(included from " + parentFile + "):";
         std::cout << fileName << includeStr << std::endl;
 
         for (const auto& sectionError : sectionErrors) { sectionError.what(); }

@@ -25,6 +25,7 @@ enable_custom_cache=true
 # TODO(kd): Change these to set
 standard_repos=["google-chrome", "nvidia", "vscode"]
 copr_repos=["repo1, repo2"]
+dkfalsdjl=["repo1, repo2"]
 
     # start defining custom repos here
     [[repo.custom_repos]]
