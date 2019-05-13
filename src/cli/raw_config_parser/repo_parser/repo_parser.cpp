@@ -1,10 +1,13 @@
-#include "toml_section_parser.hpp"
+#include "repo_parser.hpp"
 
 #include <filesystem>
 #include <memory>
 #include <string>
 #include <vector>
 
+#include "toml11/toml.hpp"
+
+#include "toml_utils.hpp"
 #include "unknown_value_sanitize.hpp"
 #include "utils.hpp"
 
@@ -21,6 +24,7 @@ std::optional<std::shared_ptr<RepoNoGPGKeyError>> checkRepoNoGPGKey(const Repo& 
     if (repo.gpgcheck && repo.gpgkey.empty()) { return std::make_shared<RepoNoGPGKeyError>(); }
     return {};
 }
+}  // namespace internal
 
 std::string RepoNoLinkError::what() const {
     return "either baseurl or metalink needs to be defined";
@@ -34,8 +38,8 @@ std::vector<std::shared_ptr<HatterParserError>> sanitize(const Repo&        repo
                                                          const toml::table& table) {
     std::vector<std::shared_ptr<HatterParserError>> errors;
     if (auto error = checkUnknownValue(table)) { errors.push_back(*error); }
-    if (auto error = checkRepoNoLink(repo)) { errors.push_back(*error); }
-    if (auto error = checkRepoNoGPGKey(repo)) { errors.push_back(*error); }
+    if (auto error = internal::checkRepoNoLink(repo)) { errors.push_back(*error); }
+    if (auto error = internal::checkRepoNoGPGKey(repo)) { errors.push_back(*error); }
 
     return errors;
 }
@@ -126,55 +130,4 @@ std::optional<SectionMergeErrorReport> merge(RepoConfig& resultConf, const RepoC
 
     return {};
 }
-
-std::optional<FileErrorReport> getFile(const std::filesystem::path& filePath,
-                                       const std::string&           parentFileName,
-                                       FullConfig&                  fullConfig) {
-    auto currDirectory = filePath.parent_path().string();
-    auto currFileName  = filePath.filename().string();
-
-    // TODO(kd): error handling here
-    auto rawConfig = toml::parse(filePath);
-
-    // TODO(kd): error handling here
-    std::vector<std::string> includeFiles;
-    // getTOMLVal(rawConfig, "include_files", includeFiles);
-    // std::cout << "Include files:" << std::endl;
-
-    FileErrorReport fileReport(currFileName, parentFileName);
-    auto            fileHasError = false;
-
-    fileHasError |= processError(fileReport, getSection(rawConfig, fullConfig.repoConfig));
-
-    for (const auto& childFile : includeFiles) {
-        // std::cout << "Parsing file:" << childFile << std::endl;
-
-        auto childPath  = (currDirectory == "") ? childFile : currDirectory + "/" + childFile;
-        auto childTable = toml::parse(childPath);
-
-        FullConfig childConf;
-        auto       childErrorReport = getFile(childPath, currFileName, childConf);
-
-        // std::cout << "Standard Repos:" << std::endl;
-        for (const auto& stdRepo : childConf.repoConfig.standardRepos) {
-            std::cout << stdRepo << std::endl;
-        }
-
-        if (!fileHasError && !childErrorReport) {
-            auto mergeError = merge(fullConfig.repoConfig, childConf.repoConfig);
-            fileHasError |= processError(fileReport, mergeError);
-        }
-
-        // std::cout << std::endl;
-    }
-
-    if (fileHasError) {
-        fileReport.what();
-        return fileReport;
-    }
-
-    return {};
-}
-
-}  // namespace internal
 }  // namespace hatter

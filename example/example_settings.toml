@@ -39,7 +39,6 @@ enable_custom_cache=true
 # $releasever and $basearch will be replaced when doing build
 [repo]
 standard_repos=["google-chrome", "nvidia", "vscode"]
-dkafjsdl=["google-chrome", "nvidia", "vscode"]
 
     # start defining custom repos here
     [[repo.custom_repos]]

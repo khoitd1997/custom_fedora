@@ -1,5 +1,6 @@
 #include "error_type.hpp"
 
+namespace hatter {
 HatterParserError::~HatterParserError() {}
 
 SectionMergeConflictError::SectionMergeConflictError(const std::string& keyName,
@@ -9,3 +10,4 @@ SectionMergeConflictError::SectionMergeConflictError(const std::string& keyName,
 std::string SectionMergeConflictError::what() const {
     return "conflict in " + keyName + ": " + val1 + " vs " + val2;
 }
+}  // namespace hatter

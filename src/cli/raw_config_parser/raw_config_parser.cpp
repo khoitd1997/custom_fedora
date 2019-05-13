@@ -18,7 +18,8 @@
 #include <filesystem>
 #include <iostream>
 
-#include "toml_section_parser.hpp"
+#include "error_report_type.hpp"
+#include "repo_parser.hpp"
 #include "toml_utils.hpp"
 
 // static const auto kResetColorCode      = "\033[0m";
@@ -30,7 +31,54 @@
 // static const auto kGreenColorCode      = "\033[38;5;154m";
 
 namespace hatter {
+std::optional<FileErrorReport> getFile(const std::filesystem::path& filePath,
+                                       const std::string&           parentFileName,
+                                       FullConfig&                  fullConfig) {
+    auto currDirectory = filePath.parent_path().string();
+    auto currFileName  = filePath.filename().string();
 
+    // TODO(kd): error handling here
+    auto rawConfig = toml::parse(filePath);
+
+    // TODO(kd): error handling here
+    std::vector<std::string> includeFiles;
+    // getTOMLVal(rawConfig, "include_files", includeFiles);
+    // std::cout << "Include files:" << std::endl;
+
+    FileErrorReport fileReport(currFileName, parentFileName);
+    auto            fileHasError = false;
+
+    fileHasError |= processError(fileReport, getSection(rawConfig, fullConfig.repoConfig));
+
+    for (const auto& childFile : includeFiles) {
+        // std::cout << "Parsing file:" << childFile << std::endl;
+
+        auto childPath  = (currDirectory == "") ? childFile : currDirectory + "/" + childFile;
+        auto childTable = toml::parse(childPath);
+
+        FullConfig childConf;
+        auto       childErrorReport = getFile(childPath, currFileName, childConf);
+
+        // std::cout << "Standard Repos:" << std::endl;
+        for (const auto& stdRepo : childConf.repoConfig.standardRepos) {
+            std::cout << stdRepo << std::endl;
+        }
+
+        if (!fileHasError && !childErrorReport) {
+            auto mergeError = merge(fullConfig.repoConfig, childConf.repoConfig);
+            fileHasError |= processError(fileReport, mergeError);
+        }
+
+        // std::cout << std::endl;
+    }
+
+    if (fileHasError) {
+        fileReport.what();
+        return fileReport;
+    }
+
+    return {};
+}
 // void printAllError(const internal::TopSectionErrorReport& error) {
 //     if (error.hasError()) {
 //         std::cout << "Topsection name: " << error.sectionName << std::endl;
@@ -106,7 +154,7 @@ namespace hatter {
 // }
 
 bool testGetFile(std::filesystem::path& filePath, FullConfig& fullConfig) {
-    if (auto error = internal::getFile(filePath, "", fullConfig)) { return true; }
+    if (auto error = getFile(filePath, "", fullConfig)) { return true; }
     return false;
 }
 

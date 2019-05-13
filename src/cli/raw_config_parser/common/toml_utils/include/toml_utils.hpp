@@ -14,7 +14,7 @@
 #include "toml11/toml.hpp"
 
 #include "error_type.hpp"
-#include "type.hpp"
+#include "hatter_config_type.hpp"
 
 namespace hatter {
 struct TOMLError : HatterParserError {

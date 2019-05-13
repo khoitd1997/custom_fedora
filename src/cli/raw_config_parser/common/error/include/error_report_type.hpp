@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "error_type.hpp"
-
+namespace hatter {
 struct ErrorReport {
    public:
     virtual ~ErrorReport() {}
@@ -89,3 +89,5 @@ bool processError(FileErrorReport&                            fileReport,
 
 bool processError(FileErrorReport&                              fileReport,
                   const std::optional<SectionMergeErrorReport>& mergeReport);
+
+}  // namespace hatter

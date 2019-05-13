@@ -1,7 +1,7 @@
 #include "error_report_type.hpp"
 
 #include <iostream>
-
+namespace hatter {
 SubSectionErrorReport::SubSectionErrorReport(const std::string& sectionName)
     : sectionName{sectionName} {}
 void SubSectionErrorReport::what() const {
@@ -76,3 +76,4 @@ bool processError(FileErrorReport&                              fileReport,
     }
     return false;
 }
+}  // namespace hatter

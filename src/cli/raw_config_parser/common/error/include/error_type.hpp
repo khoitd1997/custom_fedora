@@ -2,6 +2,7 @@
 
 #include <string>
 
+namespace hatter {
 struct HatterParserError {
     virtual std::string what() const = 0;
     virtual ~HatterParserError();
@@ -18,3 +19,4 @@ struct SectionMergeConflictError : public HatterParserError {
 
     std::string what() const override;
 };
+}  // namespace hatter
