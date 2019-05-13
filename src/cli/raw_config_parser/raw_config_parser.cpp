@@ -31,29 +31,29 @@
 
 namespace hatter {
 
-void printAllError(const internal::TopSectionErrorReport& error) {
-    if (error.hasError()) {
-        std::cout << "Topsection name: " << error.sectionName << std::endl;
-        for (const auto& err : error.subSectionErrors) {
-            std::cout << "Subsection name: " << err.sectionName << std::endl;
-            for (const auto& tomlErr : err.tomlErrors) {
-                std::cout << tomlErr->what() << std::endl;
-            }
+// void printAllError(const internal::TopSectionErrorReport& error) {
+//     if (error.hasError()) {
+//         std::cout << "Topsection name: " << error.sectionName << std::endl;
+//         for (const auto& err : error.subSectionErrors) {
+//             std::cout << "Subsection name: " << err.sectionName << std::endl;
+//             for (const auto& tomlErr : err.tomlErrors) {
+//                 std::cout << tomlErr->what() << std::endl;
+//             }
 
-            for (const auto& sanitizerError : err.sanitizerErrors) {
-                std::cout << sanitizerError->what() << std::endl;
-            }
-        }
+//             for (const auto& sanitizerError : err.sanitizerErrors) {
+//                 std::cout << sanitizerError->what() << std::endl;
+//             }
+//         }
 
-        std::cout << std::endl << "Top section error" << std::endl;
-        for (const auto& topTOMLErr : error.tomlErrors) {
-            std::cout << topTOMLErr->what() << std::endl;
-        }
-        for (const auto& sanitizerError : error.sanitizerErrors) {
-            std::cout << sanitizerError->what() << std::endl;
-        }
-    }
-}
+//         std::cout << std::endl << "Top section error" << std::endl;
+//         for (const auto& topTOMLErr : error.tomlErrors) {
+//             std::cout << topTOMLErr->what() << std::endl;
+//         }
+//         for (const auto& sanitizerError : error.sanitizerErrors) {
+//             std::cout << sanitizerError->what() << std::endl;
+//         }
+//     }
+// }
 
 // bool testGet(toml::table& t) {
 //     RepoConfig repoConf;
@@ -106,9 +106,8 @@ void printAllError(const internal::TopSectionErrorReport& error) {
 // }
 
 bool testGetFile(std::filesystem::path& filePath, FullConfig& fullConfig) {
-    auto error = internal::getFile(filePath, "", fullConfig);
-
-    return error.hasError();
+    if (auto error = internal::getFile(filePath, "", fullConfig)) { return true; }
+    return false;
 }
 
 // namespace {

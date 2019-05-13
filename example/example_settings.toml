@@ -39,10 +39,12 @@ enable_custom_cache=true
 # $releasever and $basearch will be replaced when doing build
 [repo]
 standard_repos=["google-chrome", "nvidia", "vscode"]
+dkafjsdl=["google-chrome", "nvidia", "vscode"]
 
     # start defining custom repos here
     [[repo.custom_repos]]
     name="dude"
+    dkafjsdl=["google-chrome", "nvidia", "vscode"]
     display_name="RPM Fusion for Fedora $releasever - Free" 
     metalink="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-$releasever&arch=$basearch"
     baseurl="http://download1.rpmfusion.org/free/fedora/releases/$releasever/Everything/$basearch/os/"

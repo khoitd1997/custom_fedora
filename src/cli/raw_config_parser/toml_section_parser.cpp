@@ -1,6 +1,7 @@
 #include "toml_section_parser.hpp"
 
 #include <filesystem>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -8,139 +9,108 @@
 
 namespace hatter {
 namespace internal {
-UnknownValueError::UnknownValueError(const toml::table& table) {
+std::optional<std::shared_ptr<UnknownValueError>> checkUnknownValue(const toml::table& table) {
     if (!table.empty()) {
-        for (auto const& [key, val] : table) { undefinedVals.push_back(key); }
-        hasError_ = true;
+        std::cout << "Found unknown error" << std::endl;
+        auto error = std::make_shared<UnknownValueError>();
+        for (auto const& [key, val] : table) { error->undefinedVals.push_back(key); }
+        return error;
     }
+    return {};
 }
 
-RepoNoLinkError::RepoNoLinkError(const Repo& repo)
-    : HatterParserLogicalError(repo.baseurl.empty() && repo.metaLink.empty()) {}
+// RepoNoLinkError::RepoNoLinkError(const Repo& repo)
+//     : HatterParserError(repo.baseurl.empty() && repo.metaLink.empty()) {}
 
-RepoNoGPGKeyError::RepoNoGPGKeyError(const Repo& repo)
-    : HatterParserLogicalError(repo.gpgcheck && repo.gpgkey.empty()) {}
-
-bool HatterParserLogicalError::hasError() const { return hasError_; }
-HatterParserLogicalError::HatterParserLogicalError(const bool hasError) : hasError_(hasError) {}
-HatterParserLogicalError::HatterParserLogicalError() {}
-HatterParserLogicalError::~HatterParserLogicalError() {}
-
-bool ErrorReport::hasError() const { return hasError_; }
-void ErrorReport::setError(const bool status) { hasError_ = status; }
-
-SubSectionErrorReport::SubSectionErrorReport(const std::string& sectionName)
-    : sectionName{sectionName} {}
-void SubSectionErrorReport::what() const {
-    if (tomlErrors.size() > 0 || sanitizerErrors.size() > 0) {
-        std::cout << sectionName << ":" << std::endl;
-
-        for (const auto& tomlErr : tomlErrors) { std::cout << tomlErr->what() << std::endl; }
-        for (const auto& sanitizeErr : sanitizerErrors) {
-            std::cout << sanitizeErr->what() << std::endl;
-        }
-    }
-}
-
-TopSectionErrorReport::TopSectionErrorReport(const std::string& sectionName)
-    : SubSectionErrorReport(sectionName) {}
-void TopSectionErrorReport::what() const {
-    std::cout << "top section " << sectionName << ":" << std::endl;
-
-    SubSectionErrorReport::what();
-    for (const auto& sectionErr : subSectionErrors) { sectionErr.what(); }
-}
-
-void processError(TopSectionErrorReport& errorReport, const SubSectionErrorReport& error) {
-    if (error.hasError()) {
-        errorReport.setError(true);
-        errorReport.subSectionErrors.push_back(error);
-    }
-}
+// RepoNoGPGKeyError::RepoNoGPGKeyError(const Repo& repo)
+//     : HatterParserError(repo.gpgcheck && repo.gpgkey.empty()) {}
 
 std::string UnknownValueError::what() const {
     auto undefinedStr = strJoin(undefinedVals);
     return "unknown value(s): " + undefinedStr;
 }
 
-std::string RepoNoLinkError::what() const {
-    return "either baseurl or metalink needs to be defined";
+// std::string RepoNoLinkError::what() const {
+//     return "either baseurl or metalink needs to be defined";
+// }
+
+// std::string RepoNoGPGKeyError::what() const {
+//     return "gpgkey should be defined when gpgcheck is true";
+// }
+
+std::vector<std::shared_ptr<HatterParserError>> sanitize(const Repo&        repo,
+                                                         const toml::table& table) {
+    (void)repo;
+    std::vector<std::shared_ptr<HatterParserError>> errors;
+    if (auto error = checkUnknownValue(table)) { errors.push_back(*error); }
+
+    return errors;
 }
 
-std::string RepoNoGPGKeyError::what() const {
-    return "gpgkey should be defined when gpgcheck is true";
+std::vector<std::shared_ptr<HatterParserError>> sanitize(const RepoConfig&  repoConf,
+                                                         const toml::table& table) {
+    (void)repoConf;
+    std::vector<std::shared_ptr<HatterParserError>> errors;
+    if (auto error = checkUnknownValue(table)) { errors.push_back(*error); }
+
+    return errors;
 }
 
-TopSectionErrorReport getSection(toml::table& rawConfig, RepoConfig& repoConfig) {
+std::optional<TopSectionErrorReport> getSection(toml::table& rawConfig, RepoConfig& repoConfig) {
     TopSectionErrorReport errorReport("repo");
+    bool                  topHasError = false;
 
     toml::table rawRepoConfig;
-    processError(errorReport, getTOMLVal(rawConfig, "repo", rawRepoConfig));
-    if (errorReport.hasError() || rawRepoConfig.empty()) { return errorReport; }
+    topHasError |= processError(errorReport, getTOMLVal(rawConfig, "repo", rawRepoConfig));
+    if (topHasError || rawRepoConfig.empty()) { return errorReport; }
 
-    processError(errorReport,
-                 getTOMLVal(rawRepoConfig, "standard_repos", repoConfig.standardRepos));
-    processError(errorReport, getTOMLVal(rawRepoConfig, "copr_repos", repoConfig.coprRepos));
+    topHasError |= processError(
+        errorReport, getTOMLVal(rawRepoConfig, "standard_repos", repoConfig.standardRepos));
+    topHasError |=
+        processError(errorReport, getTOMLVal(rawRepoConfig, "copr_repos", repoConfig.coprRepos));
 
     // parse custom repos
     std::vector<toml::table> rawCustomRepos;
-    processError(errorReport, getTOMLVal(rawRepoConfig, "custom_repos", rawCustomRepos));
+    topHasError |=
+        processError(errorReport, getTOMLVal(rawRepoConfig, "custom_repos", rawCustomRepos));
     for (size_t i = 0; i < rawCustomRepos.size(); ++i) {
-        SubSectionErrorReport customRepoError("custom_repo #" + std::to_string(i + 1));
+        SubSectionErrorReport customRepoReport("custom_repo #" + std::to_string(i + 1));
         auto&                 tempTable = rawCustomRepos.at(i);
         Repo                  repo;
 
-        processError(customRepoError, getTOMLVal(tempTable, "name", repo.name, false));
-        processError(customRepoError,
+        processError(customRepoReport, getTOMLVal(tempTable, "name", repo.name, false));
+        processError(customRepoReport,
                      getTOMLVal(tempTable, "display_name", repo.displayName, false));
 
-        processError(customRepoError, getTOMLVal(tempTable, "metalink", repo.metaLink));
-        processError(customRepoError, getTOMLVal(tempTable, "baseurl", repo.baseurl));
+        processError(customRepoReport, getTOMLVal(tempTable, "metalink", repo.metaLink));
+        processError(customRepoReport, getTOMLVal(tempTable, "baseurl", repo.baseurl));
 
-        processError(customRepoError, getTOMLVal(tempTable, "gpgcheck", repo.gpgcheck, false));
-        processError(customRepoError, getTOMLVal(tempTable, "gpgkey", repo.gpgkey));
+        processError(customRepoReport, getTOMLVal(tempTable, "gpgcheck", repo.gpgcheck, false));
+        processError(customRepoReport, getTOMLVal(tempTable, "gpgkey", repo.gpgkey));
 
         repoConfig.customRepos.push_back(repo);
 
         // logically sanitize the repo
-        processError(customRepoError, UnknownValueError(tempTable));
-        processError(customRepoError, RepoNoLinkError(repo));
-        processError(customRepoError, RepoNoGPGKeyError(repo));
+        processError(customRepoReport, sanitize(repo, tempTable));
+        // processError(customRepoReport, UnknownValueError(tempTable));
+        // processError(customRepoReport, RepoNoLinkError(repo));
+        // processError(customRepoReport, RepoNoGPGKeyError(repo));
 
-        processError(errorReport, customRepoError);
+        topHasError |= processError(errorReport, customRepoReport);
     }
 
-    processError(errorReport, UnknownValueError(rawRepoConfig));
+    // processError(errorReport, UnknownValueError(rawRepoConfig));
+    topHasError |= processError(errorReport, sanitize(repoConfig, rawRepoConfig));
 
-    return errorReport;
+    if (topHasError) { return errorReport; }
+
+    return {};
 }
 
-SectionMergeConflictError::SectionMergeConflictError(const std::string& keyName,
-                                                     const std::string& val1,
-                                                     const std::string& val2)
-    : keyName(keyName), val1(val1), val2(val2) {}
-std::string SectionMergeConflictError::what() const {
-    return "conflict in " + keyName + ": " + val1 + " vs " + val2;
-}
-bool SectionMergeConflictError::hasError() const { return !keyName.empty(); }
-
-SectionMergeErrorReport::SectionMergeErrorReport(const std::string& sectionName)
-    : sectionName(sectionName) {}
-void SectionMergeErrorReport::what() const {
-    std::cout << "merge error in section " << sectionName << ":" << std::endl;
-
-    for (const auto& mergeErr : errors) { std::cout << mergeErr.what() << std::endl; }
-}
-
-void processError(SectionMergeErrorReport& errorReport, const SectionMergeConflictError& error) {
-    if (error.hasError()) {
-        errorReport.setError(true);
-        errorReport.errors.push_back(error);
-    }
-}
-
-SectionMergeErrorReport merge(RepoConfig& resultConf, const RepoConfig& targetConf) {
+std::optional<SectionMergeErrorReport> merge(RepoConfig& resultConf, const RepoConfig& targetConf) {
     SectionMergeErrorReport errorReport("repo");
+    auto                    mergeHasError = false;
+
     appendUniqueVector(resultConf.standardRepos, targetConf.standardRepos);
     appendUniqueVector(resultConf.coprRepos, targetConf.coprRepos);
 
@@ -150,7 +120,7 @@ SectionMergeErrorReport merge(RepoConfig& resultConf, const RepoConfig& targetCo
         for (const auto& targetRepo : targetConf.customRepos) {
             if (resRepo.name == targetRepo.name) {
                 if (resRepo != targetRepo) {
-                    processError(
+                    mergeHasError |= processError(
                         errorReport,
                         SectionMergeConflictError("custom_repo",
                                                   "repo #" + std::to_string(resRepoCnt),
@@ -162,44 +132,16 @@ SectionMergeErrorReport merge(RepoConfig& resultConf, const RepoConfig& targetCo
         ++resRepoCnt;
     }
 
-    if (!(errorReport.hasError())) {
-        appendUniqueVector(resultConf.customRepos, targetConf.customRepos);
-    }
+    if (!mergeHasError) { appendUniqueVector(resultConf.customRepos, targetConf.customRepos); }
 
-    return errorReport;
+    if (mergeHasError) { return errorReport; }
+
+    return {};
 }
 
-FileErrorReport::FileErrorReport(const std::string& fileName, const std::string& parentFile)
-    : fileName(fileName), parentFile(parentFile) {}
-void FileErrorReport::what() const {
-    if (sectionErrors.size() > 0 || mergeErrors.size() > 0) {
-        std::string includeStr = (parentFile == "") ? ":" : "(included from " + parentFile + "):";
-        std::cout << fileName << includeStr << std::endl;
-
-        for (const auto& sectionError : sectionErrors) { sectionError.what(); }
-        for (const auto& mergeError : mergeErrors) { mergeError.what(); }
-    }
-}
-
-void processError(FileErrorReport& errorReport, const TopSectionErrorReport& error) {
-    if (error.hasError()) {
-        errorReport.setError(true);
-        errorReport.sectionErrors.push_back(error);
-    }
-}
-
-void processError(FileErrorReport& errorReport, const SectionMergeErrorReport& error) {
-    if (error.hasError()) {
-        errorReport.setError(true);
-        errorReport.mergeErrors.push_back(error);
-    }
-}
-
-// FileMergeErrorReport merge(FullConfig& resultConf, const FullConfig& targetConf) {}
-
-FileErrorReport getFile(const std::filesystem::path& filePath,
-                        const std::string&           parentFileName,
-                        FullConfig&                  fullConfig) {
+std::optional<FileErrorReport> getFile(const std::filesystem::path& filePath,
+                                       const std::string&           parentFileName,
+                                       FullConfig&                  fullConfig) {
     auto currDirectory = filePath.parent_path().string();
     auto currFileName  = filePath.filename().string();
 
@@ -208,40 +150,42 @@ FileErrorReport getFile(const std::filesystem::path& filePath,
 
     // TODO(kd): error handling here
     std::vector<std::string> includeFiles;
-    getTOMLVal(rawConfig, "include_files", includeFiles);
-    std::cout << "Include files:" << std::endl << std::endl;
+    // getTOMLVal(rawConfig, "include_files", includeFiles);
+    // std::cout << "Include files:" << std::endl;
 
     FileErrorReport fileReport(currFileName, parentFileName);
-    processError(fileReport, getSection(rawConfig, fullConfig.repoConfig));
+    auto            fileHasError = false;
 
-    auto hasMergeError = false;
+    fileHasError |= processError(fileReport, getSection(rawConfig, fullConfig.repoConfig));
+
     for (const auto& childFile : includeFiles) {
-        std::cout << "Parsing file:" << childFile << std::endl;
+        // std::cout << "Parsing file:" << childFile << std::endl;
 
         auto childPath  = (currDirectory == "") ? childFile : currDirectory + "/" + childFile;
         auto childTable = toml::parse(childPath);
 
         FullConfig childConf;
-        auto       childError = getFile(childPath, currFileName, childConf);
+        auto       childErrorReport = getFile(childPath, currFileName, childConf);
 
-        std::cout << "Standard Repos:" << std::endl;
+        // std::cout << "Standard Repos:" << std::endl;
         for (const auto& stdRepo : childConf.repoConfig.standardRepos) {
             std::cout << stdRepo << std::endl;
         }
 
-        if (!hasMergeError && !childError.hasError()) {
+        if (!fileHasError && !childErrorReport) {
             auto mergeError = merge(fullConfig.repoConfig, childConf.repoConfig);
-            processError(fileReport, mergeError);
-
-            hasMergeError = mergeError.hasError();
+            fileHasError |= processError(fileReport, mergeError);
         }
 
-        std::cout << std::endl;
+        // std::cout << std::endl;
     }
 
-    if (fileReport.hasError()) { fileReport.what(); }
+    if (fileHasError) {
+        fileReport.what();
+        return fileReport;
+    }
 
-    return fileReport;
+    return {};
 }
 
 }  // namespace internal
