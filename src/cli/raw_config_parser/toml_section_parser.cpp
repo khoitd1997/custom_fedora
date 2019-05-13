@@ -5,44 +5,37 @@
 #include <string>
 #include <vector>
 
+#include "unknown_value_sanitize.hpp"
 #include "utils.hpp"
 
 namespace hatter {
 namespace internal {
-std::optional<std::shared_ptr<UnknownValueError>> checkUnknownValue(const toml::table& table) {
-    if (!table.empty()) {
-        std::cout << "Found unknown error" << std::endl;
-        auto error = std::make_shared<UnknownValueError>();
-        for (auto const& [key, val] : table) { error->undefinedVals.push_back(key); }
-        return error;
+std::optional<std::shared_ptr<RepoNoLinkError>> checkRepoNoLink(const Repo& repo) {
+    if (repo.baseurl.empty() && repo.metaLink.empty()) {
+        return std::make_shared<RepoNoLinkError>();
     }
     return {};
 }
 
-// RepoNoLinkError::RepoNoLinkError(const Repo& repo)
-//     : HatterParserError(repo.baseurl.empty() && repo.metaLink.empty()) {}
-
-// RepoNoGPGKeyError::RepoNoGPGKeyError(const Repo& repo)
-//     : HatterParserError(repo.gpgcheck && repo.gpgkey.empty()) {}
-
-std::string UnknownValueError::what() const {
-    auto undefinedStr = strJoin(undefinedVals);
-    return "unknown value(s): " + undefinedStr;
+std::optional<std::shared_ptr<RepoNoGPGKeyError>> checkRepoNoGPGKey(const Repo& repo) {
+    if (repo.gpgcheck && repo.gpgkey.empty()) { return std::make_shared<RepoNoGPGKeyError>(); }
+    return {};
 }
 
-// std::string RepoNoLinkError::what() const {
-//     return "either baseurl or metalink needs to be defined";
-// }
+std::string RepoNoLinkError::what() const {
+    return "either baseurl or metalink needs to be defined";
+}
 
-// std::string RepoNoGPGKeyError::what() const {
-//     return "gpgkey should be defined when gpgcheck is true";
-// }
+std::string RepoNoGPGKeyError::what() const {
+    return "gpgkey should be defined when gpgcheck is true";
+}
 
 std::vector<std::shared_ptr<HatterParserError>> sanitize(const Repo&        repo,
                                                          const toml::table& table) {
-    (void)repo;
     std::vector<std::shared_ptr<HatterParserError>> errors;
     if (auto error = checkUnknownValue(table)) { errors.push_back(*error); }
+    if (auto error = checkRepoNoLink(repo)) { errors.push_back(*error); }
+    if (auto error = checkRepoNoGPGKey(repo)) { errors.push_back(*error); }
 
     return errors;
 }
@@ -90,16 +83,11 @@ std::optional<TopSectionErrorReport> getSection(toml::table& rawConfig, RepoConf
 
         repoConfig.customRepos.push_back(repo);
 
-        // logically sanitize the repo
         processError(customRepoReport, sanitize(repo, tempTable));
-        // processError(customRepoReport, UnknownValueError(tempTable));
-        // processError(customRepoReport, RepoNoLinkError(repo));
-        // processError(customRepoReport, RepoNoGPGKeyError(repo));
 
         topHasError |= processError(errorReport, customRepoReport);
     }
 
-    // processError(errorReport, UnknownValueError(rawRepoConfig));
     topHasError |= processError(errorReport, sanitize(repoConfig, rawRepoConfig));
 
     if (topHasError) { return errorReport; }

@@ -12,23 +12,13 @@
 
 namespace hatter {
 namespace internal {
-struct UnknownValueError : public HatterParserError {
-    std::vector<std::string> undefinedVals;
-
+struct RepoNoLinkError : public HatterParserError {
     std::string what() const override;
 };
 
-// struct RepoNoLinkError : public HatterParserError {
-//     std::string what() const override;
-
-//     explicit RepoNoLinkError(const Repo& repo);
-// };
-
-// struct RepoNoGPGKeyError : public HatterParserError {
-//     std::string what() const override;
-
-//     explicit RepoNoGPGKeyError(const Repo& repo);
-// };
+struct RepoNoGPGKeyError : public HatterParserError {
+    std::string what() const override;
+};
 
 std::optional<SectionMergeErrorReport> merge(RepoConfig& resultConf, const RepoConfig& targetConf);
 

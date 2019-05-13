@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+namespace hatter {
 template <>
 std::string getTypeName<int>() {
     return "integer";
@@ -71,3 +72,4 @@ std::optional<std::shared_ptr<TOMLError>> getTOMLVal(toml::table&              t
     }
     return error;
 }
+}  // namespace hatter

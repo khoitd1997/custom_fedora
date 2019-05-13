@@ -1,5 +1,4 @@
-#ifndef _TOML_UTILS_HPP
-#define _TOML_UTILS_HPP
+#pragma once
 
 #include <cxxabi.h>
 
@@ -12,10 +11,12 @@
 #include <typeinfo>
 #include <vector>
 
-#include "error_type.hpp"
-#include "raw_config_parser.hpp"
 #include "toml11/toml.hpp"
 
+#include "error_type.hpp"
+#include "type.hpp"
+
+namespace hatter {
 struct TOMLError : HatterParserError {
     const std::string keyName;
 
@@ -143,4 +144,4 @@ std::optional<std::shared_ptr<TOMLError>> getTOMLVal(toml::table&              t
                                                      const std::string&        keyName,
                                                      std::vector<std::string>& storage,
                                                      const bool                isOptional);
-#endif
+}  // namespace hatter
