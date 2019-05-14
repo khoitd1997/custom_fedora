@@ -38,7 +38,7 @@ namespace hatter {
 //                               const std::string& colorCode = "");
 // };
 
-// struct DistroInfo : public BaseConfig {
+// struct DistroInfo  {
 //     std::string kickstartTag = kDefaultKickstartTag;
 //     std::string baseSpin;
 //     std::string osName;
@@ -48,7 +48,7 @@ namespace hatter {
 //     explicit DistroInfo(const RawTOMLConfig& rawConfig);
 // };
 
-// struct ImageInfo : public BaseConfig {
+// struct ImageInfo  {
 //     int                      partitionSize;
 //     std::string              firstLoginScript;
 //     std::string              postBuildScript;
@@ -59,7 +59,7 @@ namespace hatter {
 //     explicit ImageInfo(const RawTOMLConfig& rawConfig);
 // };
 
-// struct BuildProcessConfig : public BaseConfig {
+// struct BuildProcessConfig  {
 //     bool        enableCustomCache = kDefaultEnableCustomCache;
 //     std::string mockScript;
 
@@ -90,26 +90,17 @@ struct RepoConfig {
     std::vector<Repo>        customRepos;
 };
 
-struct FullConfig {
-    RepoConfig repoConfig;
+struct PackageSet {
+    std::vector<std::string> installList;
+    std::vector<std::string> removeList;
 };
 
-// struct PackageSet : public BaseConfig {
-//     std::vector<std::string> installList;
-//     std::vector<std::string> removeList;
+struct PackageConfig {
+    PackageSet rpm;
+    PackageSet rpmGroup;
+};
 
-//     PackageSet();
-//     PackageSet(const toml::table& rawPackageConfig, const std::string& tableName);
-// };
-
-// struct PackageConfig : public BaseConfig {
-//     PackageSet rpm;
-//     PackageSet rpmGroup;
-
-//     explicit PackageConfig(const RawTOMLConfig& rawConfig);
-// };
-
-// struct MiscConfig : public BaseConfig {
+// struct MiscConfig  {
 //     std::string language = kDefaultLanguage;
 //     std::string keyboard;
 //     std::string timezone;
@@ -117,19 +108,9 @@ struct FullConfig {
 //     explicit MiscConfig(const RawTOMLConfig& rawConfig);
 // };
 
-// struct TOMLConfigFile {
-//     DistroInfo distroInfo;
-//     ImageInfo  imageInfo;
-
-//     explicit operator bool() const { return isValid_; }
-
-//     explicit TOMLConfigFile(const std::string& filePath);
-//     bool merge(const TOMLConfigFile& configFile);
-
-//    private:
-//     explicit TOMLConfigFile(const RawTOMLConfig& rawConfig);
-//     bool isValid_ = true;
-// };
+struct FullConfig {
+    RepoConfig repoConfig;
+};
 
 }  // namespace hatter
 

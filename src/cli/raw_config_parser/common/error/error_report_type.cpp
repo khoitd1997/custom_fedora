@@ -1,44 +1,89 @@
 #include "error_report_type.hpp"
 
+#include <algorithm>
 #include <iostream>
+
 namespace hatter {
 SubSectionErrorReport::SubSectionErrorReport(const std::string& sectionName)
     : sectionName{sectionName} {}
-void SubSectionErrorReport::what() const {
-    if (errors.size() > 0) {
-        std::cout << sectionName << ":" << std::endl;
+std::vector<std::string> SubSectionErrorReport::what() const {
+    std::vector<std::string> ret;
+    for (const auto& error : errors) { ret.push_back(sectionName + "::" + error->what()); }
 
-        for (const auto& error : errors) { std::cout << error->what() << std::endl; }
-    }
+    return ret;
 }
 
 TopSectionErrorReport::TopSectionErrorReport(const std::string& sectionName)
     : SubSectionErrorReport(sectionName) {}
-void TopSectionErrorReport::what() const {
-    std::cout << "top section " << sectionName << " error:" << std::endl;
+std::vector<std::string> TopSectionErrorReport::what() const {
+    std::vector<std::string> ret;
 
-    SubSectionErrorReport::what();
-    for (const auto& sectionErr : errorReports) { sectionErr.what(); }
+    auto report = SubSectionErrorReport::what();
+    ret.insert(ret.end(), report.begin(), report.end());
+
+    for (const auto& subErrorReport : errorReports) {
+        auto subReportStr = subErrorReport.what();
+        for (const auto& subError : subReportStr) { ret.push_back(sectionName + "::" + subError); }
+    }
+
+    return ret;
+}
+
+FileSectionErrorReport::FileSectionErrorReport(const std::string& fileName,
+                                               const std::string& parentFileName)
+    : fileName{fileName}, parentFileName{parentFileName} {}
+std::vector<std::string> FileSectionErrorReport::what() const {
+    std::string includeStr =
+        (parentFileName.empty()) ? "" : "(included from " + parentFileName + ")";
+    auto                     fullFileName = fileName + includeStr;
+    std::vector<std::string> ret;
+
+    for (const auto& errorReport : errorReports) {
+        for (const auto& error : errorReport.what()) { ret.push_back(fullFileName + "::" + error); }
+    }
+
+    return ret;
 }
 
 SectionMergeErrorReport::SectionMergeErrorReport(const std::string& sectionName)
-    : sectionName(sectionName) {}
-void SectionMergeErrorReport::what() const {
-    std::cout << "merge error in section " << sectionName << ":" << std::endl;
+    : sectionName{sectionName} {}
+std::vector<std::string> SectionMergeErrorReport::what() const {
+    std::vector<std::string> ret;
 
-    for (const auto& mergeErr : errors) { std::cout << mergeErr.what() << std::endl; }
+    for (const auto& mergeErr : errors) { ret.push_back(sectionName + "::" + mergeErr.what()); }
+
+    return ret;
 }
 
-FileErrorReport::FileErrorReport(const std::string& fileName, const std::string& parentFile)
-    : fileName(fileName), parentFile(parentFile) {}
-void FileErrorReport::what() const {
-    if (errorReports.size() > 0) {
-        std::string includeStr =
-            (parentFile == "") ? " error:" : "(included from " + parentFile + "):";
-        std::cout << fileName << includeStr << std::endl;
+FileMergeErrorReport::FileMergeErrorReport(const std::string& firstFileName,
+                                           const std::string& secondFileName)
+    : firstFileName{firstFileName}, secondFileName{secondFileName} {}
+std::vector<std::string> FileMergeErrorReport::what() const {
+    std::vector<std::string> ret;
 
-        for (const auto& errorReport : errorReports) { errorReport->what(); }
+    for (const auto& errorReport : errorReports) {
+        for (const auto& error : errorReport.what()) {
+            ret.push_back(firstFileName + "<=>" + secondFileName + "::" + error);
+        }
     }
+
+    return ret;
+}
+
+FileErrorReport::FileErrorReport(const FileSectionErrorReport& sectionReport)
+    : errorReport{sectionReport} {}
+FileErrorReport::FileErrorReport(const FileMergeErrorReport& mergeReport)
+    : errorReport{mergeReport} {}
+std::vector<std::string> FileErrorReport::what() const {
+    std::vector<std::string> ret;
+
+    try {
+        ret = (std::get<FileSectionErrorReport>(errorReport)).what();
+    } catch (const std::bad_variant_access&) {
+        ret = (std::get<FileMergeErrorReport>(errorReport)).what();
+    }
+
+    return ret;
 }
 
 bool processError(TopSectionErrorReport&                      topReport,
@@ -59,19 +104,19 @@ bool processError(SectionMergeErrorReport&                        sectionReport,
     return false;
 }
 
-bool processError(FileErrorReport&                            fileReport,
+bool processError(FileSectionErrorReport&                     fileReport,
                   const std::optional<TopSectionErrorReport>& topReport) {
     if (topReport) {
-        fileReport.errorReports.push_back(std::make_shared<TopSectionErrorReport>(*topReport));
+        fileReport.errorReports.push_back(*topReport);
         return true;
     }
     return false;
 }
 
-bool processError(FileErrorReport&                              fileReport,
+bool processError(FileMergeErrorReport&                         fileReport,
                   const std::optional<SectionMergeErrorReport>& mergeReport) {
     if (mergeReport) {
-        fileReport.errorReports.push_back(std::make_shared<SectionMergeErrorReport>(*mergeReport));
+        fileReport.errorReports.push_back(*mergeReport);
         return true;
     }
     return false;

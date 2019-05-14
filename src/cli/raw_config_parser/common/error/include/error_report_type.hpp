@@ -3,15 +3,17 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <variant>
 #include <vector>
 
 #include "error_type.hpp"
+
 namespace hatter {
 struct ErrorReport {
    public:
     virtual ~ErrorReport() {}
 
-    virtual void what() const = 0;
+    virtual std::vector<std::string> what() const = 0;
 };
 
 struct SubSectionErrorReport : public ErrorReport {
@@ -23,36 +25,54 @@ struct SubSectionErrorReport : public ErrorReport {
 
     explicit SubSectionErrorReport(const std::string& sectionName);
 
-    virtual void what() const override;
+    virtual std::vector<std::string> what() const override;
 };
 
 struct TopSectionErrorReport : public SubSectionErrorReport {
-    // std::vector<SubSectionErrorReport> subSectionErrors;
     std::vector<SubSectionErrorReport> errorReports;
 
     explicit TopSectionErrorReport(const std::string& sectionName);
 
-    void what() const override;
+    std::vector<std::string> what() const override;
+};
+
+struct FileSectionErrorReport : public ErrorReport {
+    std::vector<TopSectionErrorReport> errorReports;
+    const std::string                  fileName;
+    const std::string                  parentFileName;
+
+    FileSectionErrorReport(const std::string& fileName, const std::string& parentFileName);
+
+    std::vector<std::string> what() const override;
 };
 
 struct SectionMergeErrorReport : public ErrorReport {
-    const std::string                      sectionName;
+    const std::string sectionName;
+
     std::vector<SectionMergeConflictError> errors;
 
-    void what() const override;
-
     explicit SectionMergeErrorReport(const std::string& sectionName);
+
+    std::vector<std::string> what() const override;
+};
+
+struct FileMergeErrorReport : public ErrorReport {
+    std::vector<SectionMergeErrorReport> errorReports;
+    const std::string                    firstFileName;
+    const std::string                    secondFileName;
+
+    FileMergeErrorReport(const std::string& firstFileName, const std::string& secondFileName);
+
+    std::vector<std::string> what() const override;
 };
 
 struct FileErrorReport : public ErrorReport {
-    std::vector<std::shared_ptr<ErrorReport>> errorReports;
+    const std::variant<FileSectionErrorReport, FileMergeErrorReport> errorReport;
 
-    const std::string fileName;
-    const std::string parentFile;
+    explicit FileErrorReport(const FileSectionErrorReport& sectionReport);
+    explicit FileErrorReport(const FileMergeErrorReport& mergeReport);
 
-    FileErrorReport(const std::string& fileName, const std::string& parentFile);
-
-    void what() const override;
+    std::vector<std::string> what() const override;
 };
 
 template <typename T,
@@ -84,10 +104,10 @@ bool processError(TopSectionErrorReport&                      errorReport,
 bool processError(SectionMergeErrorReport&                        errorReport,
                   const std::optional<SectionMergeConflictError>& error);
 
-bool processError(FileErrorReport&                            fileReport,
+bool processError(FileSectionErrorReport&                     fileReport,
                   const std::optional<TopSectionErrorReport>& topReport);
 
-bool processError(FileErrorReport&                              fileReport,
+bool processError(FileMergeErrorReport&                         fileReport,
                   const std::optional<SectionMergeErrorReport>& mergeReport);
 
 }  // namespace hatter

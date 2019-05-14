@@ -1,20 +1,5 @@
 #include "raw_config_parser.hpp"
 
-// #include <spdlog/logger.h>
-// #include <spdlog/sinks/basic_file_sink.h>
-// #include <spdlog/sinks/stdout_color_sinks.h>
-// #include <spdlog/spdlog.h>
-
-// #include <algorithm>
-// #include <functional>
-// #include <iostream>
-// #include <numeric>
-
-// #include "toml11/toml.hpp"
-
-// #include "toml_utils.hpp"
-// #include "utils.hpp"
-
 #include <filesystem>
 #include <iostream>
 
@@ -45,16 +30,20 @@ std::optional<FileErrorReport> getFile(const std::filesystem::path& filePath,
     // getTOMLVal(rawConfig, "include_files", includeFiles);
     // std::cout << "Include files:" << std::endl;
 
-    FileErrorReport fileReport(currFileName, parentFileName);
-    auto            fileHasError = false;
+    FileSectionErrorReport                fileSectionReport(currFileName, parentFileName);
+    std::shared_ptr<FileMergeErrorReport> fileMergeErrorReport;
 
-    fileHasError |= processError(fileReport, getSection(rawConfig, fullConfig.repoConfig));
+    auto fileHasError = false;
+
+    fileHasError |= processError(fileSectionReport, getSection(rawConfig, fullConfig.repoConfig));
 
     for (const auto& childFile : includeFiles) {
         // std::cout << "Parsing file:" << childFile << std::endl;
 
-        auto childPath  = (currDirectory == "") ? childFile : currDirectory + "/" + childFile;
-        auto childTable = toml::parse(childPath);
+        auto childPath = std::filesystem::path(
+            (currDirectory == "") ? childFile : currDirectory + "/" + childFile);
+        auto childFileName = childPath.filename().string();
+        auto childTable    = toml::parse(childPath.string());
 
         FullConfig childConf;
         auto       childErrorReport = getFile(childPath, currFileName, childConf);
@@ -64,102 +53,36 @@ std::optional<FileErrorReport> getFile(const std::filesystem::path& filePath,
             std::cout << stdRepo << std::endl;
         }
 
-        if (!fileHasError && !childErrorReport) {
+        if (!fileMergeErrorReport && !fileHasError && !childErrorReport) {
             auto mergeError = merge(fullConfig.repoConfig, childConf.repoConfig);
-            fileHasError |= processError(fileReport, mergeError);
+            if (mergeError) {
+                fileMergeErrorReport =
+                    std::make_shared<FileMergeErrorReport>(currFileName, childFileName);
+                processError(*fileMergeErrorReport, mergeError);
+            }
         }
-
-        // std::cout << std::endl;
     }
 
-    if (fileHasError) {
-        fileReport.what();
-        return fileReport;
-    }
+    if (fileHasError) { return FileErrorReport(fileSectionReport); }
+    if (fileMergeErrorReport) { return FileErrorReport(*fileMergeErrorReport); }
 
     return {};
 }
-// void printAllError(const internal::TopSectionErrorReport& error) {
-//     if (error.hasError()) {
-//         std::cout << "Topsection name: " << error.sectionName << std::endl;
-//         for (const auto& err : error.subSectionErrors) {
-//             std::cout << "Subsection name: " << err.sectionName << std::endl;
-//             for (const auto& tomlErr : err.tomlErrors) {
-//                 std::cout << tomlErr->what() << std::endl;
-//             }
-
-//             for (const auto& sanitizerError : err.sanitizerErrors) {
-//                 std::cout << sanitizerError->what() << std::endl;
-//             }
-//         }
-
-//         std::cout << std::endl << "Top section error" << std::endl;
-//         for (const auto& topTOMLErr : error.tomlErrors) {
-//             std::cout << topTOMLErr->what() << std::endl;
-//         }
-//         for (const auto& sanitizerError : error.sanitizerErrors) {
-//             std::cout << sanitizerError->what() << std::endl;
-//         }
-//     }
-// }
-
-// bool testGet(toml::table& t) {
-//     RepoConfig repoConf;
-//     auto       error = internal::getSection(t, repoConf);
-
-//     printAllError(error);
-
-//     auto                     tempTable = t;
-//     std::vector<std::string> includeFiles;
-//     getTOMLVal(tempTable, "include_files", includeFiles);
-//     std::cout << "Include files:" << std::endl << std::endl;
-//     auto hasMergeError = false;
-//     for (const auto& file : includeFiles) {
-//         std::cout << "Parsing file:" << file << std::endl;
-//         auto childTable = toml::parse(file);
-
-//         RepoConfig childConf;
-//         auto       childError = internal::getSection(childTable, childConf);
-
-//         std::cout << "Standard Repos:" << std::endl;
-//         for (const auto& stdRepo : childConf.standardRepos) { std::cout << stdRepo << std::endl;
-//         }
-
-//         printAllError(childError);
-
-//         if (!hasMergeError && !childError.hasError()) {
-//             auto mergeError = internal::merge(repoConf, childConf);
-
-//             if (mergeError.hasError()) {
-//                 std::cout << "Merge error:" << std::endl;
-//                 for (const auto& mError : mergeError.errors) {
-//                     std::cout << mError.what() << std::endl;
-//                 }
-//             }
-
-//             hasMergeError = mergeError.hasError();
-//         }
-
-//         std::cout << std::endl;
-//     }
-
-//     // std::cout << "printing final repo list:" << std::endl;
-//     // for (const auto& repo : repoConf.standardRepos) { std::cout << repo << std::endl; }
-
-//     std::cout << "printing final custom repo list:" << std::endl;
-//     for (const auto& repo : repoConf.customRepos) { std::cout << repo.name << std::endl; }
-
-//     // return error.hasError;
-//     return false;
-// }
 
 bool testGetFile(std::filesystem::path& filePath, FullConfig& fullConfig) {
-    if (auto error = getFile(filePath, "", fullConfig)) { return true; }
+    if (auto fileError = getFile(filePath, "", fullConfig)) {
+        auto errors = (*fileError).what();
+        for (const auto& error : errors) { std::cout << error << std::endl; }
+        std::cout << std::endl;
+        std::cout << "-------------------------------------------------" << std::endl;
+        std::cout << "error in config found" << std::endl;
+
+        return true;
+    }
     return false;
 }
 
 // namespace {
-// // TODO(kd): Refactor this into a log formatting module if needed
 // void printSection(const std::string& colorCode, const std::string& sectionName) {
 //     spdlog::info("");
 //     spdlog::info("parsing section: " + colorCode + hatter::toUpper(sectionName) +
@@ -391,51 +314,6 @@ bool testGetFile(std::filesystem::path& filePath, FullConfig& fullConfig) {
 //         const std::vector<std::string> validOptions = {"language", "keyboard", "timezone"};
 //         isValid_ &= checkUnknownOptions(rawMiscConfig, validOptions);
 //     }
-// }
-
-// RawTOMLConfig::RawTOMLConfig(const std::string& filePath) {
-//     try {
-//         config   = toml::parse(filePath);
-//         isValid_ = true;
-//     } catch (const std::runtime_error& e) {
-//         spdlog::error("failed to parse file " + filePath + " with error: " + e.what());
-//     } catch (const toml::syntax_error& e) {
-//         spdlog::error("syntax error in file " + filePath + " with error:\n" + e.what());
-//     }
-// }
-
-// TOMLConfigFile::TOMLConfigFile(const std::string& filePath)
-//     : TOMLConfigFile(RawTOMLConfig(filePath)) {}
-
-// TOMLConfigFile::TOMLConfigFile(const RawTOMLConfig& rawConfig)
-//     : distroInfo{rawConfig}, imageInfo{rawConfig} {
-//     if (rawConfig) {
-//         std::vector<std::string> includeFiles;
-//         isValid_ &= getTOMLVal(rawConfig.config, "include_files", includeFiles, true);
-
-//         if (isValid_) {
-//             for (auto i = includeFiles.crbegin(); i != includeFiles.crend(); ++i) {
-//                 std::cout << "processing include file: " << *i << std::endl;
-//                 TOMLConfigFile childConf(*i);
-//                 if (!childConf) {
-//                     isValid_ = false;
-//                     std::cout << "child config invalid: " << *i << std::endl;
-//                 } else {
-//                     isValid_ &= this->merge(childConf);
-//                 }
-//             }
-//         }
-//     } else {
-//         isValid_ = false;
-//     }
-// }
-
-// bool TOMLConfigFile::merge(const TOMLConfigFile& configFile) {
-//     auto isValid = true;
-
-//     isValid &= this->distroInfo.merge(configFile.distroInfo);
-
-//     return isValid;
 // }
 
 }  // namespace hatter

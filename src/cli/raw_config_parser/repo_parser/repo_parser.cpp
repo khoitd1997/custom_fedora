@@ -46,6 +46,7 @@ std::vector<std::shared_ptr<HatterParserError>> sanitize(const Repo&        repo
 
 std::vector<std::shared_ptr<HatterParserError>> sanitize(const RepoConfig&  repoConf,
                                                          const toml::table& table) {
+    // TODO(kd): Finish this
     (void)repoConf;
     std::vector<std::shared_ptr<HatterParserError>> errors;
     if (auto error = checkUnknownValue(table)) { errors.push_back(*error); }
@@ -72,27 +73,37 @@ std::optional<TopSectionErrorReport> getSection(toml::table& rawConfig, RepoConf
         processError(errorReport, getTOMLVal(rawRepoConfig, "custom_repos", rawCustomRepos));
     for (size_t i = 0; i < rawCustomRepos.size(); ++i) {
         SubSectionErrorReport customRepoReport("custom_repo #" + std::to_string(i + 1));
-        auto&                 tempTable = rawCustomRepos.at(i);
+        auto&                 tempTable      = rawCustomRepos.at(i);
+        auto                  customHasError = false;
         Repo                  repo;
 
-        processError(customRepoReport, getTOMLVal(tempTable, "name", repo.name, false));
-        processError(customRepoReport,
-                     getTOMLVal(tempTable, "display_name", repo.displayName, false));
+        customHasError |=
+            processError(customRepoReport, getTOMLVal(tempTable, "name", repo.name, false));
+        customHasError |= processError(
+            customRepoReport, getTOMLVal(tempTable, "display_name", repo.displayName, false));
 
-        processError(customRepoReport, getTOMLVal(tempTable, "metalink", repo.metaLink));
-        processError(customRepoReport, getTOMLVal(tempTable, "baseurl", repo.baseurl));
+        customHasError |=
+            processError(customRepoReport, getTOMLVal(tempTable, "metalink", repo.metaLink));
+        customHasError |=
+            processError(customRepoReport, getTOMLVal(tempTable, "baseurl", repo.baseurl));
 
-        processError(customRepoReport, getTOMLVal(tempTable, "gpgcheck", repo.gpgcheck, false));
-        processError(customRepoReport, getTOMLVal(tempTable, "gpgkey", repo.gpgkey));
+        customHasError |=
+            processError(customRepoReport, getTOMLVal(tempTable, "gpgcheck", repo.gpgcheck, false));
+        customHasError |=
+            processError(customRepoReport, getTOMLVal(tempTable, "gpgkey", repo.gpgkey));
 
         repoConfig.customRepos.push_back(repo);
 
-        processError(customRepoReport, sanitize(repo, tempTable));
+        if (!customHasError) {
+            customHasError |= processError(customRepoReport, sanitize(repo, tempTable));
+        }
 
         topHasError |= processError(errorReport, customRepoReport);
     }
 
-    topHasError |= processError(errorReport, sanitize(repoConfig, rawRepoConfig));
+    if (!topHasError) {
+        topHasError |= processError(errorReport, sanitize(repoConfig, rawRepoConfig));
+    }
 
     if (topHasError) { return errorReport; }
 
