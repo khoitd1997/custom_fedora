@@ -2,7 +2,15 @@
 
 #include <algorithm>
 
+#include "ascii_code.hpp"
+#include "utils.hpp"
+
 namespace hatter {
+namespace {
+static const auto keyNameFormat     = ascii_code::kCyan + ascii_code::kBold;
+static const auto correctTypeFormat = ascii_code::kDarkYellow + ascii_code::kBold;
+}  // namespace
+
 template <>
 std::string getTypeName<int>() {
     return "integer";
@@ -33,13 +41,20 @@ TOMLError::~TOMLError() {}
 
 TOMLTypeError::TOMLTypeError(const std::string& keyName, const std::string& correctType)
     : TOMLError{keyName}, correctType{correctType} {}
-std::string TOMLTypeError::what() const { return keyName + " should have type " + correctType; }
+std::string TOMLTypeError::what() const {
+    return formatStr(keyName, keyNameFormat) + " should have type " +
+           formatStr(correctType, correctTypeFormat);
+}
 
 TOMLExistentError::TOMLExistentError(const std::string& keyName) : TOMLError{keyName} {}
-std::string TOMLExistentError::what() const { return keyName + " needs to be defined"; }
+std::string TOMLExistentError::what() const {
+    return formatStr(keyName, keyNameFormat) + " needs to be defined";
+}
 
 TOMLEmptyStringError::TOMLEmptyStringError(const std::string& keyName) : TOMLError{keyName} {}
-std::string TOMLEmptyStringError::what() const { return keyName + " has empty value"; }
+std::string TOMLEmptyStringError::what() const {
+    return formatStr(keyName, keyNameFormat) + " has empty value";
+}
 
 template <>
 std::optional<std::shared_ptr<TOMLError>> getTOMLVal(toml::table&       t,

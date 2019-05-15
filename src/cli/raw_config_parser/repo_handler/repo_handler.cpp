@@ -15,8 +15,8 @@
 namespace hatter {
 namespace repo_handler {
 namespace {
-static const auto kSectionName       = "repo";
-static const auto ksectionFormatting = ascii_code::kBlue;
+static const auto kSectionName   = "repo";
+static const auto kSectionFormat = ascii_code::kBlue;
 
 std::optional<std::shared_ptr<RepoNoLinkError>> checkRepoNoLink(const Repo& repo) {
     if (repo.baseurl.empty() && repo.metaLink.empty()) {
@@ -60,7 +60,7 @@ std::vector<std::shared_ptr<HatterParserError>> sanitize(const RepoConfig&  repo
 }
 
 std::optional<TopSectionErrorReport> parse(toml::table& rawConfig, RepoConfig& repoConfig) {
-    TopSectionErrorReport errorReport(kSectionName, ksectionFormatting);
+    TopSectionErrorReport errorReport(kSectionName, kSectionFormat);
     bool                  topHasError = false;
 
     toml::table rawRepoConfig;
@@ -117,7 +117,7 @@ std::optional<TopSectionErrorReport> parse(toml::table& rawConfig, RepoConfig& r
 }
 
 std::optional<SectionMergeErrorReport> merge(RepoConfig& resultConf, const RepoConfig& targetConf) {
-    SectionMergeErrorReport errorReport(kSectionName, ksectionFormatting);
+    SectionMergeErrorReport errorReport(kSectionName, kSectionFormat);
     auto                    mergeHasError = false;
 
     appendUniqueVector(resultConf.standardRepos, targetConf.standardRepos);

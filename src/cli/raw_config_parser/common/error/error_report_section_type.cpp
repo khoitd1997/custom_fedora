@@ -6,25 +6,25 @@
 
 namespace hatter {
 SectionErrorReport::SectionErrorReport(const std::string& sectionName,
-                                       const std::string& sectionFormatting)
-    : sectionName{sectionName}, sectionFormatting{sectionFormatting} {}
+                                       const std::string& sectionFormat)
+    : sectionName{sectionName}, sectionFormat{sectionFormat} {}
 SectionErrorReport::~SectionErrorReport() {}
 
 SubSectionErrorReport::SubSectionErrorReport(const std::string& sectionName,
-                                             const std::string& sectionFormatting)
-    : SectionErrorReport(sectionName, sectionFormatting) {}
+                                             const std::string& sectionFormat)
+    : SectionErrorReport(sectionName, sectionFormat) {}
 std::vector<std::string> SubSectionErrorReport::what() const {
     std::vector<std::string> ret;
     for (const auto& error : errors) {
-        ret.push_back(formatStr(sectionName, sectionFormatting) + ": " + error->what());
+        ret.push_back(formatStr(sectionName, sectionFormat) + ": " + error->what());
     }
 
     return ret;
 }
 
 TopSectionErrorReport::TopSectionErrorReport(const std::string& sectionName,
-                                             const std::string& sectionFormatting)
-    : SubSectionErrorReport(sectionName, sectionFormatting) {}
+                                             const std::string& sectionFormat)
+    : SubSectionErrorReport(sectionName, sectionFormat) {}
 std::vector<std::string> TopSectionErrorReport::what() const {
     std::vector<std::string> ret;
 
@@ -34,7 +34,7 @@ std::vector<std::string> TopSectionErrorReport::what() const {
     for (const auto& subErrorReport : errorReports) {
         auto subReportStr = subErrorReport.what();
         for (const auto& subError : subReportStr) {
-            ret.push_back(formatStr(sectionName, sectionFormatting) + "::" + subError);
+            ret.push_back(formatStr(sectionName, sectionFormat) + "::" + subError);
         }
     }
 
@@ -42,13 +42,13 @@ std::vector<std::string> TopSectionErrorReport::what() const {
 }
 
 SectionMergeErrorReport::SectionMergeErrorReport(const std::string& sectionName,
-                                                 const std::string& sectionFormatting)
-    : SectionErrorReport(sectionName, sectionFormatting) {}
+                                                 const std::string& sectionFormat)
+    : SectionErrorReport(sectionName, sectionFormat) {}
 std::vector<std::string> SectionMergeErrorReport::what() const {
     std::vector<std::string> ret;
 
     for (const auto& mergeErr : errors) {
-        ret.push_back(formatStr(sectionName, sectionFormatting) + ": " + mergeErr.what());
+        ret.push_back(formatStr(sectionName, sectionFormat) + ": " + mergeErr.what());
     }
 
     return ret;

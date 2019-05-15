@@ -38,8 +38,8 @@ enable_custom_cache=true
 # define list of repos
 # $releasever and $basearch will be replaced when doing build
 [repo]
-standard_repos=["google-chrome", "nvidia", "vscode"]
-dlsfjldsa=2
+# standard_repos=["google-chrome", "nvidia", "vscode"]
+standard_repos=2
 
     # start defining custom repos here
     [[repo.custom_repos]]

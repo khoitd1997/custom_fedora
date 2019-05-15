@@ -11,17 +11,16 @@
 namespace hatter {
 struct SectionErrorReport : public ErrorReportBase {
     const std::string sectionName;
-    const std::string sectionFormatting;
+    const std::string sectionFormat;
 
-    SectionErrorReport(const std::string& sectionName, const std::string& sectionFormatting);
+    SectionErrorReport(const std::string& sectionName, const std::string& sectionFormat);
     virtual ~SectionErrorReport();
 };
 
 struct SubSectionErrorReport : public SectionErrorReport {
     std::vector<std::shared_ptr<HatterParserError>> errors;
 
-    SubSectionErrorReport(const std::string& sectionName,
-                          const std::string& sectionFormatting = "");
+    SubSectionErrorReport(const std::string& sectionName, const std::string& sectionFormat = "");
 
     virtual std::vector<std::string> what() const override;
 };
@@ -29,7 +28,7 @@ struct SubSectionErrorReport : public SectionErrorReport {
 struct TopSectionErrorReport : public SubSectionErrorReport {
     std::vector<SubSectionErrorReport> errorReports;
 
-    TopSectionErrorReport(const std::string& sectionName, const std::string& sectionFormatting);
+    TopSectionErrorReport(const std::string& sectionName, const std::string& sectionFormat);
 
     std::vector<std::string> what() const override;
 };
@@ -37,7 +36,7 @@ struct TopSectionErrorReport : public SubSectionErrorReport {
 struct SectionMergeErrorReport : public SectionErrorReport {
     std::vector<SectionMergeConflictError> errors;
 
-    SectionMergeErrorReport(const std::string& sectionName, const std::string& sectionFormatting);
+    SectionMergeErrorReport(const std::string& sectionName, const std::string& sectionFormat);
 
     std::vector<std::string> what() const override;
 };
