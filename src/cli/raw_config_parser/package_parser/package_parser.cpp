@@ -57,7 +57,7 @@ std::optional<SubSectionErrorReport> getSubSection(const std::string  keyName,
     return {};
 }
 
-std::optional<TopSectionErrorReport> getSection(toml::table& rawConfig, PackageConfig& pkgConfig) {
+std::optional<TopSectionErrorReport> get(toml::table& rawConfig, PackageConfig& pkgConfig) {
     TopSectionErrorReport errorReport("package");
     bool                  hasError = false;
 

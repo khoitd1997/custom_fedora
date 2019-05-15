@@ -64,4 +64,8 @@ std::string strJoin(const std::vector<std::string>& v, const std::string& delimi
     }
     return out;
 }
+
+std::string formatStr(const std::string& rawStr, const std::string& formatCode) {
+    return formatCode + rawStr + ascii_code::kReset;
+}
 }  // namespace hatter

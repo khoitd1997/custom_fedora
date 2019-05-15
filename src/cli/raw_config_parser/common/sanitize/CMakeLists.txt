@@ -1,6 +1,7 @@
 project(Raw_config_parser_common_sanitize)
 
-add_library(raw_config_parser_common_sanitize unknown_value_sanitize.cpp)
+file(GLOB CppSources *.cpp)
+add_library(raw_config_parser_common_sanitize ${CppSources})
 target_link_libraries(raw_config_parser_common_sanitize
                       PUBLIC toml11 raw_config_parser_common_error
                       PRIVATE utils)

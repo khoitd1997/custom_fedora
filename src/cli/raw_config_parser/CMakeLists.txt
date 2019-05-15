@@ -1,9 +1,10 @@
 project(Raw_config_parser)
 
 add_subdirectory(common)
-add_subdirectory(repo_parser)
+add_subdirectory(repo_handler)
 
-add_library(raw_config_parser raw_config_parser.cpp)
+file(GLOB CppSources *.cpp)
+add_library(raw_config_parser ${CppSources})
 target_link_libraries(raw_config_parser
                       PUBLIC raw_config_parser_common_type
                       PRIVATE utils

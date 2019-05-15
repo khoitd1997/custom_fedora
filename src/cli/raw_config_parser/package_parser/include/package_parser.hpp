@@ -6,7 +6,7 @@
 
 #include "toml11/toml.hpp"
 
-#include "error_report_type.hpp"
+#include "error_report_section_type.hpp"
 #include "hatter_config_type.hpp"
 
 namespace hatter {
@@ -18,7 +18,7 @@ struct RepoNoGPGKeyError : public HatterParserError {
     std::string what() const override;
 };
 
-std::optional<TopSectionErrorReport> getSection(toml::table& rawConfig, PackageConfig& pkgConfig);
+std::optional<TopSectionErrorReport> get(toml::table& rawConfig, PackageConfig& pkgConfig);
 
 std::optional<SectionMergeErrorReport> merge(PackageConfig&       resultConf,
                                              const PackageConfig& targetConf);

@@ -1,6 +1,7 @@
 project(Raw_config_parser_package)
 
-add_library(raw_config_parser_package repo_parser.cpp)
+file(GLOB CppSources *.cpp)
+add_library(raw_config_parser_package ${CppSources})
 target_link_libraries(
   raw_config_parser_package
   PUBLIC toml11 raw_config_parser_common_error raw_config_parser_common_type

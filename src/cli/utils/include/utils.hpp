@@ -1,5 +1,5 @@
-#ifndef _HATTER_UTILS_HPP
-#define _HATTER_UTILS_HPP
+#pragma once
+
 #include <memory>
 #include <string>
 #include <string_view>
@@ -10,6 +10,8 @@
 #include <spdlog/spdlog.h>
 
 #include "toml11/toml.hpp"
+
+#include "ascii_code.hpp"
 
 namespace hatter {
 void writeFile(const std::string& s, const std::string& path);
@@ -24,6 +26,8 @@ std::string getExeDir(void);
 std::string toUpper(std::string_view str);
 
 std::string strJoin(const std::vector<std::string>& v, const std::string& delimiter = ", ");
+
+std::string formatStr(const std::string& rawStr, const std::string& formatCode);
 
 template <typename T>
 void appendVector(std::vector<T>& resultVec, const std::vector<T>& targetVec) {
@@ -42,4 +46,3 @@ void appendUniqueVector(std::vector<T>& resultVec, const std::vector<T>& targetV
     removeDuplicateVector(resultVec);
 }
 }  // namespace hatter
-#endif

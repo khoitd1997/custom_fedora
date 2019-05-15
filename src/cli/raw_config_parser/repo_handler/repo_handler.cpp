@@ -1,4 +1,4 @@
-#include "repo_parser.hpp"
+#include "repo_handler.hpp"
 
 #include <filesystem>
 #include <memory>
@@ -7,12 +7,17 @@
 
 #include "toml11/toml.hpp"
 
+#include "ascii_code.hpp"
 #include "toml_utils.hpp"
 #include "unknown_value_sanitize.hpp"
 #include "utils.hpp"
 
 namespace hatter {
-namespace internal {
+namespace repo_handler {
+namespace {
+static const auto kSectionName       = "repo";
+static const auto ksectionFormatting = ascii_code::kBlue;
+
 std::optional<std::shared_ptr<RepoNoLinkError>> checkRepoNoLink(const Repo& repo) {
     if (repo.baseurl.empty() && repo.metaLink.empty()) {
         return std::make_shared<RepoNoLinkError>();
@@ -24,7 +29,7 @@ std::optional<std::shared_ptr<RepoNoGPGKeyError>> checkRepoNoGPGKey(const Repo& 
     if (repo.gpgcheck && repo.gpgkey.empty()) { return std::make_shared<RepoNoGPGKeyError>(); }
     return {};
 }
-}  // namespace internal
+}  // namespace
 
 std::string RepoNoLinkError::what() const {
     return "either baseurl or metalink needs to be defined";
@@ -38,8 +43,8 @@ std::vector<std::shared_ptr<HatterParserError>> sanitize(const Repo&        repo
                                                          const toml::table& table) {
     std::vector<std::shared_ptr<HatterParserError>> errors;
     if (auto error = checkUnknownValue(table)) { errors.push_back(*error); }
-    if (auto error = internal::checkRepoNoLink(repo)) { errors.push_back(*error); }
-    if (auto error = internal::checkRepoNoGPGKey(repo)) { errors.push_back(*error); }
+    if (auto error = checkRepoNoLink(repo)) { errors.push_back(*error); }
+    if (auto error = checkRepoNoGPGKey(repo)) { errors.push_back(*error); }
 
     return errors;
 }
@@ -54,13 +59,14 @@ std::vector<std::shared_ptr<HatterParserError>> sanitize(const RepoConfig&  repo
     return errors;
 }
 
-std::optional<TopSectionErrorReport> getSection(toml::table& rawConfig, RepoConfig& repoConfig) {
-    TopSectionErrorReport errorReport("repo");
+std::optional<TopSectionErrorReport> parse(toml::table& rawConfig, RepoConfig& repoConfig) {
+    TopSectionErrorReport errorReport(kSectionName, ksectionFormatting);
     bool                  topHasError = false;
 
     toml::table rawRepoConfig;
-    topHasError |= processError(errorReport, getTOMLVal(rawConfig, "repo", rawRepoConfig));
-    if (topHasError || rawRepoConfig.empty()) { return errorReport; }
+    topHasError |= processError(errorReport, getTOMLVal(rawConfig, kSectionName, rawRepoConfig));
+    if (topHasError) { return errorReport; }
+    if (rawRepoConfig.empty()) { return {}; }
 
     topHasError |= processError(
         errorReport, getTOMLVal(rawRepoConfig, "standard_repos", repoConfig.standardRepos));
@@ -72,7 +78,7 @@ std::optional<TopSectionErrorReport> getSection(toml::table& rawConfig, RepoConf
     topHasError |=
         processError(errorReport, getTOMLVal(rawRepoConfig, "custom_repos", rawCustomRepos));
     for (size_t i = 0; i < rawCustomRepos.size(); ++i) {
-        SubSectionErrorReport customRepoReport("custom_repo #" + std::to_string(i + 1));
+        SubSectionErrorReport customRepoReport("custom_repo_" + std::to_string(i + 1));
         auto&                 tempTable      = rawCustomRepos.at(i);
         auto                  customHasError = false;
         Repo                  repo;
@@ -111,7 +117,7 @@ std::optional<TopSectionErrorReport> getSection(toml::table& rawConfig, RepoConf
 }
 
 std::optional<SectionMergeErrorReport> merge(RepoConfig& resultConf, const RepoConfig& targetConf) {
-    SectionMergeErrorReport errorReport("repo");
+    SectionMergeErrorReport errorReport(kSectionName, ksectionFormatting);
     auto                    mergeHasError = false;
 
     appendUniqueVector(resultConf.standardRepos, targetConf.standardRepos);
@@ -141,4 +147,5 @@ std::optional<SectionMergeErrorReport> merge(RepoConfig& resultConf, const RepoC
 
     return {};
 }
+}  // namespace repo_handler
 }  // namespace hatter

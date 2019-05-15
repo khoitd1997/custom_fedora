@@ -48,6 +48,7 @@ int main(int argc, char** argv) {
     }
 
     logInit();
+    std::cout << std::endl;
 
     auto               filePath = std::filesystem::path(std::string(argv[1]));
     hatter::FullConfig fullConfig;

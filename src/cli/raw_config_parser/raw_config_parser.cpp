@@ -3,8 +3,8 @@
 #include <filesystem>
 #include <iostream>
 
-#include "error_report_type.hpp"
-#include "repo_parser.hpp"
+#include "error_report_section_type.hpp"
+#include "repo_handler.hpp"
 #include "toml_utils.hpp"
 
 // static const auto kResetColorCode      = "\033[0m";
@@ -35,7 +35,8 @@ std::optional<FileErrorReport> getFile(const std::filesystem::path& filePath,
 
     auto fileHasError = false;
 
-    fileHasError |= processError(fileSectionReport, getSection(rawConfig, fullConfig.repoConfig));
+    fileHasError |=
+        processError(fileSectionReport, repo_handler::parse(rawConfig, fullConfig.repoConfig));
 
     for (const auto& childFile : includeFiles) {
         // std::cout << "Parsing file:" << childFile << std::endl;
@@ -54,7 +55,7 @@ std::optional<FileErrorReport> getFile(const std::filesystem::path& filePath,
         }
 
         if (!fileMergeErrorReport && !fileHasError && !childErrorReport) {
-            auto mergeError = merge(fullConfig.repoConfig, childConf.repoConfig);
+            auto mergeError = repo_handler::merge(fullConfig.repoConfig, childConf.repoConfig);
             if (mergeError) {
                 fileMergeErrorReport =
                     std::make_shared<FileMergeErrorReport>(currFileName, childFileName);
@@ -73,7 +74,6 @@ bool testGetFile(std::filesystem::path& filePath, FullConfig& fullConfig) {
     if (auto fileError = getFile(filePath, "", fullConfig)) {
         auto errors = (*fileError).what();
         for (const auto& error : errors) { std::cout << error << std::endl; }
-        std::cout << std::endl;
         std::cout << "-------------------------------------------------" << std::endl;
         std::cout << "error in config found" << std::endl;
 
