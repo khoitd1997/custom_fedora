@@ -1,4 +1,3 @@
-project(Toml11)
 
 # Header only library, therefore INTERFACE
 add_library(toml11 INTERFACE)

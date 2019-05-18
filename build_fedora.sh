@@ -1,7 +1,7 @@
 #!/bin/bash
 # script to be used to build fedora inside mock env
 
-cat > /etc/dnf/dnf.conf << 'EOF'
+cat > /etc/dnf/dnf.conf << EOF
 [main]
 keepcache=1
 debuglevel=2
@@ -17,7 +17,7 @@ install_weak_deps=0
 best=1
 max_parallel_downloads=10
 clean_requirements_on_remove=True
-module_platform_id=platform:f30
+module_platform_id=platform:f${build_fedora_ver}
 EOF
 
 # has a chance of failure and need return code so execute before set -e

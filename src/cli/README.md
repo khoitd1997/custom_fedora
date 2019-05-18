@@ -12,7 +12,13 @@ Support classic kickstart file but with additional settings through the TOML fil
 
 ## Dependency list
 
+```shell
+# library
 sudo dnf install spdlog
+
+# for build tool
+sudo dnf install cppcheck ninja-build
+```
 
 ## Build Stages
 
@@ -23,3 +29,11 @@ sudo dnf install spdlog
 - Second stage: Inside mock
   - Sanitize packages, repo
   - Control build scripts, enable caching, etc
+- Commandline argument:
+  - Rebuild flag
+  - Clear cache flag
+  - Parse/Sanitize only
+  - Build output dir
+  - Config file/dir
+  - Fedora version(default current system)
+  - Fedora arch(default current arch)

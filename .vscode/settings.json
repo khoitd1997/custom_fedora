@@ -63,7 +63,11 @@
         "memory_resource": "cpp",
         "regex": "cpp",
         "shared_mutex": "cpp",
-        "numeric": "cpp"
+        "numeric": "cpp",
+        "set": "cpp",
+        "unordered_set": "cpp",
+        "filesystem": "cpp",
+        "variant": "cpp"
     },
     "C_Cpp.default.cppStandard": "c++17",
     "editor.formatOnSave": true

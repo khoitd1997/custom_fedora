@@ -8,12 +8,17 @@
  * @copyright Copyright Khoi Trinh (c) 2019
  *
  */
+
+#define SPDLOG_LEVEL_NAMES \
+    { "[trace]", "[debug]", "[info]", "[warning]", "[error]", "[critical]", "[]" }
+
 #include <spdlog/logger.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
 #include <cassert>
+#include <filesystem>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -31,9 +36,9 @@ static void logInit() {
 
     spdlog::set_default_logger(consoleLog);
     spdlog::set_level(spdlog::level::info);
-    spdlog::set_pattern("[%^%l%$] %v");
+    spdlog::set_pattern("%^%-9l%$ %v");
 
-    spdlog::info("hatter log initialized");
+    spdlog::warn("hatter log initialized");
 }
 
 // bool parseInputTOMLFile(const std::string& filePath, toml::table& out) {
@@ -47,12 +52,16 @@ int main(int argc, char** argv) {
     }
 
     logInit();
+    std::cout << std::endl;
 
-    const auto             fileName = std::string(argv[1]);
-    hatter::TOMLConfigFile conf(fileName);
+    auto               filePath = std::filesystem::path(std::string(argv[1]));
+    hatter::FullConfig fullConfig;
+    hatter::testGetFile(filePath, fullConfig);
 
-    if (!conf) { std::cout << "Failed to get conf file" << std::endl; }
-    // toml::table data;
+    // hatter::TOMLConfigFile conf(fileName);
+
+    // if (!conf) { std::cout << "Failed to get conf file" << std::endl; }
+
     // auto        isValid  = parseInputTOMLFile(argv[1], data);
     // auto        notEmpty = !data.empty();
 
