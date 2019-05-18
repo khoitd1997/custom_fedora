@@ -2,8 +2,7 @@
 
 #include <cxxabi.h>
 
-#include <spdlog/spdlog.h>
-
+#include <iostream>
 #include <memory>
 #include <optional>
 #include <string>
@@ -47,7 +46,7 @@ struct TOMLEmptyStringError : TOMLError {
 template <typename T>
 std::string getTypeName() {
     auto rawName = abi::__cxa_demangle(typeid(T).name(), nullptr, nullptr, nullptr);
-    spdlog::error("Trying to get name of unkown type " + std::string(rawName));
+    std::cerr << "Trying to get name of unkown type " + std::string(rawName) << std::endl;
     free(rawName);
     exit(1);
 }

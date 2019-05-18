@@ -1,4 +1,3 @@
-
 add_subdirectory(common)
 add_subdirectory(repo_handler)
 
@@ -10,7 +9,8 @@ target_link_libraries(raw_config_parser
                               toml_utils
                               raw_config_parser_common_error
                               raw_config_parser_common_sanitize
-                              raw_config_parser_repo)
+                              raw_config_parser_repo
+                              logger)
 
 target_include_directories(raw_config_parser
                            PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
