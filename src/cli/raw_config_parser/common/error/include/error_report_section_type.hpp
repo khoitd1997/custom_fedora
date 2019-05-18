@@ -61,6 +61,10 @@ void processError(T& errorReport, const std::shared_ptr<V>&& error) {
 }
 
 void processError(TopSectionErrorReport& errorReport, const SubSectionErrorReport& error);
+void processError(TopSectionErrorReport&                    errorReport,
+                  const std::vector<SubSectionErrorReport>& errors);
 
 void processError(SectionMergeErrorReport& errorReport, const SectionMergeConflictError& error);
+void processError(SectionMergeErrorReport&                      errorReport,
+                  const std::vector<SectionMergeConflictError>& errors);
 }  // namespace hatter

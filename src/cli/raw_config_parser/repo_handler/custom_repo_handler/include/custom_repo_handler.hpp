@@ -10,15 +10,8 @@
 
 namespace hatter {
 namespace custom_repo_handler {
-struct RepoNoLinkError : public HatterParserError {
-    std::string what() const override;
-};
-
-struct RepoNoGPGKeyError : public HatterParserError {
-    std::string what() const override;
-};
-
-SubSectionErrorReport parse(toml::table& rawConfig, CustomRepo& customRepo);
+std::vector<SubSectionErrorReport> parse(std::vector<toml::table> rawCustomRepos,
+                                         std::vector<CustomRepo>& customRepos);
 
 std::vector<SectionMergeConflictError> merge(std::vector<CustomRepo>&       result,
                                              const std::vector<CustomRepo>& target);

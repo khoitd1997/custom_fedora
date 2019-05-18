@@ -7,8 +7,8 @@
 
 #include "toml11/toml.hpp"
 
+#include "common_sanitize.hpp"
 #include "toml_utils.hpp"
-#include "unknown_value_sanitize.hpp"
 #include "utils.hpp"
 
 namespace hatter {
