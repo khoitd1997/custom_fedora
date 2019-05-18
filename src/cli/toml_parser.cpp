@@ -8,6 +8,10 @@
  * @copyright Copyright Khoi Trinh (c) 2019
  *
  */
+
+#define SPDLOG_LEVEL_NAMES \
+    { "[trace]", "[debug]", "[info]", "[warning]", "[error]", "[critical]", "[]" }
+
 #include <spdlog/logger.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -32,7 +36,7 @@ static void logInit() {
 
     spdlog::set_default_logger(consoleLog);
     spdlog::set_level(spdlog::level::info);
-    spdlog::set_pattern("[%^%l%$] %v");
+    spdlog::set_pattern("%^%-7l%$ %v");
 
     spdlog::info("hatter log initialized");
 }
