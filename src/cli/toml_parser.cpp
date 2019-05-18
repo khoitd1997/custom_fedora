@@ -36,9 +36,9 @@ static void logInit() {
 
     spdlog::set_default_logger(consoleLog);
     spdlog::set_level(spdlog::level::info);
-    spdlog::set_pattern("%^%-7l%$ %v");
+    spdlog::set_pattern("%^%-9l%$ %v");
 
-    spdlog::info("hatter log initialized");
+    spdlog::warn("hatter log initialized");
 }
 
 // bool parseInputTOMLFile(const std::string& filePath, toml::table& out) {
