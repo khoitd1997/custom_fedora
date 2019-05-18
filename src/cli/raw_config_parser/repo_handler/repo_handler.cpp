@@ -18,16 +18,16 @@ namespace {
 static const auto kSectionName   = "repo";
 static const auto kSectionFormat = ascii_code::kBlue;
 
-std::optional<std::shared_ptr<RepoNoLinkError>> checkRepoNoLink(const CustomRepo& repo) {
+std::shared_ptr<RepoNoLinkError> checkRepoNoLink(const CustomRepo& repo) {
     if (repo.baseurl.empty() && repo.metaLink.empty()) {
         return std::make_shared<RepoNoLinkError>();
     }
-    return {};
+    return nullptr;
 }
 
-std::optional<std::shared_ptr<RepoNoGPGKeyError>> checkRepoNoGPGKey(const CustomRepo& repo) {
+std::shared_ptr<RepoNoGPGKeyError> checkRepoNoGPGKey(const CustomRepo& repo) {
     if (repo.gpgcheck && repo.gpgkey.empty()) { return std::make_shared<RepoNoGPGKeyError>(); }
-    return {};
+    return nullptr;
 }
 }  // namespace
 
@@ -42,9 +42,9 @@ std::string RepoNoGPGKeyError::what() const {
 std::vector<std::shared_ptr<HatterParserError>> sanitize(const CustomRepo&  repo,
                                                          const toml::table& table) {
     std::vector<std::shared_ptr<HatterParserError>> errors;
-    if (auto error = checkUnknownValue(table)) { errors.push_back(*error); }
-    if (auto error = checkRepoNoLink(repo)) { errors.push_back(*error); }
-    if (auto error = checkRepoNoGPGKey(repo)) { errors.push_back(*error); }
+    if (auto error = checkUnknownValue(table)) { errors.push_back(error); }
+    if (auto error = checkRepoNoLink(repo)) { errors.push_back(error); }
+    if (auto error = checkRepoNoGPGKey(repo)) { errors.push_back(error); }
 
     return errors;
 }
@@ -54,7 +54,7 @@ std::vector<std::shared_ptr<HatterParserError>> sanitize(const RepoConfig&  repo
     // TODO(kd): Finish this
     (void)repoConf;
     std::vector<std::shared_ptr<HatterParserError>> errors;
-    if (auto error = checkUnknownValue(table)) { errors.push_back(*error); }
+    if (auto error = checkUnknownValue(table)) { errors.push_back(error); }
 
     return errors;
 }

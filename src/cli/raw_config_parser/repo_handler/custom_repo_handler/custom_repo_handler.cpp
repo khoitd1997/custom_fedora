@@ -2,10 +2,10 @@
 
 namespace hatter {
 namespace custom_repo_handler {
-std::optional<SubSectionErrorReport> parse(toml::table& rawConfig, CustomRepo& customRepo) {}
+SubSectionErrorReport parse(toml::table& rawConfig, CustomRepo& customRepo) {}
 
-std::optional<std::vector<SectionMergeConflictError>> merge(std::vector<CustomRepo>&       result,
-                                                            const std::vector<CustomRepo>& target) {
+std::vector<SectionMergeConflictError> merge(std::vector<CustomRepo>&       result,
+                                             const std::vector<CustomRepo>& target) {
     std::vector<SectionMergeConflictError> errors;
 
     auto resRepoCnt = 1;

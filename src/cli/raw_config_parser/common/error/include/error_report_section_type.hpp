@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <optional>
 #include <string>
 #include <vector>
 
@@ -57,8 +56,8 @@ template <typename T,
           typename V,
           std::enable_if_t<std::is_base_of<SubSectionErrorReport, T>::value>* = nullptr,
           std::enable_if_t<std::is_base_of<HatterParserError, V>::value>*     = nullptr>
-void processError(T& errorReport, const std::optional<std::shared_ptr<V>>&& error) {
-    if (error) { errorReport.errors.push_back(*error); }
+void processError(T& errorReport, const std::shared_ptr<V>&& error) {
+    if (error) { errorReport.errors.push_back(error); }
 }
 
 void processError(TopSectionErrorReport& errorReport, const SubSectionErrorReport& error);

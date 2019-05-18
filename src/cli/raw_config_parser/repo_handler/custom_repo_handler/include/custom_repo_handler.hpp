@@ -1,6 +1,5 @@
 #pragma once
 
-#include <optional>
 #include <string>
 #include <vector>
 
@@ -19,9 +18,9 @@ struct RepoNoGPGKeyError : public HatterParserError {
     std::string what() const override;
 };
 
-std::optional<SubSectionErrorReport> parse(toml::table& rawConfig, CustomRepo& customRepo);
+SubSectionErrorReport parse(toml::table& rawConfig, CustomRepo& customRepo);
 
-std::optional<std::vector<SectionMergeConflictError>> merge(std::vector<CustomRepo>&       result,
-                                                            const std::vector<CustomRepo>& target);
+std::vector<SectionMergeConflictError> merge(std::vector<CustomRepo>&       result,
+                                             const std::vector<CustomRepo>& target);
 }  // namespace custom_repo_handler
 }  // namespace hatter

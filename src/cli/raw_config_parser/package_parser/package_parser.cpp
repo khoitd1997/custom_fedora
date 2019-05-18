@@ -19,7 +19,7 @@ std::optional<std::shared_ptr<RepoNoLinkError>> checkValidPackage(const Repo& re
     if (repo.baseurl.empty() && repo.metaLink.empty()) {
         return std::make_shared<RepoNoLinkError>();
     }
-    return {};
+    return nullptr;
 }
 }  // namespace internal
 
@@ -51,7 +51,7 @@ SubSectionErrorReport getSubSection(const std::string  keyName,
 
     if (hasError) { return errorReport; }
 
-    return {};
+    return nullptr;
 }
 
 std::optional<TopSectionErrorReport> get(toml::table& rawConfig, PackageConfig& pkgConfig) {
@@ -73,7 +73,7 @@ std::optional<TopSectionErrorReport> get(toml::table& rawConfig, PackageConfig& 
 
     if (hasError) { return errorReport; }
 
-    return {};
+    return nullptr;
 }
 
 std::optional<SectionMergeErrorReport> merge(PackageConfig&       resultConf,
@@ -83,6 +83,6 @@ std::optional<SectionMergeErrorReport> merge(PackageConfig&       resultConf,
 
     if (mergeHasError) { return errorReport; }
 
-    return {};
+    return nullptr;
 }
 }  // namespace hatter

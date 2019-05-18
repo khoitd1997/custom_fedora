@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <optional>
 #include <string>
 #include <vector>
 
@@ -16,5 +15,5 @@ struct UnknownValueError : public HatterParserError {
     std::string what() const override;
 };
 
-std::optional<std::shared_ptr<UnknownValueError>> checkUnknownValue(const toml::table& table);
+std::shared_ptr<UnknownValueError> checkUnknownValue(const toml::table& table);
 }  // namespace hatter
