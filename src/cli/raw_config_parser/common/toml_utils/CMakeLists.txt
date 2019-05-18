@@ -1,4 +1,3 @@
-
 file(GLOB CppSources *.cpp)
 add_library(toml_utils ${CppSources})
 target_link_libraries(toml_utils

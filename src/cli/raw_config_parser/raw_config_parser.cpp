@@ -3,10 +3,7 @@
 #include <filesystem>
 #include <iostream>
 
-#include <spdlog/logger.h>
-#include <spdlog/sinks/basic_file_sink.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/spdlog.h>
+#include "logger.hpp"
 
 #include "error_report_section_type.hpp"
 #include "repo_handler.hpp"
@@ -78,7 +75,7 @@ std::optional<FileErrorReport> getFile(const std::filesystem::path& filePath,
 bool testGetFile(std::filesystem::path& filePath, FullConfig& fullConfig) {
     if (auto fileError = getFile(filePath, "", fullConfig)) {
         auto errors = (*fileError).what();
-        for (const auto& error : errors) { spdlog::error(error); }
+        for (const auto& error : errors) { logger::error(error); }
 
         return true;
     }

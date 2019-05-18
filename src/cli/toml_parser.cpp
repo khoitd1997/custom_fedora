@@ -9,14 +9,6 @@
  *
  */
 
-#define SPDLOG_LEVEL_NAMES \
-    { "[trace]", "[debug]", "[info]", "[warning]", "[error]", "[critical]", "[]" }
-
-#include <spdlog/logger.h>
-#include <spdlog/sinks/basic_file_sink.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/spdlog.h>
-
 #include <cassert>
 #include <filesystem>
 #include <iostream>
@@ -26,20 +18,9 @@
 #include "toml11/toml.hpp"
 
 #include "config_builder.hpp"
+#include "logger.hpp"
 #include "raw_config_parser.hpp"
 #include "utils.hpp"
-
-// #include "cpptoml.hpp"
-
-static void logInit() {
-    auto consoleLog = spdlog::stdout_color_mt("console");
-
-    spdlog::set_default_logger(consoleLog);
-    spdlog::set_level(spdlog::level::info);
-    spdlog::set_pattern("%^%-9l%$ %v");
-
-    spdlog::warn("hatter log initialized");
-}
 
 // bool parseInputTOMLFile(const std::string& filePath, toml::table& out) {
 //     // TODO(kd): Investigate cleaner error message
@@ -51,7 +32,7 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    logInit();
+    hatter::logger::init();
     std::cout << std::endl;
 
     auto               filePath = std::filesystem::path(std::string(argv[1]));

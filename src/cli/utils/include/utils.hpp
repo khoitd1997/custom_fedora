@@ -5,10 +5,6 @@
 #include <string_view>
 #include <unordered_set>
 
-#include <spdlog/logger.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/spdlog.h>
-
 #include "toml11/toml.hpp"
 
 #include "ascii_code.hpp"

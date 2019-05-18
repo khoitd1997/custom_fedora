@@ -48,6 +48,7 @@ add_compile_options(-Wall
                     -fdiagnostics-color=always)
 add_link_options(-fsanitize=address -fsanitize=undefined)
 
+add_subdirectory(logger)
 add_subdirectory(thirdparty/toml11)
 
 add_subdirectory(config_builder)
@@ -59,5 +60,6 @@ target_link_libraries(tomlparser
                       PRIVATE toml11
                               utils
                               raw_config_parser
-                              config_builder)
+                              config_builder
+                              logger)
 # target_link_libraries(tomlparser PRIVATE toml11 utils raw_config_parser)
