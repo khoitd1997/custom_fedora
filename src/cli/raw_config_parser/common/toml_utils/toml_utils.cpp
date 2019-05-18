@@ -27,7 +27,7 @@ std::string getTypeName<std::string>() {
 }
 
 template <>
-std::string getTypeName<hatter::Repo>() {
+std::string getTypeName<hatter::CustomRepo>() {
     return "repo";
 }
 

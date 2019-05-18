@@ -61,7 +61,7 @@ template <>
 std::string getTypeName<std::string>();
 
 template <>
-std::string getTypeName<hatter::Repo>();
+std::string getTypeName<hatter::CustomRepo>();
 
 template <>
 std::string getTypeName<toml::table>();

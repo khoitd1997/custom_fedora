@@ -66,7 +66,7 @@ namespace hatter {
 //     explicit BuildProcessConfig(const RawTOMLConfig& rawConfig);
 // };
 
-struct Repo {
+struct CustomRepo {
     std::string name;
     std::string displayName;
 
@@ -76,18 +76,18 @@ struct Repo {
     bool        gpgcheck = false;
     std::string gpgkey;
 
-    bool operator==(const Repo& r) const {
+    bool operator==(const CustomRepo& r) const {
         return (this->name == r.name) && (this->displayName == r.displayName) &&
                (this->metaLink == r.metaLink) && (this->baseurl == r.baseurl) &&
                (this->gpgcheck == r.gpgcheck) && (this->gpgkey == r.gpgkey);
     }
-    bool operator!=(const Repo& r) const { return !(this->operator==(r)); }
+    bool operator!=(const CustomRepo& r) const { return !(this->operator==(r)); }
 };
 
 struct RepoConfig {
     std::vector<std::string> standardRepos;
     std::vector<std::string> coprRepos;
-    std::vector<Repo>        customRepos;
+    std::vector<CustomRepo>  customRepos;
 };
 
 struct PackageSet {
@@ -116,7 +116,7 @@ struct FullConfig {
 
 namespace std {
 template <>
-struct hash<hatter::Repo> {
-    size_t operator()(const hatter::Repo& r) const { return hash<std::string>()(r.name); }
+struct hash<hatter::CustomRepo> {
+    size_t operator()(const hatter::CustomRepo& r) const { return hash<std::string>()(r.name); }
 };
 }  // namespace std

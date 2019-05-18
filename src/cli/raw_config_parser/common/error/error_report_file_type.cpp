@@ -19,6 +19,7 @@ std::vector<std::string> FileSectionErrorReport::what() const {
 
     return ret;
 }
+FileSectionErrorReport::operator bool() const { return (!errorReports.empty()); }
 
 FileMergeErrorReport::FileMergeErrorReport(const std::string& firstFileName,
                                            const std::string& secondFileName)
@@ -34,6 +35,7 @@ std::vector<std::string> FileMergeErrorReport::what() const {
 
     return ret;
 }
+FileMergeErrorReport::operator bool() const { return (!errorReports.empty()); }
 
 FileErrorReport::FileErrorReport(const FileSectionErrorReport& sectionReport)
     : errorReport{sectionReport} {}
@@ -50,22 +52,21 @@ std::vector<std::string> FileErrorReport::what() const {
 
     return ret;
 }
-
-bool processError(FileSectionErrorReport&                     fileReport,
-                  const std::optional<TopSectionErrorReport>& topReport) {
-    if (topReport) {
-        fileReport.errorReports.push_back(*topReport);
-        return true;
+FileErrorReport::operator bool() const {
+    auto ret = false;
+    try {
+        ret = (std::get<FileSectionErrorReport>(errorReport)) ? true : false;
+    } catch (const std::bad_variant_access&) {
+        ret = (std::get<FileMergeErrorReport>(errorReport)) ? true : false;
     }
-    return false;
+    return ret;
 }
 
-bool processError(FileMergeErrorReport&                         fileReport,
-                  const std::optional<SectionMergeErrorReport>& mergeReport) {
-    if (mergeReport) {
-        fileReport.errorReports.push_back(*mergeReport);
-        return true;
-    }
-    return false;
+void processError(FileSectionErrorReport& fileReport, const TopSectionErrorReport& topReport) {
+    if (topReport) { fileReport.errorReports.push_back(topReport); }
+}
+
+void processError(FileMergeErrorReport& fileReport, const SectionMergeErrorReport& mergeReport) {
+    if (mergeReport) { fileReport.errorReports.push_back(mergeReport); }
 }
 }  // namespace hatter

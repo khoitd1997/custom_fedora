@@ -9,19 +9,21 @@
 #include "error_type.hpp"
 
 namespace hatter {
-struct SectionErrorReport : public ErrorReportBase {
+struct SectionErrorReportBase : public ErrorReportBase {
     const std::string sectionName;
     const std::string sectionFormat;
 
-    SectionErrorReport(const std::string& sectionName, const std::string& sectionFormat);
-    virtual ~SectionErrorReport();
+    SectionErrorReportBase(const std::string& sectionName, const std::string& sectionFormat);
+    virtual ~SectionErrorReportBase();
 };
 
-struct SubSectionErrorReport : public SectionErrorReport {
+struct SubSectionErrorReport : public SectionErrorReportBase {
     std::vector<std::shared_ptr<HatterParserError>> errors;
 
     SubSectionErrorReport(const std::string& sectionName, const std::string& sectionFormat = "");
+    virtual ~SubSectionErrorReport();
 
+    virtual explicit                 operator bool() const override;
     virtual std::vector<std::string> what() const override;
 };
 
@@ -30,14 +32,16 @@ struct TopSectionErrorReport : public SubSectionErrorReport {
 
     TopSectionErrorReport(const std::string& sectionName, const std::string& sectionFormat);
 
+    explicit                 operator bool() const override;
     std::vector<std::string> what() const override;
 };
 
-struct SectionMergeErrorReport : public SectionErrorReport {
+struct SectionMergeErrorReport : public SectionErrorReportBase {
     std::vector<SectionMergeConflictError> errors;
 
     SectionMergeErrorReport(const std::string& sectionName, const std::string& sectionFormat);
 
+    explicit                 operator bool() const override;
     std::vector<std::string> what() const override;
 };
 
@@ -45,27 +49,19 @@ template <typename T,
           typename V,
           std::enable_if_t<std::is_base_of<SubSectionErrorReport, T>::value>* = nullptr,
           std::enable_if_t<std::is_base_of<HatterParserError, V>::value>*     = nullptr>
-bool processError(T& errorReport, const std::vector<std::shared_ptr<V>>&& errors) {
+void processError(T& errorReport, const std::vector<std::shared_ptr<V>>&& errors) {
     errorReport.errors.insert(errorReport.errors.end(), errors.begin(), errors.end());
-    if (!errors.empty()) { return true; }
-    return false;
 }
 
 template <typename T,
           typename V,
           std::enable_if_t<std::is_base_of<SubSectionErrorReport, T>::value>* = nullptr,
           std::enable_if_t<std::is_base_of<HatterParserError, V>::value>*     = nullptr>
-bool processError(T& errorReport, const std::optional<std::shared_ptr<V>>&& error) {
-    if (error) {
-        errorReport.errors.push_back(*error);
-        return true;
-    }
-    return false;
+void processError(T& errorReport, const std::optional<std::shared_ptr<V>>&& error) {
+    if (error) { errorReport.errors.push_back(*error); }
 }
 
-bool processError(TopSectionErrorReport&                      errorReport,
-                  const std::optional<SubSectionErrorReport>& error);
+void processError(TopSectionErrorReport& errorReport, const SubSectionErrorReport& error);
 
-bool processError(SectionMergeErrorReport&                        errorReport,
-                  const std::optional<SectionMergeConflictError>& error);
+void processError(SectionMergeErrorReport& errorReport, const SectionMergeConflictError& error);
 }  // namespace hatter

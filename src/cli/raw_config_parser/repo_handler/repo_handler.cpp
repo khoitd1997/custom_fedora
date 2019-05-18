@@ -18,14 +18,14 @@ namespace {
 static const auto kSectionName   = "repo";
 static const auto kSectionFormat = ascii_code::kBlue;
 
-std::optional<std::shared_ptr<RepoNoLinkError>> checkRepoNoLink(const Repo& repo) {
+std::optional<std::shared_ptr<RepoNoLinkError>> checkRepoNoLink(const CustomRepo& repo) {
     if (repo.baseurl.empty() && repo.metaLink.empty()) {
         return std::make_shared<RepoNoLinkError>();
     }
     return {};
 }
 
-std::optional<std::shared_ptr<RepoNoGPGKeyError>> checkRepoNoGPGKey(const Repo& repo) {
+std::optional<std::shared_ptr<RepoNoGPGKeyError>> checkRepoNoGPGKey(const CustomRepo& repo) {
     if (repo.gpgcheck && repo.gpgkey.empty()) { return std::make_shared<RepoNoGPGKeyError>(); }
     return {};
 }
@@ -39,7 +39,7 @@ std::string RepoNoGPGKeyError::what() const {
     return "gpgkey should be defined when gpgcheck is true";
 }
 
-std::vector<std::shared_ptr<HatterParserError>> sanitize(const Repo&        repo,
+std::vector<std::shared_ptr<HatterParserError>> sanitize(const CustomRepo&  repo,
                                                          const toml::table& table) {
     std::vector<std::shared_ptr<HatterParserError>> errors;
     if (auto error = checkUnknownValue(table)) { errors.push_back(*error); }
@@ -59,66 +59,52 @@ std::vector<std::shared_ptr<HatterParserError>> sanitize(const RepoConfig&  repo
     return errors;
 }
 
-std::optional<TopSectionErrorReport> parse(toml::table& rawConfig, RepoConfig& repoConfig) {
+TopSectionErrorReport parse(toml::table& rawConfig, RepoConfig& repoConfig) {
     TopSectionErrorReport errorReport(kSectionName, kSectionFormat);
-    bool                  topHasError = false;
 
     toml::table rawRepoConfig;
-    topHasError |= processError(errorReport, getTOMLVal(rawConfig, kSectionName, rawRepoConfig));
-    if (topHasError) { return errorReport; }
-    if (rawRepoConfig.empty()) { return {}; }
+    processError(errorReport, getTOMLVal(rawConfig, kSectionName, rawRepoConfig));
+    if (errorReport || rawRepoConfig.empty()) { return errorReport; }
 
-    topHasError |= processError(
-        errorReport, getTOMLVal(rawRepoConfig, "standard_repos", repoConfig.standardRepos));
-    topHasError |=
-        processError(errorReport, getTOMLVal(rawRepoConfig, "copr_repos", repoConfig.coprRepos));
+    processError(errorReport,
+                 getTOMLVal(rawRepoConfig, "standard_repos", repoConfig.standardRepos));
+    processError(errorReport, getTOMLVal(rawRepoConfig, "copr_repos", repoConfig.coprRepos));
 
     // parse custom repos
     std::vector<toml::table> rawCustomRepos;
-    topHasError |=
-        processError(errorReport, getTOMLVal(rawRepoConfig, "custom_repos", rawCustomRepos));
+
+    processError(errorReport, getTOMLVal(rawRepoConfig, "custom_repos", rawCustomRepos));
     for (size_t i = 0; i < rawCustomRepos.size(); ++i) {
         SubSectionErrorReport customRepoReport("custom_repo_" + std::to_string(i + 1));
-        auto&                 tempTable      = rawCustomRepos.at(i);
-        auto                  customHasError = false;
-        Repo                  repo;
+        auto&                 tempTable = rawCustomRepos.at(i);
+        CustomRepo            repo;
 
-        customHasError |=
-            processError(customRepoReport, getTOMLVal(tempTable, "name", repo.name, false));
-        customHasError |= processError(
-            customRepoReport, getTOMLVal(tempTable, "display_name", repo.displayName, false));
+        processError(customRepoReport, getTOMLVal(tempTable, "name", repo.name, false));
+        processError(customRepoReport,
+                     getTOMLVal(tempTable, "display_name", repo.displayName, false));
 
-        customHasError |=
-            processError(customRepoReport, getTOMLVal(tempTable, "metalink", repo.metaLink));
-        customHasError |=
-            processError(customRepoReport, getTOMLVal(tempTable, "baseurl", repo.baseurl));
+        processError(customRepoReport, getTOMLVal(tempTable, "metalink", repo.metaLink));
 
-        customHasError |=
-            processError(customRepoReport, getTOMLVal(tempTable, "gpgcheck", repo.gpgcheck, false));
-        customHasError |=
-            processError(customRepoReport, getTOMLVal(tempTable, "gpgkey", repo.gpgkey));
+        processError(customRepoReport, getTOMLVal(tempTable, "baseurl", repo.baseurl));
+
+        processError(customRepoReport, getTOMLVal(tempTable, "gpgcheck", repo.gpgcheck, false));
+
+        processError(customRepoReport, getTOMLVal(tempTable, "gpgkey", repo.gpgkey));
 
         repoConfig.customRepos.push_back(repo);
 
-        if (!customHasError) {
-            customHasError |= processError(customRepoReport, sanitize(repo, tempTable));
-        }
+        if (!customRepoReport) { processError(customRepoReport, sanitize(repo, tempTable)); }
 
-        topHasError |= processError(errorReport, customRepoReport);
+        processError(errorReport, customRepoReport);
     }
 
-    if (!topHasError) {
-        topHasError |= processError(errorReport, sanitize(repoConfig, rawRepoConfig));
-    }
+    if (!errorReport) { processError(errorReport, sanitize(repoConfig, rawRepoConfig)); }
 
-    if (topHasError) { return errorReport; }
-
-    return {};
+    return errorReport;
 }
 
-std::optional<SectionMergeErrorReport> merge(RepoConfig& resultConf, const RepoConfig& targetConf) {
+SectionMergeErrorReport merge(RepoConfig& resultConf, const RepoConfig& targetConf) {
     SectionMergeErrorReport errorReport(kSectionName, kSectionFormat);
-    auto                    mergeHasError = false;
 
     appendUniqueVector(resultConf.standardRepos, targetConf.standardRepos);
     appendUniqueVector(resultConf.coprRepos, targetConf.coprRepos);
@@ -129,7 +115,7 @@ std::optional<SectionMergeErrorReport> merge(RepoConfig& resultConf, const RepoC
         for (const auto& targetRepo : targetConf.customRepos) {
             if (resRepo.name == targetRepo.name) {
                 if (resRepo != targetRepo) {
-                    mergeHasError |= processError(
+                    processError(
                         errorReport,
                         SectionMergeConflictError("custom_repo",
                                                   "repo #" + std::to_string(resRepoCnt),
@@ -141,11 +127,9 @@ std::optional<SectionMergeErrorReport> merge(RepoConfig& resultConf, const RepoC
         ++resRepoCnt;
     }
 
-    if (!mergeHasError) { appendUniqueVector(resultConf.customRepos, targetConf.customRepos); }
+    if (!errorReport) { appendUniqueVector(resultConf.customRepos, targetConf.customRepos); }
 
-    if (mergeHasError) { return errorReport; }
-
-    return {};
+    return errorReport;
 }
 }  // namespace repo_handler
 }  // namespace hatter

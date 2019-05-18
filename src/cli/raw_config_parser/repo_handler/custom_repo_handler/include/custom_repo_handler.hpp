@@ -2,6 +2,7 @@
 
 #include <optional>
 #include <string>
+#include <vector>
 
 #include "toml11/toml.hpp"
 
@@ -9,7 +10,7 @@
 #include "hatter_config_type.hpp"
 
 namespace hatter {
-namespace repo_handler {
+namespace custom_repo_handler {
 struct RepoNoLinkError : public HatterParserError {
     std::string what() const override;
 };
@@ -18,9 +19,9 @@ struct RepoNoGPGKeyError : public HatterParserError {
     std::string what() const override;
 };
 
-TopSectionErrorReport parse(toml::table& rawConfig, RepoConfig& repoConfig);
+std::optional<SubSectionErrorReport> parse(toml::table& rawConfig, CustomRepo& customRepo);
 
-SectionMergeErrorReport merge(RepoConfig& resultConf, const RepoConfig& targetConf);
-
-}  // namespace repo_handler
+std::optional<std::vector<SectionMergeConflictError>> merge(std::vector<CustomRepo>&       result,
+                                                            const std::vector<CustomRepo>& target);
+}  // namespace custom_repo_handler
 }  // namespace hatter

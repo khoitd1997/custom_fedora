@@ -16,6 +16,7 @@ struct FileSectionErrorReport : public ErrorReportBase {
 
     FileSectionErrorReport(const std::string& fileName, const std::string& parentFileName);
 
+    explicit                 operator bool() const override;
     std::vector<std::string> what() const override;
 };
 
@@ -26,6 +27,7 @@ struct FileMergeErrorReport : public ErrorReportBase {
 
     FileMergeErrorReport(const std::string& firstFileName, const std::string& secondFileName);
 
+    explicit                 operator bool() const override;
     std::vector<std::string> what() const override;
 };
 
@@ -35,12 +37,11 @@ struct FileErrorReport : public ErrorReportBase {
     explicit FileErrorReport(const FileSectionErrorReport& sectionReport);
     explicit FileErrorReport(const FileMergeErrorReport& mergeReport);
 
+    explicit                 operator bool() const override;
     std::vector<std::string> what() const override;
 };
 
-bool processError(FileSectionErrorReport&                     fileReport,
-                  const std::optional<TopSectionErrorReport>& topReport);
+void processError(FileSectionErrorReport& fileReport, const TopSectionErrorReport& topReport);
 
-bool processError(FileMergeErrorReport&                         fileReport,
-                  const std::optional<SectionMergeErrorReport>& mergeReport);
+void processError(FileMergeErrorReport& fileReport, const SectionMergeErrorReport& mergeReport);
 }  // namespace hatter
