@@ -1,4 +1,3 @@
-project(Raw_config_parser_common_sanitize)
 
 file(GLOB CppSources *.cpp)
 add_library(raw_config_parser_common_sanitize ${CppSources})

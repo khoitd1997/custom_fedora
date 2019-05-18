@@ -1,4 +1,3 @@
-project(Utils)
 
 file(GLOB CppSources *.cpp)
 add_library(utils ${CppSources})

@@ -1,4 +1,3 @@
-project(Raw_config_parser)
 
 add_subdirectory(common)
 add_subdirectory(repo_handler)

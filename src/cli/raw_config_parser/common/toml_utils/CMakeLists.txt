@@ -1,4 +1,3 @@
-project(Toml_utils)
 
 file(GLOB CppSources *.cpp)
 add_library(toml_utils ${CppSources})

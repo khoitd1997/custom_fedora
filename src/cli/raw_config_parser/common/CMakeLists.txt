@@ -1,4 +1,3 @@
-project(Raw_config_parser_common)
 
 add_subdirectory(hatter_config_type)
 add_subdirectory(error)

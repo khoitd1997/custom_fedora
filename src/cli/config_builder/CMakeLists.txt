@@ -1,4 +1,3 @@
-project(Config_builder)
 
 file(GLOB CppSources *.cpp)
 add_library(config_builder ${CppSources})
