@@ -1,17 +1,12 @@
 #include "package_set_sanitize.hpp"
 
-#include <unistd.h>
-
-#include <cstdio>
-#include <cstdlib>
 #include <functional>
-#include <iostream>
-#include <stdexcept>
 
 #include "magic_enum.hpp"
 
 #include "ascii_code.hpp"
 #include "common_sanitize.hpp"
+#include "raw_config_parser_utils.hpp"
 #include "utils.hpp"
 
 namespace hatter {
@@ -19,32 +14,6 @@ namespace package_set_handler {
 namespace {
 const auto packageListPath = "/build_temp/package_list.txt";
 const auto groupListPath   = "/build_temp/group_list.txt";
-
-std::string buildRipGrepCommand(const std::string &searchTarget,
-                                const std::string &targetFilePath,
-                                const bool         noRegex = true) {
-    const std::string regexFlag     = (noRegex) ? " " : " -F ";
-    const std::string baseRgCommand = "rg " + regexFlag + " -c ";
-
-    return baseRgCommand + searchTarget + " " + targetFilePath;
-}
-
-int ripgrepSearchFile(const std::string &searchTarget,
-                      const std::string &targetFilePath,
-                      const bool         noRegex = true) {
-    std::string output;
-    auto        rgCommand = buildRipGrepCommand(searchTarget, targetFilePath, noRegex);
-    auto        errCode   = execCommand(rgCommand, output);
-
-    if (errCode == 0) {
-        return std::stoi(output);
-    } else if (errCode == 1) {
-        return 0;
-    } else {
-        throw std::runtime_error("rg failed with message: " + output);
-        return 0;
-    }
-}
 }  // namespace
 
 PackageNotFoundError::PackageNotFoundError(const PackageSet::PackageType pkgType)

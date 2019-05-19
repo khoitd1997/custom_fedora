@@ -6,6 +6,7 @@ target_link_libraries(raw_config_parser_package_set
                       PRIVATE utils
                               magic_enum
                               raw_config_parser_common_sanitize
+                              raw_config_parser_utils
                               toml_utils)
 
 target_include_directories(raw_config_parser_package_set

@@ -73,4 +73,4 @@ copr_repos=["khoitd1997/toml11"]
 [misc]
 language="en_US.UTF-8" # locale -a
 keyboard="us" # localectl list-x11-keymap-layouts
-timezone="US/Pacific" # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+timezone="US/Pacific" # cd /usr/share/zoneinfo/posix && find * -type f -or -type l
