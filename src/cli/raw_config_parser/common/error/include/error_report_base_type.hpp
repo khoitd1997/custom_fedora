@@ -8,6 +8,7 @@ struct ErrorReportBase {
    public:
     virtual ~ErrorReportBase() {}
 
-    virtual std::vector<std::string> what() const = 0;
+    virtual std::vector<std::string> what() const          = 0;
+    virtual explicit                 operator bool() const = 0;
 };
 }  // namespace hatter

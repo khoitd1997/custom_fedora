@@ -5,7 +5,7 @@
 
 #include "logger.hpp"
 
-#include "error_report_section_type.hpp"
+#include "error_report_file_type.hpp"
 #include "repo_handler.hpp"
 #include "toml_utils.hpp"
 
@@ -18,9 +18,9 @@
 // static const auto kGreenColorCode      = "\033[38;5;154m";
 
 namespace hatter {
-std::optional<FileErrorReport> getFile(const std::filesystem::path& filePath,
-                                       const std::string&           parentFileName,
-                                       FullConfig&                  fullConfig) {
+FileErrorReport getFile(const std::filesystem::path& filePath,
+                        const std::string&           parentFileName,
+                        FullConfig&                  fullConfig) {
     auto currDirectory = filePath.parent_path().string();
     auto currFileName  = filePath.filename().string();
 
@@ -35,10 +35,7 @@ std::optional<FileErrorReport> getFile(const std::filesystem::path& filePath,
     FileSectionErrorReport                fileSectionReport(currFileName, parentFileName);
     std::shared_ptr<FileMergeErrorReport> fileMergeErrorReport;
 
-    auto fileHasError = false;
-
-    fileHasError |=
-        processError(fileSectionReport, repo_handler::parse(rawConfig, fullConfig.repoConfig));
+    processError(fileSectionReport, repo_handler::parse(rawConfig, fullConfig.repoConfig));
 
     for (const auto& childFile : includeFiles) {
         // std::cout << "Parsing file:" << childFile << std::endl;
@@ -56,7 +53,7 @@ std::optional<FileErrorReport> getFile(const std::filesystem::path& filePath,
             std::cout << stdRepo << std::endl;
         }
 
-        if (!fileMergeErrorReport && !fileHasError && !childErrorReport) {
+        if (!fileMergeErrorReport && !fileSectionReport && !childErrorReport) {
             auto mergeError = repo_handler::merge(fullConfig.repoConfig, childConf.repoConfig);
             if (mergeError) {
                 fileMergeErrorReport =
@@ -66,15 +63,14 @@ std::optional<FileErrorReport> getFile(const std::filesystem::path& filePath,
         }
     }
 
-    if (fileHasError) { return FileErrorReport(fileSectionReport); }
+    if (fileSectionReport) { return FileErrorReport(fileSectionReport); }
     if (fileMergeErrorReport) { return FileErrorReport(*fileMergeErrorReport); }
-
-    return {};
+    return FileErrorReport(fileSectionReport);
 }
 
 bool testGetFile(std::filesystem::path& filePath, FullConfig& fullConfig) {
     if (auto fileError = getFile(filePath, "", fullConfig)) {
-        auto errors = (*fileError).what();
+        auto errors = fileError.what();
         for (const auto& error : errors) { logger::error(error); }
 
         return true;

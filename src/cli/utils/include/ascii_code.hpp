@@ -11,6 +11,7 @@ static const std::string kReset     = "\033[0m";
 
 // color code
 static const std::string kBlue       = "\033[38;5;12m";
+static const std::string kLightGreen = "\033[38;5;106m";
 static const std::string kCyan       = "\033[38;5;087m";
 static const std::string kYellow     = "\033[38;5;226m";
 static const std::string kDarkYellow = "\033[38;5;220m";

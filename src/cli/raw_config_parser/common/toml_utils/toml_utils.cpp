@@ -27,7 +27,7 @@ std::string getTypeName<std::string>() {
 }
 
 template <>
-std::string getTypeName<hatter::Repo>() {
+std::string getTypeName<hatter::CustomRepo>() {
     return "repo";
 }
 
@@ -57,10 +57,10 @@ std::string TOMLEmptyStringError::what() const {
 }
 
 template <>
-std::optional<std::shared_ptr<TOMLError>> getTOMLVal(toml::table&       t,
-                                                     const std::string& keyName,
-                                                     std::string&       storage,
-                                                     const bool         isOptional) {
+std::shared_ptr<TOMLError> getTOMLVal(toml::table&       t,
+                                      const std::string& keyName,
+                                      std::string&       storage,
+                                      const bool         isOptional) {
     auto status = internal::getTOMLValHelper(t, keyName, storage);
     auto error  = internal::getTOMLErrorPtr(status, keyName, storage, isOptional);
 
@@ -73,10 +73,10 @@ std::optional<std::shared_ptr<TOMLError>> getTOMLVal(toml::table&       t,
 }
 
 template <>
-std::optional<std::shared_ptr<TOMLError>> getTOMLVal(toml::table&              t,
-                                                     const std::string&        keyName,
-                                                     std::vector<std::string>& storage,
-                                                     const bool                isOptional) {
+std::shared_ptr<TOMLError> getTOMLVal(toml::table&              t,
+                                      const std::string&        keyName,
+                                      std::vector<std::string>& storage,
+                                      const bool                isOptional) {
     auto error = internal::getTOMLValBase(t, keyName, storage, isOptional);
     if (!error && !(storage.empty())) {
         if (std::any_of(storage.cbegin(), storage.cend(), [](std::string str) -> bool {

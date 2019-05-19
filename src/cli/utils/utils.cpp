@@ -4,6 +4,8 @@
 #include <limits.h>
 #include <unistd.h>
 
+#include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <regex>
 #include <string>
@@ -65,7 +67,40 @@ std::string strJoin(const std::vector<std::string>& v, const std::string& delimi
     return out;
 }
 
+bool inStr(const std::string& strToLookFor, const std::string& strToSearchIn) {
+    if (strToSearchIn.find(strToLookFor) != std::string::npos) { return true; }
+    return false;
+}
+
+std::vector<std::string> strSplit(std::string str, const std::string& delimiter) {
+    std::vector<std::string> ret;
+    size_t                   pos = 0;
+
+    while ((pos = str.find(delimiter)) != std::string::npos) {
+        ret.push_back(str.substr(0, pos));
+        str.erase(0, pos + delimiter.length());
+    }
+    ret.push_back(str);
+
+    return ret;
+}
+
 std::string formatStr(const std::string& rawStr, const std::string& formatCode) {
     return formatCode + rawStr + ascii_code::kReset;
+}
+
+int execCommand(const std::string& cmd, std::string& output, const size_t outputBufferSize) {
+    std::vector<char> buffer(outputBufferSize);
+    auto              pipe = popen(cmd.c_str(), "r");
+
+    if (!pipe) { throw std::runtime_error("popen() failed on command: " + cmd); }
+
+    while (!feof(pipe)) {
+        if (fgets(buffer.data(), static_cast<int>(buffer.size()), pipe) != nullptr) {
+            output += buffer.data();
+        }
+    }
+
+    return pclose(pipe);
 }
 }  // namespace hatter

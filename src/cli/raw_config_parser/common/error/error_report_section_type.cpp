@@ -5,14 +5,15 @@
 #include "utils.hpp"
 
 namespace hatter {
-SectionErrorReport::SectionErrorReport(const std::string& sectionName,
-                                       const std::string& sectionFormat)
+SectionErrorReportBase::SectionErrorReportBase(const std::string& sectionName,
+                                               const std::string& sectionFormat)
     : sectionName{sectionName}, sectionFormat{sectionFormat} {}
-SectionErrorReport::~SectionErrorReport() {}
+SectionErrorReportBase::~SectionErrorReportBase() {}
 
 SubSectionErrorReport::SubSectionErrorReport(const std::string& sectionName,
                                              const std::string& sectionFormat)
-    : SectionErrorReport(sectionName, sectionFormat) {}
+    : SectionErrorReportBase(sectionName, sectionFormat) {}
+SubSectionErrorReport::~SubSectionErrorReport() {}
 std::vector<std::string> SubSectionErrorReport::what() const {
     std::vector<std::string> ret;
     for (const auto& error : errors) {
@@ -21,6 +22,7 @@ std::vector<std::string> SubSectionErrorReport::what() const {
 
     return ret;
 }
+SubSectionErrorReport::operator bool() const { return (!errors.empty()); }
 
 TopSectionErrorReport::TopSectionErrorReport(const std::string& sectionName,
                                              const std::string& sectionFormat)
@@ -40,10 +42,13 @@ std::vector<std::string> TopSectionErrorReport::what() const {
 
     return ret;
 }
+TopSectionErrorReport::operator bool() const {
+    return SubSectionErrorReport::operator bool() || (!errorReports.empty());
+}
 
 SectionMergeErrorReport::SectionMergeErrorReport(const std::string& sectionName,
                                                  const std::string& sectionFormat)
-    : SectionErrorReport(sectionName, sectionFormat) {}
+    : SectionErrorReportBase(sectionName, sectionFormat) {}
 std::vector<std::string> SectionMergeErrorReport::what() const {
     std::vector<std::string> ret;
 
@@ -53,22 +58,21 @@ std::vector<std::string> SectionMergeErrorReport::what() const {
 
     return ret;
 }
+SectionMergeErrorReport::operator bool() const { return (!errors.empty()); }
 
-bool processError(TopSectionErrorReport&                      topReport,
-                  const std::optional<SubSectionErrorReport>& subReport) {
-    if (subReport) {
-        topReport.errorReports.push_back(*subReport);
-        return true;
-    }
-    return false;
+void processError(TopSectionErrorReport& errorReport, const SubSectionErrorReport& error) {
+    if (error) { errorReport.errorReports.push_back(error); }
+}
+void processError(TopSectionErrorReport&                    errorReport,
+                  const std::vector<SubSectionErrorReport>& errors) {
+    for (const auto& error : errors) { processError(errorReport, error); }
 }
 
-bool processError(SectionMergeErrorReport&                        sectionReport,
-                  const std::optional<SectionMergeConflictError>& error) {
-    if (error) {
-        sectionReport.errors.push_back(*error);
-        return true;
-    }
-    return false;
+void processError(SectionMergeErrorReport& errorReport, const SectionMergeConflictError& error) {
+    errorReport.errors.push_back(error);
+}
+void processError(SectionMergeErrorReport&                      errorReport,
+                  const std::vector<SectionMergeConflictError>& errors) {
+    for (const auto& error : errors) { processError(errorReport, error); }
 }
 }  // namespace hatter

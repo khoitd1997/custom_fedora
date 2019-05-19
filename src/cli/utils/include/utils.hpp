@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -23,7 +24,17 @@ std::string toUpper(std::string_view str);
 
 std::string strJoin(const std::vector<std::string>& v, const std::string& delimiter = ", ");
 
+bool inStr(const std::string& strToLookFor, const std::string& strToSearchIn);
+
+std::vector<std::string> strSplit(std::string str, const std::string& delimiter);
+
 std::string formatStr(const std::string& rawStr, const std::string& formatCode);
+
+template <typename T>
+bool inVector(const T& target, const std::vector<T>& list) {
+    if (std::find(list.begin(), list.end(), target) != list.end()) { return true; }
+    return false;
+}
 
 template <typename T>
 void appendVector(std::vector<T>& resultVec, const std::vector<T>& targetVec) {
@@ -41,4 +52,6 @@ void appendUniqueVector(std::vector<T>& resultVec, const std::vector<T>& targetV
     appendVector(resultVec, targetVec);
     removeDuplicateVector(resultVec);
 }
+
+int execCommand(const std::string& cmd, std::string& output, const size_t outputBufferSize = 1000);
 }  // namespace hatter

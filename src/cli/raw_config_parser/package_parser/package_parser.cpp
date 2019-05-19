@@ -7,8 +7,8 @@
 
 #include "toml11/toml.hpp"
 
+#include "common_sanitize.hpp"
 #include "toml_utils.hpp"
-#include "unknown_value_sanitize.hpp"
 #include "utils.hpp"
 
 namespace hatter {
@@ -19,7 +19,7 @@ std::optional<std::shared_ptr<RepoNoLinkError>> checkValidPackage(const Repo& re
     if (repo.baseurl.empty() && repo.metaLink.empty()) {
         return std::make_shared<RepoNoLinkError>();
     }
-    return {};
+    return nullptr;
 }
 }  // namespace internal
 
@@ -33,28 +33,25 @@ std::vector<std::shared_ptr<HatterParserError>> sanitize(const PackageSet&  pkgS
     return errors;
 }
 
-std::optional<SubSectionErrorReport> getSubSection(const std::string  keyName,
-                                                   toml::table&       rawPkgConfig,
-                                                   PackageSet&        pkgSet,
-                                                   const PackageType& pkgType) {
+SubSectionErrorReport getSubSection(const std::string  keyName,
+                                    toml::table&       rawPkgConfig,
+                                    PackageSet&        pkgSet,
+                                    const PackageType& pkgType) {
     toml::table           pkgSetTable;
     SubSectionErrorReport errorReport(keyName);
     bool                  hasError = false;
 
-    hasError |= processError(errorReport, getTOMLVal(rawPkgConfig, keyName, pkgSetTable));
+    processError(errorReport, getTOMLVal(rawPkgConfig, keyName, pkgSetTable));
     if (pkgSetTable.size() > 0) {
-        hasError |=
-            processError(errorReport, getTOMLVal(pkgSetTable, "install", pkgSet.installList));
-        hasError |= processError(errorReport, getTOMLVal(pkgSetTable, "remove", pkgSet.removeList));
+        processError(errorReport, getTOMLVal(pkgSetTable, "install", pkgSet.installList));
+        processError(errorReport, getTOMLVal(pkgSetTable, "remove", pkgSet.removeList));
 
-        if (!hasError) {
-            hasError |= processError(errorReport, sanitize(pkgSet, pkgSetTable, pkgType));
-        }
+        if (!hasError) { processError(errorReport, sanitize(pkgSet, pkgSetTable, pkgType)); }
     }
 
     if (hasError) { return errorReport; }
 
-    return {};
+    return nullptr;
 }
 
 std::optional<TopSectionErrorReport> get(toml::table& rawConfig, PackageConfig& pkgConfig) {
@@ -76,7 +73,7 @@ std::optional<TopSectionErrorReport> get(toml::table& rawConfig, PackageConfig& 
 
     if (hasError) { return errorReport; }
 
-    return {};
+    return nullptr;
 }
 
 std::optional<SectionMergeErrorReport> merge(PackageConfig&       resultConf,
@@ -86,6 +83,6 @@ std::optional<SectionMergeErrorReport> merge(PackageConfig&       resultConf,
 
     if (mergeHasError) { return errorReport; }
 
-    return {};
+    return nullptr;
 }
 }  // namespace hatter
