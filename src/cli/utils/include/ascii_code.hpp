@@ -13,8 +13,8 @@ static const std::string kReset     = "\033[0m";
 static const std::string kBlue      = "\033[38;5;33m";
 static const std::string kLightBlue = "\033[38;5;33m";
 
-static const std::string kMidGreen      = "\033[38;5;048m";
-static const std::string kLightMidGreen = "\033[38;5;120m";
+static const std::string kMidGreen      = "\033[38;5;084m";
+static const std::string kLightMidGreen = "\033[38;5;156m";
 
 static const std::string kLightGreen = "\033[38;5;106m";
 static const std::string kGreen      = "\033[38;5;154m";
@@ -29,6 +29,7 @@ static const std::string kDarkYellow = "\033[38;5;220m";
 static const std::string kGrey = "\033[38;5;246m";
 
 // color code attached to meaning
-static const auto kErrorListColor = kDarkYellow;
+static const auto kErrorListColor     = kDarkYellow;
+static const auto kImportantWordColor = "\033[38;5;036m";
 }  // namespace ascii_code
 }  // namespace hatter

@@ -17,7 +17,7 @@ SubSectionErrorReport::~SubSectionErrorReport() {}
 std::vector<std::string> SubSectionErrorReport::what() const {
     std::vector<std::string> ret;
     for (const auto& error : errors) {
-        ret.push_back(formatStr(sectionName, sectionFormat) + ": " + error->what());
+        ret.push_back(formatStr(sectionName, sectionFormat) + kErrorDelimiter + error->what());
     }
 
     return ret;
@@ -36,7 +36,8 @@ std::vector<std::string> TopSectionErrorReport::what() const {
     for (const auto& subErrorReport : errorReports) {
         auto subReportStr = subErrorReport.what();
         for (const auto& subError : subReportStr) {
-            ret.push_back(formatStr(sectionName, sectionFormat) + "::" + subError);
+            ret.push_back(formatStr(sectionName, sectionFormat) + kErrorLocationDelimiter +
+                          subError);
         }
     }
 
@@ -53,7 +54,7 @@ std::vector<std::string> SectionMergeErrorReport::what() const {
     std::vector<std::string> ret;
 
     for (const auto& mergeErr : errors) {
-        ret.push_back(formatStr(sectionName, sectionFormat) + ": " + mergeErr.what());
+        ret.push_back(formatStr(sectionName, sectionFormat) + kErrorDelimiter + mergeErr.what());
     }
 
     return ret;

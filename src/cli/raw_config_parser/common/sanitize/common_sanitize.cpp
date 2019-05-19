@@ -6,7 +6,7 @@
 namespace hatter {
 std::string UnknownValueError::what() const {
     auto undefinedStr = formatStr(strJoin(undefinedVals), ascii_code::kErrorListColor);
-    return "unknown value(s): " + undefinedStr;
+    return formatStr("unknown", ascii_code::kImportantWordColor) + " key(s): " + undefinedStr;
 }
 
 std::shared_ptr<UnknownValueError> checkUnknownValue(const toml::table& table) {

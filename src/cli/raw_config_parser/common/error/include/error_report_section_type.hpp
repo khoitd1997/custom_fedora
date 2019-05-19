@@ -8,6 +8,9 @@
 #include "error_type.hpp"
 
 namespace hatter {
+static const auto kErrorDelimiter         = "||";
+static const auto kErrorLocationDelimiter = "::";
+
 struct SectionErrorReportBase : public ErrorReportBase {
     const std::string sectionName;
     const std::string sectionFormat;

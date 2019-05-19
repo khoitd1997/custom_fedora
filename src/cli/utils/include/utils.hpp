@@ -26,7 +26,7 @@ std::string strJoin(const std::vector<std::string>& v, const std::string& delimi
 
 bool inStr(const std::string& strToLookFor, const std::string& strToSearchIn);
 
-std::vector<std::string> strSplit(std::string str, const std::string& delimiter);
+std::vector<std::string> strSplit(std::string str, const std::string& delimiter, int limit = 0);
 
 std::string formatStr(const std::string& rawStr, const std::string& formatCode);
 

@@ -20,9 +20,6 @@ namespace {
 const auto packageListPath = "/build_temp/package_list.txt";
 const auto groupListPath   = "/build_temp/group_list.txt";
 
-// ImageMagick.x86_64
-// TODO(kd): Make these changeable
-
 std::string buildRipGrepCommand(const std::string &searchTarget,
                                 const std::string &targetFilePath,
                                 const bool         noRegex = true) {
@@ -53,7 +50,8 @@ int ripgrepSearchFile(const std::string &searchTarget,
 PackageNotFoundError::PackageNotFoundError(const PackageSet::PackageType pkgType)
     : pkgType(pkgType) {}
 std::string PackageNotFoundError::what() const {
-    return "the following " + std::string(magic_enum::enum_name(pkgType)) +
+    return "the following " +
+           formatStr(std::string(magic_enum::enum_name(pkgType)), ascii_code::kImportantWordColor) +
            "(s) can not be found: " + formatStr(strJoin(packages), ascii_code::kErrorListColor);
 }
 
