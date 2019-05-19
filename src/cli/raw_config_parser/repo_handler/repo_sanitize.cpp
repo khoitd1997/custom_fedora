@@ -52,7 +52,7 @@ std::shared_ptr<CoprRepoNotFoundError> checkCoprRepo(const RepoConfig& repoConf)
         // check if copr repo exists
         std::string dnfOutput;
         const auto  dnfCommand = "dnf copr list -q --available-by-user=" + repoOwner + " 2>&1";
-        auto        errCode    = WEXITSTATUS(execCommand(dnfCommand, dnfOutput));
+        auto        errCode    = execCommand(dnfCommand, dnfOutput);
         if (errCode) {
             logger::error("dnf command \"" + dnfCommand + "\" failed with error: " + dnfOutput);
             exit(1);

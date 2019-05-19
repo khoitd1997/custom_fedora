@@ -49,7 +49,7 @@ add_compile_options(-Wall
 add_link_options(-fsanitize=address -fsanitize=undefined)
 
 add_subdirectory(logger)
-add_subdirectory(thirdparty/toml11)
+add_subdirectory(thirdparty)
 
 add_subdirectory(config_builder)
 add_subdirectory(raw_config_parser)

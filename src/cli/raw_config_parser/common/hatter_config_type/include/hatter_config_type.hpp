@@ -91,13 +91,18 @@ struct RepoConfig {
 };
 
 struct PackageSet {
+    enum class PackageType { rpm, rpm_group };
+
+    PackageType              packageType;
     std::vector<std::string> installList;
     std::vector<std::string> removeList;
+
+    explicit PackageSet(const PackageType pkgType) : packageType(pkgType) {}
 };
 
 struct PackageConfig {
-    PackageSet rpm;
-    PackageSet rpmGroup;
+    PackageSet rpm      = PackageSet(PackageSet::PackageType::rpm);
+    PackageSet rpmGroup = PackageSet(PackageSet::PackageType::rpm_group);
 };
 
 // struct MiscConfig  {
@@ -109,7 +114,8 @@ struct PackageConfig {
 // };
 
 struct FullConfig {
-    RepoConfig repoConfig;
+    RepoConfig    repoConfig;
+    PackageConfig packageConfig;
 };
 
 }  // namespace hatter

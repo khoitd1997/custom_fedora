@@ -101,6 +101,6 @@ int execCommand(const std::string& cmd, std::string& output, const size_t output
         }
     }
 
-    return pclose(pipe);
+    return WEXITSTATUS(pclose(pipe));
 }
 }  // namespace hatter
