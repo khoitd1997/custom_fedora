@@ -7,11 +7,6 @@ namespace custom_repo_handler {
 std::string RepoNoLinkError::what() const {
     return "either baseurl or metalink needs to be defined";
 }
-
-std::string RepoNoGPGKeyError::what() const {
-    return "gpgkey should be defined when gpgcheck is true";
-}
-
 std::shared_ptr<RepoNoLinkError> checkRepoNoLink(const CustomRepo& repo) {
     if (repo.baseurl.empty() && repo.metaLink.empty()) {
         return std::make_shared<RepoNoLinkError>();
@@ -19,6 +14,9 @@ std::shared_ptr<RepoNoLinkError> checkRepoNoLink(const CustomRepo& repo) {
     return nullptr;
 }
 
+std::string RepoNoGPGKeyError::what() const {
+    return "gpgkey should be defined when gpgcheck is true";
+}
 std::shared_ptr<RepoNoGPGKeyError> checkRepoNoGPGKey(const CustomRepo& repo) {
     if (repo.gpgcheck && repo.gpgkey.empty()) { return std::make_shared<RepoNoGPGKeyError>(); }
     return nullptr;

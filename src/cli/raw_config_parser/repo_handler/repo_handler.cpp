@@ -7,9 +7,11 @@
 
 #include "toml11/toml.hpp"
 
-#include "ascii_code.hpp"
-#include "common_sanitize.hpp"
 #include "custom_repo_handler.hpp"
+
+#include "repo_sanitize.hpp"
+
+#include "ascii_code.hpp"
 #include "toml_utils.hpp"
 #include "utils.hpp"
 
@@ -19,16 +21,6 @@ namespace {
 static const auto kSectionName   = "repo";
 static const auto kSectionFormat = ascii_code::kBlue;
 }  // namespace
-
-std::vector<std::shared_ptr<HatterParserError>> sanitize(const RepoConfig&  repoConf,
-                                                         const toml::table& table) {
-    // TODO(kd): Finish this
-    (void)repoConf;
-    std::vector<std::shared_ptr<HatterParserError>> errors;
-    if (auto error = checkUnknownValue(table)) { errors.push_back(error); }
-
-    return errors;
-}
 
 TopSectionErrorReport parse(toml::table& rawConfig, RepoConfig& repoConfig) {
     TopSectionErrorReport errorReport(kSectionName, kSectionFormat);
