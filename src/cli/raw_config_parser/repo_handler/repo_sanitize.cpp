@@ -33,7 +33,6 @@ std::shared_ptr<StandardRepoNotSupportedError> checkStandardRepo(const RepoConfi
 std::string CoprRepoNotFoundError::what() const {
     const auto repoListStr = formatStr(strJoin(repos), ascii_code::kDarkYellow);
 
-    // TODO(kd): Beatify this
     return "the following " + formatStr("copr", ascii_code::kLightGreen) +
            " repo(s) can't be found: " + repoListStr;
 }

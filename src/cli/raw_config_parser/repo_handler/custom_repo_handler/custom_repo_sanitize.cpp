@@ -28,6 +28,7 @@ std::vector<std::shared_ptr<HatterParserError>> sanitize(const CustomRepo&  repo
     if (auto error = checkUnknownValue(table)) { errors.push_back(error); }
     if (auto error = checkRepoNoLink(repo)) { errors.push_back(error); }
     if (auto error = checkRepoNoGPGKey(repo)) { errors.push_back(error); }
+    // TODO(kd): Add check for gpgkey directory and url validity
 
     return errors;
 }
