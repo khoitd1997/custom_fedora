@@ -14,7 +14,7 @@ const std::vector<std::string> supportedStandardRepos = {"google-chrome", "nvidi
 std::string StandardRepoNotSupportedError::what() const {
     const auto repoListStr = formatStr(strJoin(repos), ascii_code::kDarkYellow);
 
-    return "the following " + formatStr("standard", ascii_code::kLightGreen) +
+    return "the following " + formatStr("standard", ascii_code::kImportantWordColor) +
            " repo(s) are not supported: " + repoListStr;
 }
 std::shared_ptr<StandardRepoNotSupportedError> checkStandardRepo(const RepoConfig& repoConf) {
@@ -33,7 +33,7 @@ std::shared_ptr<StandardRepoNotSupportedError> checkStandardRepo(const RepoConfi
 std::string CoprRepoNotFoundError::what() const {
     const auto repoListStr = formatStr(strJoin(repos), ascii_code::kDarkYellow);
 
-    return "the following " + formatStr("copr", ascii_code::kLightGreen) +
+    return "the following " + formatStr("copr", ascii_code::kImportantWordColor) +
            " repo(s) can't be found: " + repoListStr;
 }
 std::shared_ptr<CoprRepoNotFoundError> checkCoprRepo(const RepoConfig& repoConf) {
@@ -52,7 +52,7 @@ std::shared_ptr<CoprRepoNotFoundError> checkCoprRepo(const RepoConfig& repoConf)
         // check if copr repo exists
         std::string dnfOutput;
         const auto  dnfCommand = "dnf copr list -q --available-by-user=" + repoOwner + " 2>&1";
-        auto        errCode    = WEXITSTATUS(execCommand(dnfCommand, dnfOutput));
+        auto        errCode    = execCommand(dnfCommand, dnfOutput);
         if (errCode) {
             logger::error("dnf command \"" + dnfCommand + "\" failed with error: " + dnfOutput);
             exit(1);

@@ -8,7 +8,7 @@
 namespace hatter {
 namespace {
 static const auto keyNameFormat     = ascii_code::kCyan + ascii_code::kBold;
-static const auto correctTypeFormat = ascii_code::kDarkYellow + ascii_code::kBold;
+static const auto correctTypeFormat = ascii_code::kErrorListColor + ascii_code::kBold;
 }  // namespace
 
 template <>

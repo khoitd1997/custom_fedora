@@ -72,13 +72,16 @@ bool inStr(const std::string& strToLookFor, const std::string& strToSearchIn) {
     return false;
 }
 
-std::vector<std::string> strSplit(std::string str, const std::string& delimiter) {
+std::vector<std::string> strSplit(std::string str, const std::string& delimiter, int limit) {
     std::vector<std::string> ret;
     size_t                   pos = 0;
 
-    while ((pos = str.find(delimiter)) != std::string::npos) {
+    if (limit == 0) { limit = static_cast<int>(str.length()) + 2; }
+
+    while (((pos = str.find(delimiter)) != std::string::npos) && (limit > 0)) {
         ret.push_back(str.substr(0, pos));
         str.erase(0, pos + delimiter.length());
+        --limit;
     }
     ret.push_back(str);
 
@@ -101,6 +104,6 @@ int execCommand(const std::string& cmd, std::string& output, const size_t output
         }
     }
 
-    return pclose(pipe);
+    return WEXITSTATUS(pclose(pipe));
 }
 }  // namespace hatter

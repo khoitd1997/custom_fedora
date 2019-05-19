@@ -6,6 +6,7 @@
 #include "logger.hpp"
 
 #include "error_report_file_type.hpp"
+#include "package_handler.hpp"
 #include "repo_handler.hpp"
 #include "toml_utils.hpp"
 
@@ -13,7 +14,7 @@
 // static const auto kCyanColorCode       = "\033[38;5;087m";
 // static const auto kBlueColorCode       = "\033[38;5;12m";
 // static const auto kYellowColorCode     = "\033[38;5;226m";
-// static const auto kDarkYellowColorCode = "\033[38;5;220m";
+// static const auto kErrorListColorColorCode = "\033[38;5;220m";
 // static const auto kDarkGreenColorCode  = "\033[38;5;34m";
 // static const auto kGreenColorCode      = "\033[38;5;154m";
 
@@ -30,16 +31,19 @@ FileErrorReport getFile(const std::filesystem::path& filePath,
     // TODO(kd): error handling here
     std::vector<std::string> includeFiles;
     // getTOMLVal(rawConfig, "include_files", includeFiles);
-    // std::cout << "Include files:" << std::endl;
+    std::cout << "current file: " << filePath << std::endl;
 
-    FileSectionErrorReport                fileSectionReport(currFileName, parentFileName);
-    std::shared_ptr<FileMergeErrorReport> fileMergeErrorReport;
+    FileSectionErrorReport fileSectionReport(currFileName, parentFileName);
 
     processError(fileSectionReport, repo_handler::parse(rawConfig, fullConfig.repoConfig));
+    processError(fileSectionReport, package_handler::parse(rawConfig, fullConfig.packageConfig));
+
+    std::cout << "Config:" << std::endl;
+    for (const auto& package : fullConfig.packageConfig.rpm.installList) {
+        std::cout << package << std::endl;
+    }
 
     for (const auto& childFile : includeFiles) {
-        // std::cout << "Parsing file:" << childFile << std::endl;
-
         auto childPath = std::filesystem::path(
             (currDirectory == "") ? childFile : currDirectory + "/" + childFile);
         auto childFileName = childPath.filename().string();
@@ -48,23 +52,18 @@ FileErrorReport getFile(const std::filesystem::path& filePath,
         FullConfig childConf;
         auto       childErrorReport = getFile(childPath, currFileName, childConf);
 
-        // std::cout << "Standard Repos:" << std::endl;
-        for (const auto& stdRepo : childConf.repoConfig.standardRepos) {
-            std::cout << stdRepo << std::endl;
-        }
+        if (!fileSectionReport && !childErrorReport) {
+            FileMergeErrorReport fileMergeErrorReport(currFileName, childFileName);
 
-        if (!fileMergeErrorReport && !fileSectionReport && !childErrorReport) {
-            auto mergeError = repo_handler::merge(fullConfig.repoConfig, childConf.repoConfig);
-            if (mergeError) {
-                fileMergeErrorReport =
-                    std::make_shared<FileMergeErrorReport>(currFileName, childFileName);
-                processError(*fileMergeErrorReport, mergeError);
-            }
+            processError(fileMergeErrorReport,
+                         repo_handler::merge(fullConfig.repoConfig, childConf.repoConfig));
+            processError(fileMergeErrorReport,
+                         package_handler::merge(fullConfig.packageConfig, childConf.packageConfig));
+
+            if (fileMergeErrorReport) { return FileErrorReport(fileMergeErrorReport); }
         }
     }
 
-    if (fileSectionReport) { return FileErrorReport(fileSectionReport); }
-    if (fileMergeErrorReport) { return FileErrorReport(*fileMergeErrorReport); }
     return FileErrorReport(fileSectionReport);
 }
 
@@ -170,7 +169,7 @@ bool testGetFile(std::filesystem::path& filePath, FullConfig& fullConfig) {
 // }
 
 // ImageInfo::ImageInfo(const RawTOMLConfig& rawConfig) {
-//     auto rawImageInfo = getBaseTable_(rawConfig, "image_info", kDarkYellowColorCode);
+//     auto rawImageInfo = getBaseTable_(rawConfig, "image_info", kErrorListColorColorCode);
 
 //     if (isPresent_) {
 //         isValid_ &= getTOMLVal(rawImageInfo, "partition_size", partitionSize);

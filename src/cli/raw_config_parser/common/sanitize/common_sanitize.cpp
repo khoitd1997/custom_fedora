@@ -1,17 +1,17 @@
 #include "common_sanitize.hpp"
 
+#include "ascii_code.hpp"
 #include "utils.hpp"
 
 namespace hatter {
 std::string UnknownValueError::what() const {
-    auto undefinedStr = strJoin(undefinedVals);
-    return "unknown value(s): " + undefinedStr;
+    auto undefinedStr = formatStr(strJoin(undefinedVals), ascii_code::kErrorListColor);
+    return formatStr("unknown", ascii_code::kImportantWordColor) + " key(s): " + undefinedStr;
 }
 
 std::shared_ptr<UnknownValueError> checkUnknownValue(const toml::table& table) {
     if (!table.empty()) {
         auto error = std::make_shared<UnknownValueError>();
-        std::cout << "Found unknown error" << std::endl;
         for (auto const& [key, val] : table) { error->undefinedVals.push_back(key); }
         return error;
     }
