@@ -9,12 +9,22 @@
             "command": "./src/cli/build.sh",
             "presentation": {
                 "showReuseMessage": false,
-                "clear": true,
+                "clear": true
             },
             "group": {
                 "kind": "build",
-                "isDefault": true,
+                "isDefault": true
             }
+        },
+        {
+            "label": "rebuild",
+            "type": "shell",
+            "command": "./src/cli/build.sh --clean",
+            "presentation": {
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "problemMatcher": []
         }
     ]
 }

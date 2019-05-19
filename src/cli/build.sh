@@ -10,6 +10,16 @@ ln -sfv ~/hatter/example/child_path/child_setting_2.toml ~/hatter/src/cli/build/
 
 cd ${currDir}/build
 
+while (( "$#" )); do
+    case "$1" in
+        --clean)
+        ninja clean
+        shift 1
+        ;;
+    esac
+done
+
+
 # cmake .. && make && ./bin/tomlparser ./bin/example_settings.toml
 # scan-build cmake -G Ninja .. && scan-build ninja && ./bin/tomlparser ./bin/settings.toml
 cmake -G Ninja .. && ninja 

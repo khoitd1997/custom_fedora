@@ -10,7 +10,7 @@ find_program(CMAKE_CXX_CPPLINT NAMES cpplint)
 list(
   APPEND
     CMAKE_CXX_CPPLINT
-    "--filter=-legal/copyright, -whitespace/line_length, -whitespace/ending_newline, -build/c++11, -runtime/references"
+    "--filter=-legal/copyright, -whitespace/line_length, -whitespace/ending_newline, -build/c++11, -runtime/references, -whitespace/indent"
     "--quiet")
 
 find_program(CMAKE_CXX_CPPCHECK NAMES cppcheck)
