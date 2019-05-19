@@ -14,7 +14,7 @@
 // static const auto kCyanColorCode       = "\033[38;5;087m";
 // static const auto kBlueColorCode       = "\033[38;5;12m";
 // static const auto kYellowColorCode     = "\033[38;5;226m";
-// static const auto kDarkYellowColorCode = "\033[38;5;220m";
+// static const auto kErrorListColorColorCode = "\033[38;5;220m";
 // static const auto kDarkGreenColorCode  = "\033[38;5;34m";
 // static const auto kGreenColorCode      = "\033[38;5;154m";
 
@@ -169,7 +169,7 @@ bool testGetFile(std::filesystem::path& filePath, FullConfig& fullConfig) {
 // }
 
 // ImageInfo::ImageInfo(const RawTOMLConfig& rawConfig) {
-//     auto rawImageInfo = getBaseTable_(rawConfig, "image_info", kDarkYellowColorCode);
+//     auto rawImageInfo = getBaseTable_(rawConfig, "image_info", kErrorListColorColorCode);
 
 //     if (isPresent_) {
 //         isValid_ &= getTOMLVal(rawImageInfo, "partition_size", partitionSize);

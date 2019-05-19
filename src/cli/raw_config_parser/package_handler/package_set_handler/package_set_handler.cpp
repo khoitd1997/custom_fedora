@@ -17,13 +17,13 @@
 
 namespace hatter {
 namespace package_set_handler {
-// namespace {
-// // static const auto kSectionFormat = ascii_code::kCyan;
-// }  // namespace
+namespace {
+static const auto kSectionFormat = ascii_code::kCyan;
+}  // namespace
 
 SubSectionErrorReport parse(toml::table& rawConfig, PackageSet& pkgSet) {
     const auto            sectionName = std::string(magic_enum::enum_name(pkgSet.packageType));
-    SubSectionErrorReport errorReport(sectionName);
+    SubSectionErrorReport errorReport(sectionName, kSectionFormat);
 
     toml::table rawPkgSet;
     processError(errorReport, getTOMLVal(rawConfig, sectionName, rawPkgSet));

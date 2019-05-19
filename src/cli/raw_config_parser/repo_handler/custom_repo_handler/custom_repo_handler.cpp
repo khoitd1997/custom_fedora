@@ -1,17 +1,22 @@
 #include "custom_repo_handler.hpp"
 
+#include "ascii_code.hpp"
 #include "custom_repo_sanitize.hpp"
 #include "toml_utils.hpp"
 #include "utils.hpp"
 
 namespace hatter {
 namespace custom_repo_handler {
+namespace {
+const auto kSectionFormat = ascii_code::kMidGreen;
+}
+
 std::vector<SubSectionErrorReport> parse(std::vector<toml::table> rawCustomRepos,
                                          std::vector<CustomRepo>& customRepos) {
     std::vector<SubSectionErrorReport> errorReports;
 
     for (size_t i = 0; i < rawCustomRepos.size(); ++i) {
-        SubSectionErrorReport errorReport("custom_repo_" + std::to_string(i + 1));
+        SubSectionErrorReport errorReport("custom_repo_" + std::to_string(i + 1), kSectionFormat);
         auto&                 tempTable = rawCustomRepos.at(i);
         CustomRepo            repo;
 

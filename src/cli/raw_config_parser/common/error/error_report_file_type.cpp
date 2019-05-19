@@ -10,7 +10,7 @@ FileSectionErrorReport::FileSectionErrorReport(const std::string& fileName,
 std::vector<std::string> FileSectionErrorReport::what() const {
     std::string includeStr =
         (parentFileName.empty()) ? "" : "(included from " + parentFileName + ")";
-    const auto               fullFileName = formatStr(fileName, ascii_code::kBold) + includeStr;
+    const auto               fullFileName = formatStr(fileName, ascii_code::kItalic) + includeStr;
     std::vector<std::string> ret;
 
     for (const auto& errorReport : errorReports) {

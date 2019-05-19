@@ -54,7 +54,7 @@ PackageNotFoundError::PackageNotFoundError(const PackageSet::PackageType pkgType
     : pkgType(pkgType) {}
 std::string PackageNotFoundError::what() const {
     return "the following " + std::string(magic_enum::enum_name(pkgType)) +
-           "(s) can not be found: " + formatStr(strJoin(packages), ascii_code::kDarkYellow);
+           "(s) can not be found: " + formatStr(strJoin(packages), ascii_code::kErrorListColor);
 }
 
 std::shared_ptr<PackageNotFoundError> checkPackageNotFound(const PackageSet &pkgSet) {

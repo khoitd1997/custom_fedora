@@ -1,10 +1,11 @@
 #include "common_sanitize.hpp"
 
+#include "ascii_code.hpp"
 #include "utils.hpp"
 
 namespace hatter {
 std::string UnknownValueError::what() const {
-    auto undefinedStr = strJoin(undefinedVals);
+    auto undefinedStr = formatStr(strJoin(undefinedVals), ascii_code::kErrorListColor);
     return "unknown value(s): " + undefinedStr;
 }
 
