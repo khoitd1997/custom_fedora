@@ -45,7 +45,8 @@ add_compile_options(-Wall
                     -fsanitize=address
                     -fsanitize=undefined
                     -g
-                    -fdiagnostics-color=always)
+                    -fdiagnostics-color=always
+                    -fno-omit-frame-pointer)
 add_link_options(-fsanitize=address -fsanitize=undefined)
 
 add_subdirectory(logger)
