@@ -62,6 +62,7 @@ add_link_options(-fsanitize=address -fsanitize=undefined)
 
 add_subdirectory(utils)
 add_subdirectory(logger)
+add_subdirectory(formatter)
 add_subdirectory(thirdparty)
 
 add_subdirectory(config_builder)

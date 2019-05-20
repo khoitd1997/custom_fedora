@@ -3,7 +3,7 @@ add_library(raw_config_parser_misc_sanitize ${CppSources})
 target_link_libraries(raw_config_parser_misc_sanitize
                       PUBLIC toml11 raw_config_parser_common_error
                              raw_config_parser_common_type
-                      PRIVATE utils raw_config_parser_common_sanitize
+                      PRIVATE raw_config_parser_common_sanitize formatter
                               raw_config_parser_utils)
 
 target_include_directories(raw_config_parser_misc_sanitize
@@ -15,7 +15,6 @@ file(GLOB CppTestSources test/*.cpp)
 add_executable(raw_config_parser_misc_sanitize_test ${CppTestSources})
 target_link_libraries(raw_config_parser_misc_sanitize_test
                       PRIVATE raw_config_parser_misc_sanitize
-                              utils
                               raw_config_parser_common_sanitize
                               GTest::GTest
                               GTest::Main)

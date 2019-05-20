@@ -6,6 +6,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <fstream>
 #include <iostream>
 #include <regex>
 #include <string>
@@ -90,10 +91,6 @@ std::vector<std::string> strSplit(std::string str, const std::string& delimiter,
     ret.push_back(str);
 
     return ret;
-}
-
-std::string formatStr(const std::string& rawStr, const std::string& formatCode) {
-    return formatCode + rawStr + ascii_format::kReset;
 }
 
 int execCommand(const std::string& cmd, std::string& output, const size_t outputBufferSize) {

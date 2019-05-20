@@ -11,7 +11,6 @@
 
 #include "raw_config_parser_utils.hpp"
 #include "toml_utils.hpp"
-#include "utils.hpp"
 
 namespace hatter {
 namespace misc_handler {

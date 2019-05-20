@@ -24,7 +24,7 @@ struct SubSectionErrorReport : public SectionErrorReportBase {
     std::vector<std::shared_ptr<HatterParserError>> errors;
 
     SubSectionErrorReport(const std::string& sectionName,
-                          const std::string& sectionFormat = ascii_format::kErrorSubSectionFormat);
+                          const std::string& sectionFormat = formatter::kErrorSubSectionFormat);
     virtual ~SubSectionErrorReport();
 
     virtual explicit                 operator bool() const override;
@@ -35,7 +35,7 @@ struct TopSectionErrorReport : public SubSectionErrorReport {
     std::vector<SubSectionErrorReport> errorReports;
 
     TopSectionErrorReport(const std::string& sectionName,
-                          const std::string& sectionFormat = ascii_format::kErrorTopSectionFormat);
+                          const std::string& sectionFormat = formatter::kErrorTopSectionFormat);
 
     explicit                 operator bool() const override;
     std::vector<std::string> what() const override;

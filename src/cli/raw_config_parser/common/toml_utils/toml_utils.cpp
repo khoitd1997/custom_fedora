@@ -2,14 +2,10 @@
 
 #include <algorithm>
 
-#include "ascii_format.hpp"
+#include "formatter.hpp"
 #include "utils.hpp"
 
 namespace hatter {
-namespace {
-static const auto keyNameFormat = ascii_format::kImportantWordFormat;
-}  // namespace
-
 template <>
 std::string getTypeName<int>() {
     return "integer";
@@ -41,18 +37,18 @@ TOMLError::~TOMLError() {}
 TOMLTypeError::TOMLTypeError(const std::string& keyName, const std::string& correctType)
     : TOMLError{keyName}, correctType{correctType} {}
 std::string TOMLTypeError::what() const {
-    return formatStr(keyName, keyNameFormat) + " should have type " +
-           formatStr(correctType, ascii_format::kImportantWordFormat);
+    return formatter::formatImportantText(keyName) + " should have type " +
+           formatter::formatImportantText(correctType);
 }
 
 TOMLExistentError::TOMLExistentError(const std::string& keyName) : TOMLError{keyName} {}
 std::string TOMLExistentError::what() const {
-    return formatStr(keyName, keyNameFormat) + " needs to be defined";
+    return formatter::formatImportantText(keyName) + " needs to be defined";
 }
 
 TOMLEmptyStringError::TOMLEmptyStringError(const std::string& keyName) : TOMLError{keyName} {}
 std::string TOMLEmptyStringError::what() const {
-    return "key has " + formatStr("empty", ascii_format::kImportantWordFormat) + " value";
+    return "key has " + formatter::formatImportantText("empty") + " value";
 }
 
 template <>

@@ -67,7 +67,8 @@
         "set": "cpp",
         "unordered_set": "cpp",
         "filesystem": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "cinttypes": "cpp"
     },
     "C_Cpp.default.cppStandard": "c++17",
     "editor.formatOnSave": true

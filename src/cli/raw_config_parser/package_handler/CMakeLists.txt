@@ -6,6 +6,7 @@ target_link_libraries(raw_config_parser_package
                       PUBLIC toml11 raw_config_parser_common_error
                              raw_config_parser_common_type
                       PRIVATE utils
+                              formatter
                               magic_enum
                               raw_config_parser_package_set
                               raw_config_parser_common_sanitize

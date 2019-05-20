@@ -2,7 +2,6 @@
 
 #include "magic_enum.hpp"
 
-#include "ascii_format.hpp"
 #include "common_sanitize.hpp"
 #include "utils.hpp"
 

@@ -18,7 +18,7 @@ namespace hatter {
 namespace repo_handler {
 namespace {
 static const auto kSectionName   = "repo";
-static const auto kSectionFormat = ascii_format::kErrorTopSectionFormat;
+static const auto kSectionFormat = formatter::kErrorTopSectionFormat;
 }  // namespace
 
 TopSectionErrorReport parse(toml::table& rawConfig, RepoConfig& repoConfig) {

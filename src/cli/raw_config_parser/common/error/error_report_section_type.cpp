@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include "formatter.hpp"
 #include "utils.hpp"
 
 namespace hatter {
@@ -18,7 +19,7 @@ std::vector<std::string> SubSectionErrorReport::what() const {
     std::vector<std::string> ret;
 
     std::transform(errors.begin(), errors.end(), std::back_inserter(ret), [&](auto error) {
-        return formatStr(sectionName, sectionFormat) + kErrorDelimiter + error->what();
+        return formatter::formatText(sectionName, sectionFormat) + kErrorDelimiter + error->what();
     });
 
     return ret;
@@ -39,7 +40,8 @@ std::vector<std::string> TopSectionErrorReport::what() const {
 
         std::transform(
             subReportStr.begin(), subReportStr.end(), std::back_inserter(ret), [&](auto subError) {
-                return formatStr(sectionName, sectionFormat) + kErrorLocationDelimiter + subError;
+                return formatter::formatText(sectionName, sectionFormat) + kErrorLocationDelimiter +
+                       subError;
             });
     }
 
