@@ -76,7 +76,7 @@ something="fsdkl"
     ]
 
 [misc]
-language="en_US.UTF-8" # locale -a
+language="en_US.utf8" # locale -a
 sdlfkas="lasd"
 daksf="lasd"
 # keyboard="us" # localectl list-x11-keymap-layouts

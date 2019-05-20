@@ -40,7 +40,9 @@ TopSectionErrorReport parse(toml::table& rawConfig, MiscConfig& outConf) {
 SectionMergeErrorReport merge(MiscConfig& resultConf, const MiscConfig& targetConf) {
     SectionMergeErrorReport errorReport(kSectionName, kSectionFormat);
 
+    mergeAndCheckStrConflict(errorReport, "language", resultConf.language, targetConf.language);
     mergeAndCheckStrConflict(errorReport, "keyboard", resultConf.keyboard, targetConf.keyboard);
+    mergeAndCheckStrConflict(errorReport, "timezone", resultConf.timezone, targetConf.timezone);
 
     return errorReport;
 }
