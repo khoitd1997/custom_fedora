@@ -1,6 +1,8 @@
 #include "custom_repo_sanitize.hpp"
 
+#include "ascii_code.hpp"
 #include "common_sanitize.hpp"
+#include "utils.hpp"
 
 namespace hatter {
 namespace custom_repo_handler {
@@ -15,7 +17,8 @@ std::shared_ptr<RepoNoLinkError> checkRepoNoLink(const CustomRepo& repo) {
 }
 
 std::string RepoNoGPGKeyError::what() const {
-    return "gpgkey should be defined when gpgcheck is true";
+    return formatStr("gpgkey", ascii_code::kImportantWordFormat) + " should be defined when " +
+           formatStr("gpgcheck", ascii_code::kImportantWordFormat) + " is true";
 }
 std::shared_ptr<RepoNoGPGKeyError> checkRepoNoGPGKey(const CustomRepo& repo) {
     if (repo.gpgcheck && repo.gpgkey.empty()) { return std::make_shared<RepoNoGPGKeyError>(); }

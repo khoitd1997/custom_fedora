@@ -20,7 +20,7 @@ namespace hatter {
 namespace package_handler {
 namespace {
 static const auto kSectionName   = "package";
-static const auto kSectionFormat = ascii_code::kLightCyan;
+static const auto kSectionFormat = ascii_code::kErrorLocationSecondLevelFormat;
 }  // namespace
 
 TopSectionErrorReport parse(toml::table& rawConfig, PackageConfig& pkgConfig) {

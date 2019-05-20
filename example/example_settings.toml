@@ -38,13 +38,13 @@ sklfjlsd="flasd"
     gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"
 
     [[repo.custom_repos]]
-    # name="test"
-    name=""
+    name="test"
+    # name=""
     display_name="RPM Fusion for Fedora $releasever - Free" 
     metalink="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-$releasever&arch=$basearch"
     baseurl="http://download1.rpmfusion.org/free/fedora/releases/$releasever/Everything/$basearch/os/"
     gpgcheck=true
-    gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"
+    # gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"
 
 # define multiple types of packages to be included
 [package]
@@ -52,11 +52,12 @@ something="fsdkl"
     [package.rpm]
     install=[
         "moreutils",
-        "dklassa",
+        # "dklassa",
         "jq",
         "ripgrep",
         "gnome-terminal"
     ]
+    # install=2
 
     remove=[
         "gnome-calculator"
@@ -77,6 +78,7 @@ something="fsdkl"
 [misc]
 language="en_US.UTF-8" # locale -a
 sdlfkas="lasd"
+daksf="lasd"
 # keyboard="us" # localectl list-x11-keymap-layouts
 keyboard="fdsasdfasdlkfasdlsdajls" # localectl list-x11-keymap-layouts
 timezone="US/Pacific" # cd /usr/share/zoneinfo/posix && find * -type f -or -type l

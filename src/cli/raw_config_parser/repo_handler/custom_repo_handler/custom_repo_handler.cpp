@@ -8,7 +8,7 @@
 namespace hatter {
 namespace custom_repo_handler {
 namespace {
-const auto kSectionFormat = ascii_code::kMidGreen;
+const auto kSectionFormat = ascii_code::kErrorLocationThirdLevelFormat;
 }  // namespace
 
 std::vector<SubSectionErrorReport> parse(std::vector<toml::table> rawCustomRepos,

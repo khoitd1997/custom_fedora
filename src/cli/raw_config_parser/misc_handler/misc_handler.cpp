@@ -18,7 +18,7 @@ namespace hatter {
 namespace misc_handler {
 namespace {
 static const auto kSectionName   = "misc";
-static const auto kSectionFormat = ascii_code::kLightMidGreen;
+static const auto kSectionFormat = ascii_code::kErrorLocationSecondLevelFormat;
 }  // namespace
 
 TopSectionErrorReport parse(toml::table& rawConfig, MiscConfig& outConf) {

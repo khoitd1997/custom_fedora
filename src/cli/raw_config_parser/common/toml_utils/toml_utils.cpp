@@ -52,8 +52,7 @@ std::string TOMLExistentError::what() const {
 
 TOMLEmptyStringError::TOMLEmptyStringError(const std::string& keyName) : TOMLError{keyName} {}
 std::string TOMLEmptyStringError::what() const {
-    return formatStr(keyName, keyNameFormat) + " has " +
-           formatStr("empty", ascii_code::kImportantWordFormat) + " value";
+    return "key has " + formatStr("empty", ascii_code::kImportantWordFormat) + " value";
 }
 
 template <>

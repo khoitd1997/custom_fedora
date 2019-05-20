@@ -11,7 +11,6 @@
 
 namespace hatter {
 namespace {
-
 class PrettyPrinter {
    private:
     struct ErrorMessage {
@@ -30,7 +29,7 @@ class PrettyPrinter {
 
     int       maxLeft_         = 0;
     int       maxReduceLength_ = 0;
-    const int kGapSize         = 3;
+    const int kGapSize         = 4;
 
    public:
     void addError(std::string& fullMessage) {
@@ -73,7 +72,9 @@ FileSectionErrorReport::FileSectionErrorReport(const std::string& fileName,
 std::vector<std::string> FileSectionErrorReport::what() const {
     std::string includeStr =
         (parentFileName.empty()) ? "" : "(included from " + parentFileName + ")";
-    const auto fullFileName = formatStr(fileName, ascii_code::kItalic) + includeStr;
+    // const auto fullFileName = formatStr(fileName, ascii_code::kItalic) + includeStr;
+    const auto fullFileName =
+        formatStr(fileName, ascii_code::kErrorLocationFirstLevelFormat) + includeStr;
 
     PrettyPrinter printer;
     for (const auto& errorReport : errorReports) {

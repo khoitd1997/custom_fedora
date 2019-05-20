@@ -18,7 +18,7 @@
 namespace hatter {
 namespace package_set_handler {
 namespace {
-static const auto kSectionFormat = ascii_code::kCyan;
+static const auto kSectionFormat = ascii_code::kErrorLocationThirdLevelFormat;
 }  // namespace
 
 SubSectionErrorReport parse(toml::table& rawConfig, PackageSet& pkgSet) {

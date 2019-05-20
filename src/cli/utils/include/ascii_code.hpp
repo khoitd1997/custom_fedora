@@ -29,7 +29,12 @@ static const std::string kDarkYellow = "\033[38;5;220m";
 static const std::string kGrey = "\033[38;5;246m";
 
 // color code for common purposes
-static const auto kErrorListFormat     = kDarkYellow;
-static const auto kImportantWordFormat = "\033[38;5;036m";
+static const auto kErrorListFormat = kDarkYellow;
+// static const auto kImportantWordFormat = "\033[38;5;036m";
+static const auto kImportantWordFormat = "\033[38;5;78m";
+
+static const auto kErrorLocationFirstLevelFormat  = "\033[38;5;173m";
+static const auto kErrorLocationSecondLevelFormat = "\033[38;5;069m";
+static const auto kErrorLocationThirdLevelFormat  = "\033[38;5;184m";
 }  // namespace ascii_code
 }  // namespace hatter
