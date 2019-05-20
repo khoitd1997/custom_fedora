@@ -10,14 +10,34 @@ Maybe /libexec for all other files and just the main one in /usr/bin
 
 Support classic kickstart file but with additional settings through the TOML file like caching.
 
-## Dependency list
+## Building from Source
+
+### Dependency
+
+The project uses C++17 features so to compile it, the newer gcc/clang are needed. The project uses catch for unit testing as well as cppcheck and cpplint for extra linting, the default cmake won't turn these options on.
 
 ```shell
 # library
-sudo dnf install spdlog
+sudo dnf install spdlog libasan
 
-# for build tool
-sudo dnf install cppcheck ninja-build
+# for bare minimum build tool
+sudo dnf install ninja-build cmake gcc
+
+# for extra stuffs
+sudo dnf install cppcheck catch-devel
+pip3 install cpplint
+```
+
+### Build
+
+```shell
+# assume in source directory
+mkdir -p build
+cd build
+cmake -G Ninja .. && ninja # bare minimum build
+cmake -G Ninja -DUSE_CPPLINT=ON -DUSE_CPPCHECK=ON .. && ninja  # full build with unit test and linting
+
+cd bin
 ```
 
 ## Build Stages
