@@ -7,8 +7,6 @@
 
 namespace hatter {
 namespace misc_handler {
-int targetFunc(int num) { return num + 5; }
-
 TEST(MiscSanitizeTest, UnknownValueTest) {
     MiscConfig  config;
     toml::table table;

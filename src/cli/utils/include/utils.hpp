@@ -32,6 +32,11 @@ bool inVector(const T& target, const std::vector<T>& list) {
 }
 
 template <typename T>
+void sortVector(std::vector<T>& list) {
+    std::sort(list.begin(), list.end());
+}
+
+template <typename T>
 void appendVector(std::vector<T>& resultVec, const std::vector<T>& targetVec) {
     resultVec.insert(resultVec.end(), targetVec.begin(), targetVec.end());
 }
