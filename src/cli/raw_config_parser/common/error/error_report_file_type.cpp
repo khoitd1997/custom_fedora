@@ -6,7 +6,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "ascii_code.hpp"
+#include "ascii_format.hpp"
 #include "utils.hpp"
 
 namespace hatter {
@@ -71,8 +71,8 @@ FileSectionErrorReport::FileSectionErrorReport(const std::string& fileName,
     : fileName{fileName}, parentFileName{parentFileName} {}
 std::vector<std::string> FileSectionErrorReport::what() const {
     std::string includeStr   = (parentFileName.empty()) ? "" : "(" + parentFileName + ")";
-    const auto  fullFileName = formatStr(fileName, ascii_code::kErrorFileLocationFormat) +
-                              formatStr(includeStr, ascii_code::kFaint);
+    const auto  fullFileName = formatStr(fileName, ascii_format::kErrorFileLocationFormat) +
+                              formatStr(includeStr, ascii_format::kFaint);
 
     PrettyPrinter printer;
     for (const auto& errorReport : errorReports) {
@@ -95,9 +95,9 @@ std::vector<std::string> FileMergeErrorReport::what() const {
 
     for (const auto& errorReport : errorReports) {
         for (const auto& error : errorReport.what()) {
-            auto fullMessage = formatStr(firstFileName, ascii_code::kErrorFileLocationFormat) +
+            auto fullMessage = formatStr(firstFileName, ascii_format::kErrorFileLocationFormat) +
                                "<=>" +
-                               formatStr(secondFileName, ascii_code::kErrorFileLocationFormat) +
+                               formatStr(secondFileName, ascii_format::kErrorFileLocationFormat) +
                                kErrorLocationDelimiter + error;
 
             printer.addError(fullMessage);

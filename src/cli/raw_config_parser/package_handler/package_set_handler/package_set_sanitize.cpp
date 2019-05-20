@@ -4,7 +4,7 @@
 
 #include "magic_enum.hpp"
 
-#include "ascii_code.hpp"
+#include "ascii_format.hpp"
 #include "common_sanitize.hpp"
 #include "raw_config_parser_utils.hpp"
 #include "utils.hpp"
@@ -21,8 +21,8 @@ PackageNotFoundError::PackageNotFoundError(const PackageSet::PackageType pkgType
 std::string PackageNotFoundError::what() const {
     return "the following " +
            formatStr(std::string(magic_enum::enum_name(pkgType)),
-                     ascii_code::kImportantWordFormat) +
-           "(s) can not be found: " + formatStr(strJoin(packages), ascii_code::kErrorListFormat);
+                     ascii_format::kImportantWordFormat) +
+           "(s) can not be found: " + formatStr(strJoin(packages), ascii_format::kErrorListFormat);
 }
 
 std::shared_ptr<PackageNotFoundError> checkPackageNotFound(const PackageSet &pkgSet) {

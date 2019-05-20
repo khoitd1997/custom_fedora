@@ -63,7 +63,6 @@ bool getFile(const std::filesystem::path&  filePath,
         failed |= getFile(childPath, currFileName, childConf, errorReports);
 
         if (!failed) {
-            std::cout << "MERGING FILE" << std::endl;
             FileMergeErrorReport fileMergeErrorReport(currFileName, childFileName);
 
             processError(fileMergeErrorReport,
@@ -75,7 +74,6 @@ bool getFile(const std::filesystem::path&  filePath,
             processError(FileErrorReport(fileMergeErrorReport), errorReports);
             failed = failed || fileMergeErrorReport;
         } else {
-            std::cout << "ERROR IN FILE" << std::endl;
         }
     }
 

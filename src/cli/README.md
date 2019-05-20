@@ -14,7 +14,7 @@ Support classic kickstart file but with additional settings through the TOML fil
 
 ### Dependency
 
-The project uses C++17 features so to compile it, the newer gcc/clang are needed. The project uses catch for unit testing as well as cppcheck and cpplint for extra linting, the default cmake won't turn these options on.
+The project uses C++17 features so to compile it, the newer gcc/clang are needed. The project uses gtest for unit testing as well as cppcheck and cpplint for extra linting, the default cmake won't turn these options on.
 
 ```shell
 # library
@@ -24,7 +24,7 @@ sudo dnf install spdlog libasan
 sudo dnf install ninja-build cmake gcc
 
 # for extra stuffs
-sudo dnf install cppcheck catch-devel
+sudo dnf install cppcheck catch-devel gtest-devel gtest
 pip3 install cpplint
 ```
 

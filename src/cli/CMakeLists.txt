@@ -5,6 +5,11 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+option(RUN_TEST "Run unit test as part of build" OFF)
+if(RUN_TEST)
+  enable_testing()
+endif()
+
 option(USE_CPPLINT "Run cpplint on the source files" OFF)
 if(USE_CPPLINT)
   find_program(CMAKE_CXX_CPPLINT NAMES cpplint)
@@ -55,12 +60,12 @@ add_compile_options(-Wall
                     -fno-omit-frame-pointer)
 add_link_options(-fsanitize=address -fsanitize=undefined)
 
+add_subdirectory(utils)
 add_subdirectory(logger)
 add_subdirectory(thirdparty)
 
 add_subdirectory(config_builder)
 add_subdirectory(raw_config_parser)
-add_subdirectory(utils)
 
 add_executable(tomlparser toml_parser.cpp ${PROJECT_SOURCES})
 target_link_libraries(tomlparser

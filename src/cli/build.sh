@@ -21,8 +21,12 @@ ln -sfv ~/hatter/example/child_path/child_setting_2.toml ~/hatter/src/cli/build/
 
 # cmake .. && make && ./bin/tomlparser ./bin/example_settings.toml
 # scan-build cmake -G Ninja .. && scan-build ninja && ./bin/tomlparser ./bin/settings.toml
+set -e
 cmake -G Ninja .. && ninja 
-cmake -G Ninja -DUSE_CPPLINT=ON -DUSE_CPPCHECK=ON .. && ninja 
+cmake -G Ninja -DUSE_CPPLINT=ON -DUSE_CPPCHECK=ON -DRUN_TEST=ON .. && ninja 
+
+GTEST_BREAK_ON_FAILURE=1 GTEST_COLOR=1 ctest --verbose
+
 cd bin
 ./tomlparser example_settings.toml
 # cmake -G Ninja .. && ninja && ./bin/tomlparser ./bin/random.toml

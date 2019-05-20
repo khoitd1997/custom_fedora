@@ -1,6 +1,6 @@
 #include "repo_sanitize.hpp"
 
-#include "ascii_code.hpp"
+#include "ascii_format.hpp"
 #include "common_sanitize.hpp"
 #include "logger.hpp"
 #include "utils.hpp"
@@ -12,9 +12,9 @@ const std::vector<std::string> supportedStandardRepos = {"google-chrome", "nvidi
 }
 
 std::string StandardRepoNotSupportedError::what() const {
-    const auto repoListStr = formatStr(strJoin(repos), ascii_code::kDarkYellow);
+    const auto repoListStr = formatStr(strJoin(repos), ascii_format::kDarkYellow);
 
-    return "the following " + formatStr("standard", ascii_code::kImportantWordFormat) +
+    return "the following " + formatStr("standard", ascii_format::kImportantWordFormat) +
            " repo(s) are not supported: " + repoListStr;
 }
 std::shared_ptr<StandardRepoNotSupportedError> checkStandardRepo(const RepoConfig& repoConf) {
@@ -31,9 +31,9 @@ std::shared_ptr<StandardRepoNotSupportedError> checkStandardRepo(const RepoConfi
 }
 
 std::string CoprRepoNotFoundError::what() const {
-    const auto repoListStr = formatStr(strJoin(repos), ascii_code::kDarkYellow);
+    const auto repoListStr = formatStr(strJoin(repos), ascii_format::kDarkYellow);
 
-    return "the following " + formatStr("copr", ascii_code::kImportantWordFormat) +
+    return "the following " + formatStr("copr", ascii_format::kImportantWordFormat) +
            " repo(s) can't be found: " + repoListStr;
 }
 std::shared_ptr<CoprRepoNotFoundError> checkCoprRepo(const RepoConfig& repoConf) {

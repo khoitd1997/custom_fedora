@@ -1,12 +1,12 @@
 #include "common_sanitize.hpp"
 
-#include "ascii_code.hpp"
+#include "ascii_format.hpp"
 #include "utils.hpp"
 
 namespace hatter {
 std::string UnknownValueError::what() const {
-    const auto undefinedStr = formatStr(strJoin(undefinedVals), ascii_code::kErrorListFormat);
-    return formatStr("unknown", ascii_code::kImportantWordFormat) + " key(s): " + undefinedStr;
+    const auto undefinedStr = formatStr(strJoin(undefinedVals), ascii_format::kErrorListFormat);
+    return formatStr("unknown", ascii_format::kImportantWordFormat) + " key(s): " + undefinedStr;
 }
 std::shared_ptr<UnknownValueError> checkUnknownValue(const toml::table& table) {
     if (!table.empty()) {
@@ -26,8 +26,8 @@ InvalidValueError::InvalidValueError(const std::string& typeName,
     invalidVals.push_back(invalidVal);
 }
 std::string InvalidValueError::what() const {
-    const auto invalidStr = formatStr(strJoin(invalidVals), ascii_code::kErrorListFormat);
-    return "invalid " + formatStr(typeName, ascii_code::kImportantWordFormat) +
+    const auto invalidStr = formatStr(strJoin(invalidVals), ascii_format::kErrorListFormat);
+    return "invalid " + formatStr(typeName, ascii_format::kImportantWordFormat) +
            "(s): " + invalidStr + ". " + extraMessage;
 }
 std::shared_ptr<InvalidValueError> checkInvalidValue(const std::string&              typeName,

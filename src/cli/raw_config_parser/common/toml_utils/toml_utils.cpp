@@ -2,12 +2,12 @@
 
 #include <algorithm>
 
-#include "ascii_code.hpp"
+#include "ascii_format.hpp"
 #include "utils.hpp"
 
 namespace hatter {
 namespace {
-static const auto keyNameFormat = ascii_code::kImportantWordFormat;
+static const auto keyNameFormat = ascii_format::kImportantWordFormat;
 }  // namespace
 
 template <>
@@ -42,7 +42,7 @@ TOMLTypeError::TOMLTypeError(const std::string& keyName, const std::string& corr
     : TOMLError{keyName}, correctType{correctType} {}
 std::string TOMLTypeError::what() const {
     return formatStr(keyName, keyNameFormat) + " should have type " +
-           formatStr(correctType, ascii_code::kImportantWordFormat);
+           formatStr(correctType, ascii_format::kImportantWordFormat);
 }
 
 TOMLExistentError::TOMLExistentError(const std::string& keyName) : TOMLError{keyName} {}
@@ -52,7 +52,7 @@ std::string TOMLExistentError::what() const {
 
 TOMLEmptyStringError::TOMLEmptyStringError(const std::string& keyName) : TOMLError{keyName} {}
 std::string TOMLEmptyStringError::what() const {
-    return "key has " + formatStr("empty", ascii_code::kImportantWordFormat) + " value";
+    return "key has " + formatStr("empty", ascii_format::kImportantWordFormat) + " value";
 }
 
 template <>

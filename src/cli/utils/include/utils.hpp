@@ -8,7 +8,7 @@
 
 #include "toml11/toml.hpp"
 
-#include "ascii_code.hpp"
+#include "ascii_format.hpp"
 
 namespace hatter {
 void writeFile(const std::string& s, const std::string& path);

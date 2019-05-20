@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "ascii_code.hpp"
+#include "ascii_format.hpp"
 #include "error_report_base_type.hpp"
 #include "error_type.hpp"
 
@@ -24,7 +24,7 @@ struct SubSectionErrorReport : public SectionErrorReportBase {
     std::vector<std::shared_ptr<HatterParserError>> errors;
 
     SubSectionErrorReport(const std::string& sectionName,
-                          const std::string& sectionFormat = ascii_code::kErrorSubSectionFormat);
+                          const std::string& sectionFormat = ascii_format::kErrorSubSectionFormat);
     virtual ~SubSectionErrorReport();
 
     virtual explicit                 operator bool() const override;
@@ -35,7 +35,7 @@ struct TopSectionErrorReport : public SubSectionErrorReport {
     std::vector<SubSectionErrorReport> errorReports;
 
     TopSectionErrorReport(const std::string& sectionName,
-                          const std::string& sectionFormat = ascii_code::kErrorTopSectionFormat);
+                          const std::string& sectionFormat = ascii_format::kErrorTopSectionFormat);
 
     explicit                 operator bool() const override;
     std::vector<std::string> what() const override;
