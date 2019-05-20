@@ -7,5 +7,5 @@ static const auto kDefaultKickstartTag = "latest";
 
 static const auto kDefaultEnableCustomCache = true;
 
-static const auto kDefaultLanguage = "en_US.UTF-8";
+static const auto kDefaultLanguage = "en_US.utf8";
 }  // namespace hatter

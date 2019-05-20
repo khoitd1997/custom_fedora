@@ -105,19 +105,17 @@ struct PackageConfig {
     PackageSet rpmGroup = PackageSet(PackageSet::PackageType::rpm_group);
 };
 
-// struct MiscConfig  {
-//     std::string language = kDefaultLanguage;
-//     std::string keyboard;
-//     std::string timezone;
-
-//     explicit MiscConfig(const RawTOMLConfig& rawConfig);
-// };
+struct MiscConfig {
+    std::string language = kDefaultLanguage;
+    std::string keyboard;
+    std::string timezone;
+};
 
 struct FullConfig {
     RepoConfig    repoConfig;
     PackageConfig packageConfig;
+    MiscConfig    miscConfig;
 };
-
 }  // namespace hatter
 
 namespace std {

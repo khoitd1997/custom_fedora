@@ -1,7 +1,9 @@
 #include "error_report_file_type.hpp"
 
 #include <algorithm>
+#include <cctype>
 #include <iomanip>
+#include <iostream>
 #include <sstream>
 
 #include "ascii_code.hpp"
@@ -11,28 +13,52 @@ namespace hatter {
 namespace {
 class PrettyPrinter {
    private:
-    std::vector<std::string> errorLocations_;
-    std::vector<std::string> errorMessages_;
-    size_t                   maxLeft_ = 0;
-    const size_t             kGapSize = 3;
+    struct ErrorMessage {
+        std::string errorLocation;
+        std::string errorDetail;
+        int         reduceLength;
+
+        ErrorMessage(const std::string& errorLocation, const std::string& errorDetail)
+            : errorLocation{errorLocation},
+              errorDetail{errorDetail},
+              reduceLength{static_cast<int>(
+                  3 * (std::count(errorLocation.begin(), errorLocation.end(), '\033') - 1))} {}
+    };
+
+    std::vector<ErrorMessage> errorMessages;
+
+    int       maxLeft_         = 0;
+    int       maxReduceLength_ = 0;
+    const int kGapSize         = 4;
 
    public:
     void addError(std::string& fullMessage) {
         const auto errorPart = strSplit(fullMessage, kErrorDelimiter, 1);
 
-        maxLeft_ = std::max(maxLeft_, errorPart.at(0).length());
-        errorLocations_.push_back(errorPart.at(0));
+        errorMessages.push_back(ErrorMessage(errorPart.at(0), errorPart.at(1)));
+        const auto currMessage = errorMessages.back();
 
-        errorMessages_.push_back(errorPart.at(1));
+        maxLeft_         = std::max(maxLeft_, static_cast<int>(currMessage.errorLocation.length()));
+        maxReduceLength_ = std::max(maxReduceLength_, currMessage.reduceLength);
     }
 
     std::vector<std::string> makePrettyErrors() {
         std::vector<std::string> ret;
-        for (size_t i = 0; i < errorLocations_.size(); ++i) {
+
+        std::sort(errorMessages.begin(), errorMessages.end(), [](ErrorMessage e1, ErrorMessage e2) {
+            return e1.errorLocation.length() > e2.errorLocation.length();
+        });
+
+        for (const auto& errorMessage : errorMessages) {
+            int width = 0;
+            if (errorMessage.reduceLength != maxReduceLength_) {
+                width = maxLeft_ + kGapSize - maxReduceLength_;
+            } else {
+                width = maxLeft_ + kGapSize;
+            }
             std::stringstream buffer;
-            buffer << std::left << std::setfill(' ')
-                   << std::setw(static_cast<int>(maxLeft_ + kGapSize)) << errorLocations_.at(i)
-                   << errorMessages_.at(i);
+            buffer << std::left << std::setw(width) << errorMessage.errorLocation
+                   << errorMessage.errorDetail;
             ret.push_back(buffer.str());
         }
 
@@ -46,10 +72,11 @@ FileSectionErrorReport::FileSectionErrorReport(const std::string& fileName,
 std::vector<std::string> FileSectionErrorReport::what() const {
     std::string includeStr =
         (parentFileName.empty()) ? "" : "(included from " + parentFileName + ")";
-    const auto fullFileName = formatStr(fileName, ascii_code::kItalic) + includeStr;
+    // const auto fullFileName = formatStr(fileName, ascii_code::kItalic) + includeStr;
+    const auto fullFileName =
+        formatStr(fileName, ascii_code::kErrorLocationFirstLevelFormat) + includeStr;
 
     PrettyPrinter printer;
-
     for (const auto& errorReport : errorReports) {
         for (const auto& error : errorReport.what()) {
             auto fullMessage = fullFileName + kErrorLocationDelimiter + error;

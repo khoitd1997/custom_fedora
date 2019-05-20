@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include <iostream>
+
 #include "toml11/toml.hpp"
 
 #include "package_sanitize.hpp"
@@ -18,7 +20,7 @@ namespace hatter {
 namespace package_handler {
 namespace {
 static const auto kSectionName   = "package";
-static const auto kSectionFormat = ascii_code::kLightCyan;
+static const auto kSectionFormat = ascii_code::kErrorLocationSecondLevelFormat;
 }  // namespace
 
 TopSectionErrorReport parse(toml::table& rawConfig, PackageConfig& pkgConfig) {

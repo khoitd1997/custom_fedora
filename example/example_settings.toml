@@ -25,11 +25,12 @@ enable_custom_cache=true
 [repo]
 standard_repos=["google-chrome", "nvidia", "vscode"]
 copr_repos=["khoitd1997/toml11"]
+sklfjlsd="flasd"
 
     # start defining custom repos here
     [[repo.custom_repos]]
-    name="2"
-    dkafjsdl=["google-chrome", "nvidia", "vscode"]
+    name="sdk"
+    # dkafjsdl=["google-chrome", "nvidia", "vscode"]
     display_name="RPM Fusion for Fedora $releasever - Free" 
     metalink="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-$releasever&arch=$basearch"
     baseurl="http://download1.rpmfusion.org/free/fedora/releases/$releasever/Everything/$basearch/os/"
@@ -38,22 +39,25 @@ copr_repos=["khoitd1997/toml11"]
 
     [[repo.custom_repos]]
     name="test"
+    # name=""
     display_name="RPM Fusion for Fedora $releasever - Free" 
     metalink="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-$releasever&arch=$basearch"
     baseurl="http://download1.rpmfusion.org/free/fedora/releases/$releasever/Everything/$basearch/os/"
     gpgcheck=true
-    gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"
+    # gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"
 
 # define multiple types of packages to be included
 [package]
+something="fsdkl"
     [package.rpm]
     install=[
-        "fklasf",
         "moreutils",
+        # "dklassa",
         "jq",
         "ripgrep",
         "gnome-terminal"
     ]
+    # install=2
 
     remove=[
         "gnome-calculator"
@@ -63,6 +67,7 @@ copr_repos=["khoitd1997/toml11"]
     [package.rpm_group]
     install=[
         "multimedia",
+        # "fkasjklfjasdklfjasdklfjaklsdjfadkljsd",
         "sound-and-video"
     ]
 
@@ -71,6 +76,9 @@ copr_repos=["khoitd1997/toml11"]
     ]
 
 [misc]
-language="en_US.UTF-8" # locale -a
-keyboard="us" # localectl list-x11-keymap-layouts
-timezone="US/Pacific" # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+language="en_US.utf8" # locale -a
+sdlfkas="lasd"
+daksf="lasd"
+# keyboard="us" # localectl list-x11-keymap-layouts
+keyboard="fdsasdfasdlkfasdlsdajls" # localectl list-x11-keymap-layouts
+timezone="US/Pacific" # cd /usr/share/zoneinfo/posix && find * -type f -or -type l

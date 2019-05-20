@@ -1,5 +1,7 @@
 #include "logger.hpp"
 
+#include <iostream>
+
 #define SPDLOG_LEVEL_NAMES \
     { "[trace]", "[debug]", "[info]", "[warning]", "[error]", "[critical]", "[]" }
 
