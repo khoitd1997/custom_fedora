@@ -1,7 +1,5 @@
 #include "logger.hpp"
 
-#include <iostream>
-
 #define SPDLOG_LEVEL_NAMES \
     { "[trace]", "[debug]", "[info]", "[warning]", "[error]", "[critical]", "[]" }
 
@@ -9,6 +7,8 @@
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
+
+#include <iostream>
 
 namespace hatter {
 namespace logger {

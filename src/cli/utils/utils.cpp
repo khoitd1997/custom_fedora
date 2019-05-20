@@ -58,12 +58,16 @@ std::string toUpper(std::string_view str) {
     return ret;
 }
 
-std::string strJoin(const std::vector<std::string>& v, const std::string& delimiter) {
+std::string strJoin(const std::vector<std::string>& strings, const std::string& delimiter) {
     std::string out;
-    if (auto i = v.begin(), e = v.end(); i != e) {
-        out += *i++;
-        for (; i != e; ++i) out.append(delimiter).append(*i);
+    size_t      count = 0;
+
+    for (const auto& str : strings) {
+        out += str;
+        if (count < strings.size() - 1) { out += delimiter; }
+        ++count;
     }
+
     return out;
 }
 
