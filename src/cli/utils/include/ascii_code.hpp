@@ -28,8 +28,8 @@ static const std::string kDarkYellow = "\033[38;5;220m";
 
 static const std::string kGrey = "\033[38;5;246m";
 
-// color code attached to meaning
-static const auto kErrorListColor     = kDarkYellow;
-static const auto kImportantWordColor = "\033[38;5;036m";
+// color code for common purposes
+static const auto kErrorListFormat     = kDarkYellow;
+static const auto kImportantWordFormat = "\033[38;5;036m";
 }  // namespace ascii_code
 }  // namespace hatter

@@ -4,13 +4,22 @@
 
 namespace hatter {
 namespace {
-std::string buildRipGrepCommand(const std::string &searchTarget,
-                                const std::string &targetFilePath,
-                                const bool         noRegex) {
+std::string buildRipgrepSearchFileCommand(const std::string &searchTarget,
+                                          const std::string &targetFilePath,
+                                          const bool         noRegex) {
     const std::string regexFlag     = (noRegex) ? " " : " -F ";
     const std::string baseRgCommand = "rg " + regexFlag + " -c ";
 
     return baseRgCommand + searchTarget + " " + targetFilePath;
+}
+
+std::string buildRipgrepSearchOutputCommand(const std::string &searchTarget,
+                                            const std::string &cmd,
+                                            const bool         noRegex) {
+    const std::string regexFlag     = (noRegex) ? " " : " -F ";
+    const std::string baseRgCommand = "rg " + regexFlag + " -c ";
+
+    return cmd + " | " + baseRgCommand + searchTarget;
 }
 }  // namespace
 
@@ -18,8 +27,8 @@ int ripgrepSearchFile(const std::string &searchTarget,
                       const std::string &targetFilePath,
                       const bool         noRegex) {
     std::string output;
-    auto        rgCommand = buildRipGrepCommand(searchTarget, targetFilePath, noRegex);
-    auto        errCode   = execCommand(rgCommand, output);
+    const auto  rgCommand = buildRipgrepSearchFileCommand(searchTarget, targetFilePath, noRegex);
+    const auto  errCode   = execCommand(rgCommand, output);
 
     if (errCode == 0) {
         return std::stoi(output);
@@ -29,5 +38,38 @@ int ripgrepSearchFile(const std::string &searchTarget,
         throw std::runtime_error("rg failed with message: " + output);
         return 0;
     }
+}
+
+int ripgrepSearchCmdOutput(const std::string &searchTarget,
+                           const std::string &cmd,
+                           std::string &      errorOutput,
+                           const bool         noRegex) {
+    std::string tempOutput;
+    const auto  rgCommand = buildRipgrepSearchOutputCommand(searchTarget, cmd, noRegex);
+    const auto  errCode   = execCommand(rgCommand, tempOutput);
+
+    if (errCode == 0) {
+        return std::stoi(tempOutput);
+    } else if (errCode == 1 && tempOutput.empty()) {
+        return 0;
+    }
+
+    errorOutput = tempOutput;
+    return 0;
+}
+
+void mergeAndCheckStrConflict(SectionMergeErrorReport &errorReport,
+                              const std::string &      keyName,
+                              std::string &            dest,
+                              const std::string &      target) {
+    if (target.empty()) { return; }
+    if (dest.empty()) {
+        dest = target;
+        return;
+    }
+    if (target != dest) {
+        processError(errorReport, SectionMergeConflictError(keyName, dest, target));
+    }
+    return;
 }
 }  // namespace hatter

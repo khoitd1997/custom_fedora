@@ -6,6 +6,7 @@
 #include "logger.hpp"
 
 #include "error_report_file_type.hpp"
+#include "misc_handler.hpp"
 #include "package_handler.hpp"
 #include "repo_handler.hpp"
 #include "toml_utils.hpp"
@@ -14,7 +15,7 @@
 // static const auto kCyanColorCode       = "\033[38;5;087m";
 // static const auto kBlueColorCode       = "\033[38;5;12m";
 // static const auto kYellowColorCode     = "\033[38;5;226m";
-// static const auto kErrorListColorColorCode = "\033[38;5;220m";
+// static const auto kErrorListFormatColorCode = "\033[38;5;220m";
 // static const auto kDarkGreenColorCode  = "\033[38;5;34m";
 // static const auto kGreenColorCode      = "\033[38;5;154m";
 
@@ -37,6 +38,7 @@ FileErrorReport getFile(const std::filesystem::path& filePath,
 
     processError(fileSectionReport, repo_handler::parse(rawConfig, fullConfig.repoConfig));
     processError(fileSectionReport, package_handler::parse(rawConfig, fullConfig.packageConfig));
+    processError(fileSectionReport, misc_handler::parse(rawConfig, fullConfig.miscConfig));
 
     std::cout << "Config:" << std::endl;
     for (const auto& package : fullConfig.packageConfig.rpm.installList) {
@@ -59,6 +61,8 @@ FileErrorReport getFile(const std::filesystem::path& filePath,
                          repo_handler::merge(fullConfig.repoConfig, childConf.repoConfig));
             processError(fileMergeErrorReport,
                          package_handler::merge(fullConfig.packageConfig, childConf.packageConfig));
+            processError(fileMergeErrorReport,
+                         misc_handler::merge(fullConfig.miscConfig, childConf.miscConfig));
 
             if (fileMergeErrorReport) { return FileErrorReport(fileMergeErrorReport); }
         }
@@ -169,7 +173,7 @@ bool testGetFile(std::filesystem::path& filePath, FullConfig& fullConfig) {
 // }
 
 // ImageInfo::ImageInfo(const RawTOMLConfig& rawConfig) {
-//     auto rawImageInfo = getBaseTable_(rawConfig, "image_info", kErrorListColorColorCode);
+//     auto rawImageInfo = getBaseTable_(rawConfig, "image_info", kErrorListFormatColorCode);
 
 //     if (isPresent_) {
 //         isValid_ &= getTOMLVal(rawImageInfo, "partition_size", partitionSize);

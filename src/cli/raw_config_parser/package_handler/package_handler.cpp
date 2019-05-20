@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include <iostream>
+
 #include "toml11/toml.hpp"
 
 #include "package_sanitize.hpp"

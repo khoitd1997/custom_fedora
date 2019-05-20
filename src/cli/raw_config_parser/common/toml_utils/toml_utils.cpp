@@ -7,8 +7,7 @@
 
 namespace hatter {
 namespace {
-static const auto keyNameFormat     = ascii_code::kCyan + ascii_code::kBold;
-static const auto correctTypeFormat = ascii_code::kErrorListColor + ascii_code::kBold;
+static const auto keyNameFormat = ascii_code::kImportantWordFormat;
 }  // namespace
 
 template <>
@@ -43,7 +42,7 @@ TOMLTypeError::TOMLTypeError(const std::string& keyName, const std::string& corr
     : TOMLError{keyName}, correctType{correctType} {}
 std::string TOMLTypeError::what() const {
     return formatStr(keyName, keyNameFormat) + " should have type " +
-           formatStr(correctType, correctTypeFormat);
+           formatStr(correctType, ascii_code::kImportantWordFormat);
 }
 
 TOMLExistentError::TOMLExistentError(const std::string& keyName) : TOMLError{keyName} {}
@@ -53,7 +52,8 @@ std::string TOMLExistentError::what() const {
 
 TOMLEmptyStringError::TOMLEmptyStringError(const std::string& keyName) : TOMLError{keyName} {}
 std::string TOMLEmptyStringError::what() const {
-    return formatStr(keyName, keyNameFormat) + " has empty value";
+    return formatStr(keyName, keyNameFormat) + " has " +
+           formatStr("empty", ascii_code::kImportantWordFormat) + " value";
 }
 
 template <>
