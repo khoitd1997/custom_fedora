@@ -71,7 +71,7 @@ FileSectionErrorReport::FileSectionErrorReport(const std::string& fileName,
     : fileName{fileName}, parentFileName{parentFileName} {}
 std::vector<std::string> FileSectionErrorReport::what() const {
     std::string includeStr   = (parentFileName.empty()) ? "" : "(" + parentFileName + ")";
-    const auto  fullFileName = formatStr(fileName, ascii_code::kErrorLocationFirstLevelFormat) +
+    const auto  fullFileName = formatStr(fileName, ascii_code::kErrorFileLocationFormat) +
                               formatStr(includeStr, ascii_code::kFaint);
 
     PrettyPrinter printer;
@@ -95,10 +95,10 @@ std::vector<std::string> FileMergeErrorReport::what() const {
 
     for (const auto& errorReport : errorReports) {
         for (const auto& error : errorReport.what()) {
-            auto fullMessage =
-                formatStr(firstFileName, ascii_code::kErrorLocationFirstLevelFormat) + "<=>" +
-                formatStr(secondFileName, ascii_code::kErrorLocationFirstLevelFormat) +
-                kErrorLocationDelimiter + error;
+            auto fullMessage = formatStr(firstFileName, ascii_code::kErrorFileLocationFormat) +
+                               "<=>" +
+                               formatStr(secondFileName, ascii_code::kErrorFileLocationFormat) +
+                               kErrorLocationDelimiter + error;
 
             printer.addError(fullMessage);
         }
