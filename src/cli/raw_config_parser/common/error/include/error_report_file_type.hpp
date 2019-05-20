@@ -20,9 +20,9 @@ struct FileSectionErrorReport : public ErrorReportBase {
 };
 
 struct FileMergeErrorReport : public ErrorReportBase {
-    std::vector<SectionMergeErrorReport> errorReports;
-    const std::string                    firstFileName;
-    const std::string                    secondFileName;
+    std::vector<TopSectionErrorReport> errorReports;
+    const std::string                  firstFileName;
+    const std::string                  secondFileName;
 
     FileMergeErrorReport(const std::string& firstFileName, const std::string& secondFileName);
 
@@ -42,5 +42,5 @@ struct FileErrorReport : public ErrorReportBase {
 
 void processError(FileSectionErrorReport& fileReport, const TopSectionErrorReport& topReport);
 
-void processError(FileMergeErrorReport& fileReport, const SectionMergeErrorReport& mergeReport);
+void processError(FileMergeErrorReport& fileReport, const TopSectionErrorReport& mergeReport);
 }  // namespace hatter

@@ -11,7 +11,6 @@
 
 #include "repo_sanitize.hpp"
 
-#include "ascii_code.hpp"
 #include "toml_utils.hpp"
 #include "utils.hpp"
 
@@ -43,8 +42,8 @@ TopSectionErrorReport parse(toml::table& rawConfig, RepoConfig& repoConfig) {
     return errorReport;
 }
 
-SectionMergeErrorReport merge(RepoConfig& resultConf, const RepoConfig& targetConf) {
-    SectionMergeErrorReport errorReport(kSectionName, kSectionFormat);
+TopSectionErrorReport merge(RepoConfig& resultConf, const RepoConfig& targetConf) {
+    TopSectionErrorReport errorReport(kSectionName, kSectionFormat);
 
     appendUniqueVector(resultConf.standardRepos, targetConf.standardRepos);
     appendUniqueVector(resultConf.coprRepos, targetConf.coprRepos);

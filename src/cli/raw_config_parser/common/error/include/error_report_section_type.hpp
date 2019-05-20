@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "ascii_code.hpp"
 #include "error_report_base_type.hpp"
 #include "error_type.hpp"
 
@@ -22,7 +23,9 @@ struct SectionErrorReportBase : public ErrorReportBase {
 struct SubSectionErrorReport : public SectionErrorReportBase {
     std::vector<std::shared_ptr<HatterParserError>> errors;
 
-    SubSectionErrorReport(const std::string& sectionName, const std::string& sectionFormat = "");
+    SubSectionErrorReport(
+        const std::string& sectionName,
+        const std::string& sectionFormat = ascii_code::kErrorLocationThirdLevelFormat);
     virtual ~SubSectionErrorReport();
 
     virtual explicit                 operator bool() const override;
@@ -32,16 +35,9 @@ struct SubSectionErrorReport : public SectionErrorReportBase {
 struct TopSectionErrorReport : public SubSectionErrorReport {
     std::vector<SubSectionErrorReport> errorReports;
 
-    TopSectionErrorReport(const std::string& sectionName, const std::string& sectionFormat);
-
-    explicit                 operator bool() const override;
-    std::vector<std::string> what() const override;
-};
-
-struct SectionMergeErrorReport : public SectionErrorReportBase {
-    std::vector<SectionMergeConflictError> errors;
-
-    SectionMergeErrorReport(const std::string& sectionName, const std::string& sectionFormat);
+    TopSectionErrorReport(
+        const std::string& sectionName,
+        const std::string& sectionFormat = ascii_code::kErrorLocationSecondLevelFormat);
 
     explicit                 operator bool() const override;
     std::vector<std::string> what() const override;
@@ -66,8 +62,4 @@ void processError(T& errorReport, const std::shared_ptr<V>&& error) {
 void processError(TopSectionErrorReport& errorReport, const SubSectionErrorReport& error);
 void processError(TopSectionErrorReport&                    errorReport,
                   const std::vector<SubSectionErrorReport>& errors);
-
-void processError(SectionMergeErrorReport& errorReport, const SectionMergeConflictError& error);
-void processError(SectionMergeErrorReport&                      errorReport,
-                  const std::vector<SectionMergeConflictError>& errors);
 }  // namespace hatter

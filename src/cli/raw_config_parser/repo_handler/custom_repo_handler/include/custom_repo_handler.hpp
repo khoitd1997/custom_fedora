@@ -13,7 +13,6 @@ namespace custom_repo_handler {
 std::vector<SubSectionErrorReport> parse(std::vector<toml::table> rawCustomRepos,
                                          std::vector<CustomRepo>& customRepos);
 
-std::vector<SectionMergeConflictError> merge(std::vector<CustomRepo>&       result,
-                                             const std::vector<CustomRepo>& target);
+SubSectionErrorReport merge(std::vector<CustomRepo>& result, const std::vector<CustomRepo>& target);
 }  // namespace custom_repo_handler
 }  // namespace hatter

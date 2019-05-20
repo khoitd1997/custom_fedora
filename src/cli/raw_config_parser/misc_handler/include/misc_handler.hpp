@@ -11,7 +11,7 @@ namespace hatter {
 namespace misc_handler {
 TopSectionErrorReport parse(toml::table& rawConfig, MiscConfig& outConf);
 
-SectionMergeErrorReport merge(MiscConfig& resultConf, const MiscConfig& targetConf);
+TopSectionErrorReport merge(MiscConfig& resultConf, const MiscConfig& targetConf);
 
 }  // namespace misc_handler
 }  // namespace hatter

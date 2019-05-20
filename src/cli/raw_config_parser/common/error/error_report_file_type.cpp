@@ -70,11 +70,9 @@ FileSectionErrorReport::FileSectionErrorReport(const std::string& fileName,
                                                const std::string& parentFileName)
     : fileName{fileName}, parentFileName{parentFileName} {}
 std::vector<std::string> FileSectionErrorReport::what() const {
-    std::string includeStr =
-        (parentFileName.empty()) ? "" : "(included from " + parentFileName + ")";
-    // const auto fullFileName = formatStr(fileName, ascii_code::kItalic) + includeStr;
-    const auto fullFileName =
-        formatStr(fileName, ascii_code::kErrorLocationFirstLevelFormat) + includeStr;
+    std::string includeStr   = (parentFileName.empty()) ? "" : "(" + parentFileName + ")";
+    const auto  fullFileName = formatStr(fileName, ascii_code::kErrorLocationFirstLevelFormat) +
+                              formatStr(includeStr, ascii_code::kFaint);
 
     PrettyPrinter printer;
     for (const auto& errorReport : errorReports) {
@@ -98,7 +96,9 @@ std::vector<std::string> FileMergeErrorReport::what() const {
     for (const auto& errorReport : errorReports) {
         for (const auto& error : errorReport.what()) {
             auto fullMessage =
-                firstFileName + "<=>" + secondFileName + kErrorLocationDelimiter + error;
+                formatStr(firstFileName, ascii_code::kErrorLocationFirstLevelFormat) + "<=>" +
+                formatStr(secondFileName, ascii_code::kErrorLocationFirstLevelFormat) +
+                kErrorLocationDelimiter + error;
 
             printer.addError(fullMessage);
         }
@@ -137,7 +137,7 @@ void processError(FileSectionErrorReport& fileReport, const TopSectionErrorRepor
     if (topReport) { fileReport.errorReports.push_back(topReport); }
 }
 
-void processError(FileMergeErrorReport& fileReport, const SectionMergeErrorReport& mergeReport) {
+void processError(FileMergeErrorReport& fileReport, const TopSectionErrorReport& mergeReport) {
     if (mergeReport) { fileReport.errorReports.push_back(mergeReport); }
 }
 }  // namespace hatter

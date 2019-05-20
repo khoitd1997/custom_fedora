@@ -14,8 +14,8 @@ int ripgrepSearchCmdOutput(const std::string& searchTarget,
                            std::string&       errorOutput,
                            const bool         noRegex = true);
 
-void mergeAndCheckStrConflict(SectionMergeErrorReport& errorReport,
-                              const std::string&       keyName,
-                              std::string&             dest,
-                              const std::string&       target);
+void mergeAndCheckStrConflict(TopSectionErrorReport& errorReport,
+                              const std::string&     keyName,
+                              std::string&           dest,
+                              const std::string&     target);
 }  // namespace hatter

@@ -12,19 +12,17 @@
 #include "package_sanitize.hpp"
 #include "package_set_handler.hpp"
 
-#include "ascii_code.hpp"
 #include "toml_utils.hpp"
 #include "utils.hpp"
 
 namespace hatter {
 namespace package_handler {
 namespace {
-static const auto kSectionName   = "package";
-static const auto kSectionFormat = ascii_code::kErrorLocationSecondLevelFormat;
+static const auto kSectionName = "package";
 }  // namespace
 
 TopSectionErrorReport parse(toml::table& rawConfig, PackageConfig& pkgConfig) {
-    TopSectionErrorReport errorReport(kSectionName, kSectionFormat);
+    TopSectionErrorReport errorReport(kSectionName);
 
     toml::table rawPkgConf;
     processError(errorReport, getTOMLVal(rawConfig, kSectionName, rawPkgConf));
@@ -38,8 +36,8 @@ TopSectionErrorReport parse(toml::table& rawConfig, PackageConfig& pkgConfig) {
     return errorReport;
 }
 
-SectionMergeErrorReport merge(PackageConfig& resultConf, const PackageConfig& targetConf) {
-    SectionMergeErrorReport errorReport(kSectionName, kSectionFormat);
+TopSectionErrorReport merge(PackageConfig& resultConf, const PackageConfig& targetConf) {
+    TopSectionErrorReport errorReport(kSectionName);
 
     appendUniqueVector(resultConf.rpm.installList, targetConf.rpm.installList);
     appendUniqueVector(resultConf.rpm.removeList, targetConf.rpm.removeList);

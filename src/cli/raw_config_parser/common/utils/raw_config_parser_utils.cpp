@@ -1,5 +1,7 @@
 #include "raw_config_parser_utils.hpp"
 
+#include <memory>
+
 #include "utils.hpp"
 
 namespace hatter {
@@ -58,17 +60,18 @@ int ripgrepSearchCmdOutput(const std::string &searchTarget,
     return 0;
 }
 
-void mergeAndCheckStrConflict(SectionMergeErrorReport &errorReport,
-                              const std::string &      keyName,
-                              std::string &            dest,
-                              const std::string &      target) {
+void mergeAndCheckStrConflict(TopSectionErrorReport &errorReport,
+                              const std::string &    keyName,
+                              std::string &          dest,
+                              const std::string &    target) {
     if (target.empty()) { return; }
     if (dest.empty()) {
         dest = target;
         return;
     }
     if (target != dest) {
-        processError(errorReport, SectionMergeConflictError(keyName, dest, target));
+        processError(errorReport,
+                     std::make_shared<SectionMergeConflictError>(keyName, dest, target));
     }
     return;
 }
