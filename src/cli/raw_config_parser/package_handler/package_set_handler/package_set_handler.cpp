@@ -11,14 +11,13 @@
 
 #include "package_set_sanitize.hpp"
 
-#include "ascii_code.hpp"
 #include "toml_utils.hpp"
 #include "utils.hpp"
 
 namespace hatter {
 namespace package_set_handler {
 namespace {
-static const auto kSectionFormat = ascii_code::kErrorLocationThirdLevelFormat;
+static const auto kSectionFormat = ascii_code::kErrorSubSectionFormat;
 }  // namespace
 
 SubSectionErrorReport parse(toml::table& rawConfig, PackageSet& pkgSet) {

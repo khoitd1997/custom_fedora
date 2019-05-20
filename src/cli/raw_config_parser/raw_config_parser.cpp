@@ -20,18 +20,24 @@
 // static const auto kGreenColorCode      = "\033[38;5;154m";
 
 namespace hatter {
-FileErrorReport getFile(const std::filesystem::path& filePath,
-                        const std::string&           parentFileName,
-                        FullConfig&                  fullConfig) {
+void processError(const FileErrorReport& errorReport, std::vector<FileErrorReport>& errorReports) {
+    if (errorReport) { errorReports.push_back(errorReport); }
+}
+
+bool getFile(const std::filesystem::path&  filePath,
+             const std::string&            parentFileName,
+             FullConfig&                   fullConfig,
+             std::vector<FileErrorReport>& errorReports) {
     auto currDirectory = filePath.parent_path().string();
     auto currFileName  = filePath.filename().string();
+    auto failed        = false;
 
     // TODO(kd): error handling here
     auto rawConfig = toml::parse(filePath);
 
     // TODO(kd): error handling here
     std::vector<std::string> includeFiles;
-    // getTOMLVal(rawConfig, "include_files", includeFiles);
+    getTOMLVal(rawConfig, "include_files", includeFiles);
     std::cout << "current file: " << filePath << std::endl;
 
     FileSectionErrorReport fileSectionReport(currFileName, parentFileName);
@@ -39,6 +45,8 @@ FileErrorReport getFile(const std::filesystem::path& filePath,
     processError(fileSectionReport, repo_handler::parse(rawConfig, fullConfig.repoConfig));
     processError(fileSectionReport, package_handler::parse(rawConfig, fullConfig.packageConfig));
     processError(fileSectionReport, misc_handler::parse(rawConfig, fullConfig.miscConfig));
+    processError(FileErrorReport(fileSectionReport), errorReports);
+    failed = failed || fileSectionReport;
 
     std::cout << "Config:" << std::endl;
     for (const auto& package : fullConfig.packageConfig.rpm.installList) {
@@ -52,9 +60,10 @@ FileErrorReport getFile(const std::filesystem::path& filePath,
         auto childTable    = toml::parse(childPath.string());
 
         FullConfig childConf;
-        auto       childErrorReport = getFile(childPath, currFileName, childConf);
+        failed |= getFile(childPath, currFileName, childConf, errorReports);
 
-        if (!fileSectionReport && !childErrorReport) {
+        if (!failed) {
+            std::cout << "MERGING FILE" << std::endl;
             FileMergeErrorReport fileMergeErrorReport(currFileName, childFileName);
 
             processError(fileMergeErrorReport,
@@ -63,19 +72,24 @@ FileErrorReport getFile(const std::filesystem::path& filePath,
                          package_handler::merge(fullConfig.packageConfig, childConf.packageConfig));
             processError(fileMergeErrorReport,
                          misc_handler::merge(fullConfig.miscConfig, childConf.miscConfig));
-
-            if (fileMergeErrorReport) { return FileErrorReport(fileMergeErrorReport); }
+            processError(FileErrorReport(fileMergeErrorReport), errorReports);
+            failed = failed || fileMergeErrorReport;
+        } else {
+            std::cout << "ERROR IN FILE" << std::endl;
         }
     }
 
-    return FileErrorReport(fileSectionReport);
+    return failed;
 }
 
 bool testGetFile(std::filesystem::path& filePath, FullConfig& fullConfig) {
-    if (auto fileError = getFile(filePath, "", fullConfig)) {
-        auto errors = fileError.what();
-        for (const auto& error : errors) { logger::error(error); }
-
+    std::vector<FileErrorReport> errorReports;
+    if (getFile(filePath, "", fullConfig, errorReports)) {
+        std::cout << "Printing out error" << std::endl;
+        for (const auto& errorReport : errorReports) {
+            for (const auto& error : errorReport.what()) { logger::error(error); }
+            logger::skipLine();
+        }
         return true;
     }
     return false;

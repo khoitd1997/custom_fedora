@@ -29,26 +29,26 @@ sklfjlsd="flasd"
 
     # start defining custom repos here
     [[repo.custom_repos]]
-    name="sdk"
-    # dkafjsdl=["google-chrome", "nvidia", "vscode"]
+    name="rpmfusion-free"
+    display_name="RPM Fusion for Fedora $releasever - Free" 
+    metalink="lsjfdasl"
+    baseurl="http://download1.rpmfusion.org/free/fedora/releases/$releasever/Everything/$basearch/os/"
+    gpgcheck=true
+    gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"
+
+
+    [[repo.custom_repos]]
+    # name="test"
+    name=""
     display_name="RPM Fusion for Fedora $releasever - Free" 
     metalink="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-$releasever&arch=$basearch"
     baseurl="http://download1.rpmfusion.org/free/fedora/releases/$releasever/Everything/$basearch/os/"
     gpgcheck=true
     gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"
 
-    [[repo.custom_repos]]
-    name="test"
-    # name=""
-    display_name="RPM Fusion for Fedora $releasever - Free" 
-    metalink="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-$releasever&arch=$basearch"
-    baseurl="http://download1.rpmfusion.org/free/fedora/releases/$releasever/Everything/$basearch/os/"
-    gpgcheck=true
-    # gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"
-
 # define multiple types of packages to be included
 [package]
-something="fsdkl"
+# something="fsdkl"
     [package.rpm]
     install=[
         "moreutils",
@@ -77,8 +77,8 @@ something="fsdkl"
 
 [misc]
 language="en_US.utf8" # locale -a
-sdlfkas="lasd"
-daksf="lasd"
+# sdlfkas="lasd"
+# daksf="lasd"
 # keyboard="us" # localectl list-x11-keymap-layouts
-keyboard="fdsasdfasdlkfasdlsdajls" # localectl list-x11-keymap-layouts
+# keyboard="fdsasdfasdlkfasdlsdajls" # localectl list-x11-keymap-layouts
 timezone="US/Pacific" # cd /usr/share/zoneinfo/posix && find * -type f -or -type l

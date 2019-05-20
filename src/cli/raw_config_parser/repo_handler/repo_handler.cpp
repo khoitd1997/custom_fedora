@@ -11,7 +11,6 @@
 
 #include "repo_sanitize.hpp"
 
-#include "ascii_code.hpp"
 #include "toml_utils.hpp"
 #include "utils.hpp"
 
@@ -19,7 +18,7 @@ namespace hatter {
 namespace repo_handler {
 namespace {
 static const auto kSectionName   = "repo";
-static const auto kSectionFormat = ascii_code::kErrorLocationSecondLevelFormat;
+static const auto kSectionFormat = ascii_code::kErrorTopSectionFormat;
 }  // namespace
 
 TopSectionErrorReport parse(toml::table& rawConfig, RepoConfig& repoConfig) {
@@ -43,8 +42,8 @@ TopSectionErrorReport parse(toml::table& rawConfig, RepoConfig& repoConfig) {
     return errorReport;
 }
 
-SectionMergeErrorReport merge(RepoConfig& resultConf, const RepoConfig& targetConf) {
-    SectionMergeErrorReport errorReport(kSectionName, kSectionFormat);
+TopSectionErrorReport merge(RepoConfig& resultConf, const RepoConfig& targetConf) {
+    TopSectionErrorReport errorReport(kSectionName, kSectionFormat);
 
     appendUniqueVector(resultConf.standardRepos, targetConf.standardRepos);
     appendUniqueVector(resultConf.coprRepos, targetConf.coprRepos);

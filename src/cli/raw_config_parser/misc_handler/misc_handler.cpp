@@ -9,7 +9,6 @@
 
 #include "misc_sanitize.hpp"
 
-#include "ascii_code.hpp"
 #include "raw_config_parser_utils.hpp"
 #include "toml_utils.hpp"
 #include "utils.hpp"
@@ -17,12 +16,11 @@
 namespace hatter {
 namespace misc_handler {
 namespace {
-static const auto kSectionName   = "misc";
-static const auto kSectionFormat = ascii_code::kErrorLocationSecondLevelFormat;
+static const auto kSectionName = "misc";
 }  // namespace
 
 TopSectionErrorReport parse(toml::table& rawConfig, MiscConfig& outConf) {
-    TopSectionErrorReport errorReport(kSectionName, kSectionFormat);
+    TopSectionErrorReport errorReport(kSectionName);
 
     toml::table rawMiscConf;
     processError(errorReport, getTOMLVal(rawConfig, kSectionName, rawMiscConf));
@@ -37,8 +35,8 @@ TopSectionErrorReport parse(toml::table& rawConfig, MiscConfig& outConf) {
     return errorReport;
 }
 
-SectionMergeErrorReport merge(MiscConfig& resultConf, const MiscConfig& targetConf) {
-    SectionMergeErrorReport errorReport(kSectionName, kSectionFormat);
+TopSectionErrorReport merge(MiscConfig& resultConf, const MiscConfig& targetConf) {
+    TopSectionErrorReport errorReport(kSectionName);
 
     mergeAndCheckStrConflict(errorReport, "language", resultConf.language, targetConf.language);
     mergeAndCheckStrConflict(errorReport, "keyboard", resultConf.keyboard, targetConf.keyboard);

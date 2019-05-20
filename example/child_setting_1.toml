@@ -70,6 +70,6 @@ dkfalsdjl=["repo1, repo2"]
     ]
 
 [misc]
-language="en_US.UTF-8" # locale -a
+language="en_US.utf8" # locale -a
 keyboard="us" # localectl list-x11-keymap-layouts
 timezone="US/Pacific" # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones

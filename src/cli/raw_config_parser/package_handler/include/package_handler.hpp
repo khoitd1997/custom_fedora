@@ -12,6 +12,6 @@ namespace hatter {
 namespace package_handler {
 TopSectionErrorReport parse(toml::table& rawConfig, PackageConfig& pkgConfig);
 
-SectionMergeErrorReport merge(PackageConfig& resultConf, const PackageConfig& targetConf);
+TopSectionErrorReport merge(PackageConfig& resultConf, const PackageConfig& targetConf);
 }  // namespace package_handler
 }  // namespace hatter

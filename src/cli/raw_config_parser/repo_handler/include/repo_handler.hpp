@@ -11,7 +11,7 @@ namespace hatter {
 namespace repo_handler {
 TopSectionErrorReport parse(toml::table& rawConfig, RepoConfig& repoConfig);
 
-SectionMergeErrorReport merge(RepoConfig& resultConf, const RepoConfig& targetConf);
+TopSectionErrorReport merge(RepoConfig& resultConf, const RepoConfig& targetConf);
 
 }  // namespace repo_handler
 }  // namespace hatter
