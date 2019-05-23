@@ -11,9 +11,9 @@ namespace hatter {
 TEST(CommonSanitizeTest, UnknownValueTest) {
     {
         toml::table nonEmptyTable;
-        nonEmptyTable["val1"]     = "str1";
-        nonEmptyTable["val2"]     = "str2";
-        auto correctUndefinedVals = std::vector<std::string>{"val1", "val2"};
+        nonEmptyTable["val1"] = "str1";
+        nonEmptyTable["val2"] = "str2";
+        std::vector<std::string> correctUndefinedVals{"val1", "val2"};
         sortVector(correctUndefinedVals);
 
         auto error = checkUnknownValue(nonEmptyTable);
@@ -31,9 +31,9 @@ TEST(CommonSanitizeTest, UnknownValueTest) {
 
 TEST(CommonSanitizeTest, SingleInvalidValueTest) {
     {
-        auto correctInvalidVals = std::vector<std::string>{"testVal"};
+        std::vector<std::string> correctInvalidVals{"testVal"};
         sortVector(correctInvalidVals);
-        const auto testType = std::string{"testType"};
+        const std::string testType{"testType"};
 
         auto error = checkInvalidValue(
             testType, correctInvalidVals.at(0), std::vector<std::string>{"listVal1", "listVal2"});
@@ -46,18 +46,18 @@ TEST(CommonSanitizeTest, SingleInvalidValueTest) {
     }
 
     {
-        const auto testType  = std::string{"randomType"};
-        const auto validVals = std::vector<std::string>{"listVal1", "listVal2"};
+        const std::string              testType{"randomType"};
+        const std::vector<std::string> validVals{"listVal1", "listVal2"};
 
         auto error = checkInvalidValue(testType, validVals.at(0), validVals);
         EXPECT_EQ(error.operator bool(), false);
     }
 
     {
-        auto       correctInvalidVals = std::vector<std::string>{"dalsjjasf"};
-        const auto testType           = std::string{"randomType"};
-        const auto validVals          = std::vector<std::string>{"listVal1", "listVal2"};
-        const auto extraMessage       = std::string{"somebody once told"};
+        std::vector<std::string>       correctInvalidVals{"dalsjjasf"};
+        const std::string              testType{"randomType"};
+        const std::vector<std::string> validVals{"listVal1", "listVal2"};
+        const std::string              extraMessage{"somebody once told"};
 
         auto error = checkInvalidValue(testType, correctInvalidVals.at(0), validVals, extraMessage);
 
