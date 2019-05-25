@@ -21,10 +21,10 @@ The project uses C++17 features so to compile it, the newer gcc/clang are needed
 sudo dnf install spdlog libasan
 
 # for bare minimum build tool
-sudo dnf install ninja-build cmake gcc
+sudo dnf install ninja-build cmake gcc-c++ clang
 
 # for extra stuffs
-sudo dnf install cppcheck catch-devel gtest-devel gtest
+sudo dnf install cppcheck gtest-devel gtest
 pip3 install cpplint
 ```
 

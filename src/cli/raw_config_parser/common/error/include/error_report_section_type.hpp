@@ -11,16 +11,9 @@
 namespace hatter {
 static const auto kErrorDelimiter         = "||";
 static const auto kErrorLocationDelimiter = "::";
-
-struct SectionErrorReportBase : public ErrorReportBase {
-    const std::string sectionName;
-    const std::string sectionFormat;
-
-    SectionErrorReportBase(const std::string& sectionName, const std::string& sectionFormat);
-    virtual ~SectionErrorReportBase();
-};
-
-struct SubSectionErrorReport : public SectionErrorReportBase {
+struct SubSectionErrorReport : public ErrorReportBase {
+    const std::string                               sectionName;
+    const std::string                               sectionFormat;
     std::vector<std::shared_ptr<HatterParserError>> errors;
 
     SubSectionErrorReport(const std::string& sectionName,
@@ -29,6 +22,9 @@ struct SubSectionErrorReport : public SectionErrorReportBase {
 
     virtual explicit                 operator bool() const override;
     virtual std::vector<std::string> what() const override;
+
+    void add(const std::vector<std::shared_ptr<HatterParserError>>&& parserErrors);
+    void add(const std::shared_ptr<HatterParserError>&& parserError);
 };
 
 struct TopSectionErrorReport : public SubSectionErrorReport {
@@ -39,25 +35,9 @@ struct TopSectionErrorReport : public SubSectionErrorReport {
 
     explicit                 operator bool() const override;
     std::vector<std::string> what() const override;
+
+    using SubSectionErrorReport::add;
+    void add(const std::vector<SubSectionErrorReport>& subReports);
+    void add(const SubSectionErrorReport& subReport);
 };
-
-template <typename T,
-          typename V,
-          std::enable_if_t<std::is_base_of<SubSectionErrorReport, T>::value>* = nullptr,
-          std::enable_if_t<std::is_base_of<HatterParserError, V>::value>*     = nullptr>
-void processError(T& errorReport, const std::vector<std::shared_ptr<V>>&& errors) {
-    errorReport.errors.insert(errorReport.errors.end(), errors.begin(), errors.end());
-}
-
-template <typename T,
-          typename V,
-          std::enable_if_t<std::is_base_of<SubSectionErrorReport, T>::value>* = nullptr,
-          std::enable_if_t<std::is_base_of<HatterParserError, V>::value>*     = nullptr>
-void processError(T& errorReport, const std::shared_ptr<V>&& error) {
-    if (error) { errorReport.errors.push_back(error); }
-}
-
-void processError(TopSectionErrorReport& errorReport, const SubSectionErrorReport& error);
-void processError(TopSectionErrorReport&                    errorReport,
-                  const std::vector<SubSectionErrorReport>& errors);
 }  // namespace hatter

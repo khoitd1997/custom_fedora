@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <iostream>
+#include <memory>
 
 #include "logger.hpp"
 
@@ -11,23 +12,12 @@
 #include "repo_handler.hpp"
 #include "toml_utils.hpp"
 
-// static const auto kResetColorCode      = "\033[0m";
-// static const auto kCyanColorCode       = "\033[38;5;087m";
-// static const auto kBlueColorCode       = "\033[38;5;12m";
-// static const auto kYellowColorCode     = "\033[38;5;226m";
-// static const auto kErrorListFormatColorCode = "\033[38;5;220m";
-// static const auto kDarkGreenColorCode  = "\033[38;5;34m";
-// static const auto kGreenColorCode      = "\033[38;5;154m";
-
 namespace hatter {
-void processError(const FileErrorReport& errorReport, std::vector<FileErrorReport>& errorReports) {
-    if (errorReport) { errorReports.push_back(errorReport); }
-}
-
-bool getFile(const std::filesystem::path&  filePath,
-             const std::string&            parentFileName,
-             FullConfig&                   fullConfig,
-             std::vector<FileErrorReport>& errorReports) {
+namespace {
+bool getFile(const std::filesystem::path& filePath,
+             const std::string&           parentFileName,
+             FullConfig&                  fullConfig,
+             FullErrorReport&             fullReport) {
     auto currDirectory = filePath.parent_path().string();
     auto currFileName  = filePath.filename().string();
     auto failed        = false;
@@ -42,10 +32,10 @@ bool getFile(const std::filesystem::path&  filePath,
 
     FileSectionErrorReport fileSectionReport(currFileName, parentFileName);
 
-    processError(fileSectionReport, repo_handler::parse(rawConfig, fullConfig.repoConfig));
-    processError(fileSectionReport, package_handler::parse(rawConfig, fullConfig.packageConfig));
-    processError(fileSectionReport, misc_handler::parse(rawConfig, fullConfig.miscConfig));
-    processError(FileErrorReport(fileSectionReport), errorReports);
+    fileSectionReport.add(repo_handler::parse(rawConfig, fullConfig.repoConfig));
+    fileSectionReport.add(package_handler::parse(rawConfig, fullConfig.packageConfig));
+    fileSectionReport.add(misc_handler::parse(rawConfig, fullConfig.miscConfig));
+    fullReport.add(std::make_shared<FileSectionErrorReport>(fileSectionReport));
     failed = failed || fileSectionReport;
 
     std::cout << "Config:" << std::endl;
@@ -60,18 +50,18 @@ bool getFile(const std::filesystem::path&  filePath,
         auto childTable    = toml::parse(childPath.string());
 
         FullConfig childConf;
-        failed |= getFile(childPath, currFileName, childConf, errorReports);
+        failed |= getFile(childPath, currFileName, childConf, fullReport);
 
         if (!failed) {
             FileMergeErrorReport fileMergeErrorReport(currFileName, childFileName);
 
-            processError(fileMergeErrorReport,
-                         repo_handler::merge(fullConfig.repoConfig, childConf.repoConfig));
-            processError(fileMergeErrorReport,
-                         package_handler::merge(fullConfig.packageConfig, childConf.packageConfig));
-            processError(fileMergeErrorReport,
-                         misc_handler::merge(fullConfig.miscConfig, childConf.miscConfig));
-            processError(FileErrorReport(fileMergeErrorReport), errorReports);
+            fileMergeErrorReport.add(
+                repo_handler::merge(fullConfig.repoConfig, childConf.repoConfig));
+            fileMergeErrorReport.add(
+                package_handler::merge(fullConfig.packageConfig, childConf.packageConfig));
+            fileMergeErrorReport.add(
+                misc_handler::merge(fullConfig.miscConfig, childConf.miscConfig));
+            fullReport.add(std::make_shared<FileMergeErrorReport>(fileMergeErrorReport));
             failed = failed || fileMergeErrorReport;
         } else {
         }
@@ -79,15 +69,14 @@ bool getFile(const std::filesystem::path&  filePath,
 
     return failed;
 }
+}  // namespace
 
-bool testGetFile(std::filesystem::path& filePath, FullConfig& fullConfig) {
-    std::vector<FileErrorReport> errorReports;
-    if (getFile(filePath, "", fullConfig, errorReports)) {
+bool getFullConfig(std::filesystem::path& filePath, FullConfig& fullConfig) {
+    FullErrorReport fullReport;
+    getFile(filePath, "", fullConfig, fullReport);
+    if (fullReport) {
         std::cout << "Printing out error" << std::endl;
-        for (const auto& errorReport : errorReports) {
-            for (const auto& error : errorReport.what()) { logger::error(error); }
-            logger::skipLine();
-        }
+        fullReport.what();
         return true;
     }
     return false;

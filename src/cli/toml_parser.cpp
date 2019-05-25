@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
 
     auto               filePath = std::filesystem::path(std::string(argv[1]));
     hatter::FullConfig fullConfig;
-    hatter::testGetFile(filePath, fullConfig);
+    hatter::getFullConfig(filePath, fullConfig);
 
     // hatter::TOMLConfigFile conf(fileName);
 

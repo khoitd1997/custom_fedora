@@ -22,14 +22,14 @@ TopSectionErrorReport parse(toml::table& rawConfig, MiscConfig& outConf) {
     TopSectionErrorReport errorReport(kSectionName);
 
     toml::table rawMiscConf;
-    processError(errorReport, getTOMLVal(rawConfig, kSectionName, rawMiscConf));
+    errorReport.add(getTOMLVal(rawConfig, kSectionName, rawMiscConf));
     if (errorReport || rawMiscConf.empty()) { return errorReport; }
 
-    processError(errorReport, getTOMLVal(rawMiscConf, "language", outConf.language));
-    processError(errorReport, getTOMLVal(rawMiscConf, "keyboard", outConf.keyboard));
-    processError(errorReport, getTOMLVal(rawMiscConf, "timezone", outConf.timezone));
+    errorReport.add(getTOMLVal(rawMiscConf, "language", outConf.language));
+    errorReport.add(getTOMLVal(rawMiscConf, "keyboard", outConf.keyboard));
+    errorReport.add(getTOMLVal(rawMiscConf, "timezone", outConf.timezone));
 
-    if (!errorReport) { processError(errorReport, sanitize(outConf, rawMiscConf)); }
+    if (!errorReport) { errorReport.add(sanitize(outConf, rawMiscConf)); }
 
     return errorReport;
 }

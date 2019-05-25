@@ -25,13 +25,13 @@ TopSectionErrorReport parse(toml::table& rawConfig, PackageConfig& pkgConfig) {
     TopSectionErrorReport errorReport(kSectionName);
 
     toml::table rawPkgConf;
-    processError(errorReport, getTOMLVal(rawConfig, kSectionName, rawPkgConf));
+    errorReport.add(getTOMLVal(rawConfig, kSectionName, rawPkgConf));
     if (errorReport || rawPkgConf.empty()) { return errorReport; }
 
-    processError(errorReport, package_set_handler::parse(rawPkgConf, pkgConfig.rpm));
-    processError(errorReport, package_set_handler::parse(rawPkgConf, pkgConfig.rpmGroup));
+    errorReport.add(package_set_handler::parse(rawPkgConf, pkgConfig.rpm));
+    errorReport.add(package_set_handler::parse(rawPkgConf, pkgConfig.rpmGroup));
 
-    if (!errorReport) { processError(errorReport, sanitize(pkgConfig, rawPkgConf)); }
+    if (!errorReport) { errorReport.add(sanitize(pkgConfig, rawPkgConf)); }
 
     return errorReport;
 }
