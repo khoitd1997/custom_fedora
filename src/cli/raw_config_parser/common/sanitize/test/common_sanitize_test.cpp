@@ -37,7 +37,7 @@ TEST(CommonSanitizeTest, SingleInputInvalidValueTest) {
         std::vector<std::string> correctInvalidVals{"testVal"};
         sortVector(correctInvalidVals);
         const std::string              testType{"testType"};
-        const std::vector<std::string> validVals{"listVal1", "listVal2"};
+        const std::vector<std::string> validVals{"allowedVal1", "allowedVal2"};
 
         auto error = checkInvalidValue(testType, correctInvalidVals.at(0), validVals);
 
@@ -51,7 +51,7 @@ TEST(CommonSanitizeTest, SingleInputInvalidValueTest) {
     {
         /* check single input val, negative case */
         const std::string              testType{"randomType"};
-        const std::vector<std::string> validVals{"listVal1", "listVal2"};
+        const std::vector<std::string> validVals{"allowedVal1", "allowedVal2"};
 
         auto error = checkInvalidValue(testType, validVals.at(0), validVals);
         EXPECT_EQ(error.operator bool(), false);
@@ -61,7 +61,7 @@ TEST(CommonSanitizeTest, SingleInputInvalidValueTest) {
         /* check single input val, positive with extra message case */
         std::vector<std::string>       correctInvalidVals{"dalsjjasf"};
         const std::string              testType{"randomType"};
-        const std::vector<std::string> validVals{"listVal1", "listVal2"};
+        const std::vector<std::string> validVals{"allowedVal1", "allowedVal2"};
         const std::string              extraMessage{"somebody once told"};
 
         auto error = checkInvalidValue(testType, correctInvalidVals.at(0), validVals, extraMessage);
@@ -71,6 +71,90 @@ TEST(CommonSanitizeTest, SingleInputInvalidValueTest) {
         EXPECT_EQ(error->invalidVals, correctInvalidVals);
         EXPECT_EQ(error->extraMessage, extraMessage);
         EXPECT_EQ(error->typeName, testType);
+    }
+}
+
+TEST(CommonSanitizeTest, MultipleInputInvalidValueTest) {
+    {
+        /* check multiple input val, positive case */
+        std::vector<std::string> inputVals{"testVal", "testVal1", "allowedVal3"};
+        std::vector<std::string> correctInvalidVals{"testVal", "testVal1"};
+        sortVector(correctInvalidVals);
+        const std::string              testType{"testType"};
+        const std::string              extraMessage{"message"};
+        const std::vector<std::string> validVals{"allowedVal1", "allowedVal2", "allowedVal3"};
+
+        auto error = checkInvalidValue(testType, inputVals, validVals, extraMessage);
+
+        ASSERT_EQ(error.operator bool(), true);
+        sortVector(error->invalidVals);
+        EXPECT_EQ(error->invalidVals, correctInvalidVals);
+        EXPECT_EQ(error->extraMessage, extraMessage);
+        EXPECT_EQ(error->typeName, testType);
+    }
+
+    {
+        /* check multiple input val, negative case */
+        std::vector<std::string> inputVals{
+            "allowedVal2", "allowedVal3", "allowedVal1", "allowedVal3"};
+        const std::string              testType{"testType"};
+        const std::vector<std::string> validVals{"allowedVal1", "allowedVal2", "allowedVal3"};
+
+        auto error = checkInvalidValue(testType, inputVals, validVals);
+
+        EXPECT_EQ(error.operator bool(), false);
+    }
+}
+
+TEST(CommonSanitizeTest, SingleInputCmdInvalidValueTest) {
+    {
+        /* check single input val, positive case */
+        std::vector<std::string> correctInvalidVals{"testVal"};
+        const std::string        testType{"testType"};
+        const std::string        testCmd{"echo 'allowedVal1\nallowedVal2\nallowedVal3'"};
+
+        auto error = checkInvalidValue(testType, correctInvalidVals.at(0), testCmd);
+
+        ASSERT_EQ(error.operator bool(), true);
+        sortVector(error->invalidVals);
+        EXPECT_EQ(error->invalidVals, correctInvalidVals);
+        EXPECT_EQ(error->extraMessage, "Run '" + testCmd + "' for full list");
+        EXPECT_EQ(error->typeName, testType);
+    }
+
+    {
+        /* check single input val, negative case with default delimiter */
+        const std::string testType{"testType"};
+        const std::string testCmd{"echo 'allowedVal1\nallowedVal2\nallowedVal3'"};
+
+        auto error = checkInvalidValue(testType, "allowedVal1", testCmd);
+
+        EXPECT_EQ(error.operator bool(), false);
+    }
+
+    {
+        /* check single input val, positive case with custom delimiter*/
+        std::vector<std::string> correctInvalidVals{"testVal"};
+        const std::string        testType{"testType"};
+        const std::string        testCmd{"echo 'allowedVal1, allowedVal2, allowedVal3'"};
+
+        auto error = checkInvalidValue(testType, correctInvalidVals.at(0), testCmd, ", ");
+
+        ASSERT_EQ(error.operator bool(), true);
+        sortVector(error->invalidVals);
+        EXPECT_EQ(error->invalidVals, correctInvalidVals);
+        EXPECT_EQ(error->extraMessage, "Run '" + testCmd + "' for full list");
+        EXPECT_EQ(error->typeName, testType);
+    }
+
+    {
+        /* check single input val, negative case with custom delimiter */
+        const std::string testType{"testType"};
+        const std::string testCmd{"echo 'allowedVal1, allowedVal2, allowedVal3'"};
+
+        auto error = checkInvalidValue(testType, "allowedVal1", testCmd, ", ");
+
+        EXPECT_EQ(error.operator bool(), false);
     }
 }
 }  // namespace hatter
