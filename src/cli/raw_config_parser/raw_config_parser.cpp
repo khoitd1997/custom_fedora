@@ -53,16 +53,14 @@ bool getFile(const std::filesystem::path& filePath,
         failed |= getFile(childPath, currFileName, childConf, fullReport);
 
         if (!failed) {
-            FileMergeErrorReport fileMergeErrorReport(currFileName, childFileName);
+            FileMergeErrorReport mergeReport(currFileName, childFileName);
 
-            fileMergeErrorReport.add(
-                repo_handler::merge(fullConfig.repoConfig, childConf.repoConfig));
-            fileMergeErrorReport.add(
+            mergeReport.add(repo_handler::merge(fullConfig.repoConfig, childConf.repoConfig));
+            mergeReport.add(
                 package_handler::merge(fullConfig.packageConfig, childConf.packageConfig));
-            fileMergeErrorReport.add(
-                misc_handler::merge(fullConfig.miscConfig, childConf.miscConfig));
-            fullReport.add(std::make_shared<FileMergeErrorReport>(fileMergeErrorReport));
-            failed = failed || fileMergeErrorReport;
+            mergeReport.add(misc_handler::merge(fullConfig.miscConfig, childConf.miscConfig));
+            fullReport.add(std::make_shared<FileMergeErrorReport>(mergeReport));
+            failed = failed || mergeReport;
         } else {
         }
     }

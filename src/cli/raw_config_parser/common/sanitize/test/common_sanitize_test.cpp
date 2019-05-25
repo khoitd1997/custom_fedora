@@ -10,33 +10,36 @@
 namespace hatter {
 TEST(CommonSanitizeTest, UnknownValueTest) {
     {
-        toml::table nonEmptyTable;
-        nonEmptyTable["val1"] = "str1";
-        nonEmptyTable["val2"] = "str2";
+        /* check multiple unknown values */
+        toml::table table;
+        table["val1"] = "str1";
+        table["val2"] = "str2";
         std::vector<std::string> correctUndefinedVals{"val1", "val2"};
         sortVector(correctUndefinedVals);
 
-        auto error = checkUnknownValue(nonEmptyTable);
+        auto error = checkUnknownValue(table);
         ASSERT_EQ(error.operator bool(), true);
         sortVector(error->undefinedVals);
         EXPECT_EQ(error->undefinedVals, correctUndefinedVals);
     }
 
     {
-        toml::table emptyTable;
-        auto        error = checkUnknownValue(emptyTable);
+        /* check no unknown values */
+        toml::table table;
+        auto        error = checkUnknownValue(table);
         EXPECT_EQ(error.operator bool(), false);
     }
 }
 
-TEST(CommonSanitizeTest, SingleInvalidValueTest) {
+TEST(CommonSanitizeTest, SingleInputInvalidValueTest) {
     {
+        /* check single input val, positive case */
         std::vector<std::string> correctInvalidVals{"testVal"};
         sortVector(correctInvalidVals);
-        const std::string testType{"testType"};
+        const std::string              testType{"testType"};
+        const std::vector<std::string> validVals{"listVal1", "listVal2"};
 
-        auto error = checkInvalidValue(
-            testType, correctInvalidVals.at(0), std::vector<std::string>{"listVal1", "listVal2"});
+        auto error = checkInvalidValue(testType, correctInvalidVals.at(0), validVals);
 
         ASSERT_EQ(error.operator bool(), true);
         sortVector(error->invalidVals);
@@ -46,6 +49,7 @@ TEST(CommonSanitizeTest, SingleInvalidValueTest) {
     }
 
     {
+        /* check single input val, negative case */
         const std::string              testType{"randomType"};
         const std::vector<std::string> validVals{"listVal1", "listVal2"};
 
@@ -54,6 +58,7 @@ TEST(CommonSanitizeTest, SingleInvalidValueTest) {
     }
 
     {
+        /* check single input val, positive with extra message case */
         std::vector<std::string>       correctInvalidVals{"dalsjjasf"};
         const std::string              testType{"randomType"};
         const std::vector<std::string> validVals{"listVal1", "listVal2"};
