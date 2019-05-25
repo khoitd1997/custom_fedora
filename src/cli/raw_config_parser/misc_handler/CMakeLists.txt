@@ -10,9 +10,3 @@ target_link_libraries(raw_config_parser_misc
 
 target_include_directories(raw_config_parser_misc
                            PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-# include(GoogleTest) file(GLOB CppTestSources test/*.cpp)
-# add_executable(raw_config_parser_misc_test ${CppTestSources})
-# target_link_libraries(raw_config_parser_misc_test raw_config_parser_misc
-# GTest::GTest GTest::Main) gtest_discover_tests(raw_config_parser_misc_test
-# WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test)

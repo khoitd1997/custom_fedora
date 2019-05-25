@@ -61,6 +61,7 @@ add_compile_options(-Wall
 add_link_options(-fsanitize=address -fsanitize=undefined)
 
 add_subdirectory(utils)
+add_subdirectory(test_utils)
 add_subdirectory(logger)
 add_subdirectory(formatter)
 add_subdirectory(thirdparty)

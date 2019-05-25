@@ -16,7 +16,6 @@ add_executable(raw_config_parser_misc_sanitize_test ${CppTestSources})
 target_link_libraries(raw_config_parser_misc_sanitize_test
                       PRIVATE raw_config_parser_misc_sanitize
                               raw_config_parser_common_sanitize
-                              GTest::GTest
-                              GTest::Main)
+                              gtest_custom_main)
 gtest_discover_tests(raw_config_parser_misc_sanitize_test WORKING_DIRECTORY
                      ${CMAKE_CURRENT_SOURCE_DIR}/test)

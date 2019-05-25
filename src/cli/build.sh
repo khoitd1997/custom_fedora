@@ -25,7 +25,7 @@ set -e
 cmake -G Ninja .. && ninja 
 cmake -G Ninja -DUSE_CPPLINT=ON -DUSE_CPPCHECK=ON -DRUN_TEST=ON .. && ninja 
 
-GTEST_BREAK_ON_FAILURE=1 GTEST_COLOR=1 ctest --verbose
+GTEST_BREAK_ON_FAILURE=1 GTEST_COLOR=1 ctest --verbose --gtest_print_time=0
 
 cd bin
 ./tomlparser example_settings.toml
