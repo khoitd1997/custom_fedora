@@ -1,7 +1,7 @@
 #pragma once
 
 namespace hatter {
-namespace ascii_code {
+namespace formatter {
 // formatting code
 static const std::string kBold      = "\033[1m";
 static const std::string kUnderline = "\033[4m";
@@ -35,5 +35,5 @@ static const auto kImportantWordFormat = "\033[38;5;78m";
 static const auto kErrorFileLocationFormat = "\033[38;5;173m";
 static const auto kErrorTopSectionFormat   = "\033[38;5;069m";
 static const auto kErrorSubSectionFormat   = "\033[38;5;184m";
-}  // namespace ascii_code
+}  // namespace formatter
 }  // namespace hatter

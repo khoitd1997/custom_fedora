@@ -12,12 +12,11 @@
 #include "package_set_sanitize.hpp"
 
 #include "toml_utils.hpp"
-#include "utils.hpp"
 
 namespace hatter {
 namespace package_set_handler {
 namespace {
-static const auto kSectionFormat = ascii_code::kErrorSubSectionFormat;
+static const auto kSectionFormat = formatter::kErrorSubSectionFormat;
 }  // namespace
 
 SubSectionErrorReport parse(toml::table& rawConfig, PackageSet& pkgSet) {
@@ -25,13 +24,13 @@ SubSectionErrorReport parse(toml::table& rawConfig, PackageSet& pkgSet) {
     SubSectionErrorReport errorReport(sectionName, kSectionFormat);
 
     toml::table rawPkgSet;
-    processError(errorReport, getTOMLVal(rawConfig, sectionName, rawPkgSet));
+    errorReport.add({getTOMLVal(rawConfig, sectionName, rawPkgSet)});
     if (errorReport || rawPkgSet.empty()) { return errorReport; }
 
-    processError(errorReport, getTOMLVal(rawPkgSet, "install", pkgSet.installList));
-    processError(errorReport, getTOMLVal(rawPkgSet, "remove", pkgSet.removeList));
+    errorReport.add({getTOMLVal(rawPkgSet, "install", pkgSet.installList)});
+    errorReport.add({getTOMLVal(rawPkgSet, "remove", pkgSet.removeList)});
 
-    if (!errorReport) { processError(errorReport, sanitize(pkgSet, rawPkgSet)); }
+    if (!errorReport) { errorReport.add(sanitize(pkgSet, rawPkgSet)); }
 
     return errorReport;
 }

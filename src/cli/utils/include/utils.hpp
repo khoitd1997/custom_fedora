@@ -6,14 +6,11 @@
 #include <string_view>
 #include <unordered_set>
 
-#include "toml11/toml.hpp"
-
-#include "ascii_code.hpp"
-
 namespace hatter {
 void writeFile(const std::string& s, const std::string& path);
 void writeFile(const std::vector<std::string>& lines, const std::string& path);
 bool readFile(std::vector<std::string>& lines, const std::string& path);
+
 void replacePattern(std::vector<std::string>& lines,
                     const std::string&        regexPattern,
                     const std::string&        replaceStr);
@@ -28,12 +25,15 @@ bool inStr(const std::string& strToLookFor, const std::string& strToSearchIn);
 
 std::vector<std::string> strSplit(std::string str, const std::string& delimiter, int limit = 0);
 
-std::string formatStr(const std::string& rawStr, const std::string& formatCode);
-
 template <typename T>
 bool inVector(const T& target, const std::vector<T>& list) {
     if (std::find(list.begin(), list.end(), target) != list.end()) { return true; }
     return false;
+}
+
+template <typename T>
+void sortVector(std::vector<T>& list) {
+    std::sort(list.begin(), list.end());
 }
 
 template <typename T>

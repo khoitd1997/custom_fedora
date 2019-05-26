@@ -4,60 +4,40 @@
 #include <string>
 #include <vector>
 
-#include "ascii_code.hpp"
+#include "ascii_format.hpp"
 #include "error_report_base_type.hpp"
 #include "error_type.hpp"
 
 namespace hatter {
 static const auto kErrorDelimiter         = "||";
 static const auto kErrorLocationDelimiter = "::";
-
-struct SectionErrorReportBase : public ErrorReportBase {
-    const std::string sectionName;
-    const std::string sectionFormat;
-
-    SectionErrorReportBase(const std::string& sectionName, const std::string& sectionFormat);
-    virtual ~SectionErrorReportBase();
-};
-
-struct SubSectionErrorReport : public SectionErrorReportBase {
+struct SubSectionErrorReport : public ErrorReportBase {
+    const std::string                               sectionName;
+    const std::string                               sectionFormat;
     std::vector<std::shared_ptr<HatterParserError>> errors;
 
     SubSectionErrorReport(const std::string& sectionName,
-                          const std::string& sectionFormat = ascii_code::kErrorSubSectionFormat);
+                          const std::string& sectionFormat = formatter::kErrorSubSectionFormat);
     virtual ~SubSectionErrorReport();
 
     virtual explicit                 operator bool() const override;
     virtual std::vector<std::string> what() const override;
+
+    void add(const std::vector<std::shared_ptr<HatterParserError>>&& parserErrors);
+    // void add(const std::shared_ptr<HatterParserError>&& parserError);
 };
 
 struct TopSectionErrorReport : public SubSectionErrorReport {
     std::vector<SubSectionErrorReport> errorReports;
 
     TopSectionErrorReport(const std::string& sectionName,
-                          const std::string& sectionFormat = ascii_code::kErrorTopSectionFormat);
+                          const std::string& sectionFormat = formatter::kErrorTopSectionFormat);
 
     explicit                 operator bool() const override;
     std::vector<std::string> what() const override;
+
+    using SubSectionErrorReport::add;
+    void add(const std::vector<SubSectionErrorReport>& subReports);
+    // void add(const SubSectionErrorReport& subReport);
 };
-
-template <typename T,
-          typename V,
-          std::enable_if_t<std::is_base_of<SubSectionErrorReport, T>::value>* = nullptr,
-          std::enable_if_t<std::is_base_of<HatterParserError, V>::value>*     = nullptr>
-void processError(T& errorReport, const std::vector<std::shared_ptr<V>>&& errors) {
-    errorReport.errors.insert(errorReport.errors.end(), errors.begin(), errors.end());
-}
-
-template <typename T,
-          typename V,
-          std::enable_if_t<std::is_base_of<SubSectionErrorReport, T>::value>* = nullptr,
-          std::enable_if_t<std::is_base_of<HatterParserError, V>::value>*     = nullptr>
-void processError(T& errorReport, const std::shared_ptr<V>&& error) {
-    if (error) { errorReport.errors.push_back(error); }
-}
-
-void processError(TopSectionErrorReport& errorReport, const SubSectionErrorReport& error);
-void processError(TopSectionErrorReport&                    errorReport,
-                  const std::vector<SubSectionErrorReport>& errors);
 }  // namespace hatter

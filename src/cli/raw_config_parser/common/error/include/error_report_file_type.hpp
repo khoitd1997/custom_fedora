@@ -8,39 +8,37 @@
 #include "error_report_section_type.hpp"
 
 namespace hatter {
-struct FileSectionErrorReport : public ErrorReportBase {
+struct FileErrorReportBase : public ErrorReportBase {
     std::vector<TopSectionErrorReport> errorReports;
-    const std::string                  fileName;
-    const std::string                  parentFileName;
+
+    void             add(const TopSectionErrorReport& errorReport);
+    virtual explicit operator bool() const override;
+};
+
+struct FileSectionErrorReport : public FileErrorReportBase {
+    const std::string fileName;
+    const std::string parentFileName;
 
     FileSectionErrorReport(const std::string& fileName, const std::string& parentFileName);
 
-    explicit                 operator bool() const override;
     std::vector<std::string> what() const override;
 };
 
-struct FileMergeErrorReport : public ErrorReportBase {
-    std::vector<TopSectionErrorReport> errorReports;
-    const std::string                  firstFileName;
-    const std::string                  secondFileName;
+struct FileMergeErrorReport : public FileErrorReportBase {
+    const std::string firstFileName;
+    const std::string secondFileName;
 
     FileMergeErrorReport(const std::string& firstFileName, const std::string& secondFileName);
 
-    explicit                 operator bool() const override;
     std::vector<std::string> what() const override;
 };
 
-struct FileErrorReport : public ErrorReportBase {
-    const std::variant<FileSectionErrorReport, FileMergeErrorReport> errorReport;
+struct FullErrorReport {
+    std::vector<std::shared_ptr<FileErrorReportBase>> errorReports;
 
-    explicit FileErrorReport(const FileSectionErrorReport& sectionReport);
-    explicit FileErrorReport(const FileMergeErrorReport& mergeReport);
+    explicit operator bool() const;
+    void     what() const;
 
-    explicit                 operator bool() const override;
-    std::vector<std::string> what() const override;
+    void add(const std::shared_ptr<FileErrorReportBase>& errorReport);
 };
-
-void processError(FileSectionErrorReport& fileReport, const TopSectionErrorReport& topReport);
-
-void processError(FileMergeErrorReport& fileReport, const TopSectionErrorReport& mergeReport);
 }  // namespace hatter

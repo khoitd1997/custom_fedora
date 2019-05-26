@@ -28,17 +28,11 @@ struct InvalidValueError : public HatterParserError {
     std::string what() const override;
 };
 std::shared_ptr<InvalidValueError> checkInvalidValue(const std::string&              typeName,
-                                                     const std::string&              value,
-                                                     const std::vector<std::string>& validVals,
-                                                     const std::string& extraMessage = "");
-
-std::shared_ptr<InvalidValueError> checkInvalidValue(const std::string&              typeName,
                                                      const std::vector<std::string>& values,
                                                      const std::vector<std::string>& validVals,
                                                      const std::string& extraMessage = "");
-
-std::shared_ptr<InvalidValueError> checkInvalidValue(const std::string& typeName,
-                                                     const std::string& value,
-                                                     const std::string& cmd,
+std::shared_ptr<InvalidValueError> checkInvalidValue(const std::string&              typeName,
+                                                     const std::vector<std::string>& values,
+                                                     const std::string&              cmd,
                                                      const std::string& delimiter = "\n");
 }  // namespace hatter

@@ -101,8 +101,8 @@ struct PackageSet {
 };
 
 struct PackageConfig {
-    PackageSet rpm      = PackageSet(PackageSet::PackageType::rpm);
-    PackageSet rpmGroup = PackageSet(PackageSet::PackageType::rpm_group);
+    PackageSet rpm{PackageSet::PackageType::rpm};
+    PackageSet rpmGroup{PackageSet::PackageType::rpm_group};
 };
 
 struct MiscConfig {

@@ -18,26 +18,25 @@ namespace hatter {
 namespace repo_handler {
 namespace {
 static const auto kSectionName   = "repo";
-static const auto kSectionFormat = ascii_code::kErrorTopSectionFormat;
+static const auto kSectionFormat = formatter::kErrorTopSectionFormat;
 }  // namespace
 
 TopSectionErrorReport parse(toml::table& rawConfig, RepoConfig& repoConfig) {
     TopSectionErrorReport errorReport(kSectionName, kSectionFormat);
 
     toml::table rawRepoConfig;
-    processError(errorReport, getTOMLVal(rawConfig, kSectionName, rawRepoConfig));
+    errorReport.add({getTOMLVal(rawConfig, kSectionName, rawRepoConfig)});
     if (errorReport || rawRepoConfig.empty()) { return errorReport; }
 
-    processError(errorReport,
-                 getTOMLVal(rawRepoConfig, "standard_repos", repoConfig.standardRepos));
-    processError(errorReport, getTOMLVal(rawRepoConfig, "copr_repos", repoConfig.coprRepos));
+    errorReport.add({getTOMLVal(rawRepoConfig, "standard_repos", repoConfig.standardRepos)});
+    errorReport.add({getTOMLVal(rawRepoConfig, "copr_repos", repoConfig.coprRepos)});
 
     // parse custom repos
     std::vector<toml::table> rawCustomRepos;
-    processError(errorReport, getTOMLVal(rawRepoConfig, "custom_repos", rawCustomRepos));
-    processError(errorReport, custom_repo_handler::parse(rawCustomRepos, repoConfig.customRepos));
+    errorReport.add({getTOMLVal(rawRepoConfig, "custom_repos", rawCustomRepos)});
+    errorReport.add({custom_repo_handler::parse(rawCustomRepos, repoConfig.customRepos)});
 
-    if (!errorReport) { processError(errorReport, sanitize(repoConfig, rawRepoConfig)); }
+    if (!errorReport) { errorReport.add(sanitize(repoConfig, rawRepoConfig)); }
 
     return errorReport;
 }
@@ -48,8 +47,7 @@ TopSectionErrorReport merge(RepoConfig& resultConf, const RepoConfig& targetConf
     appendUniqueVector(resultConf.standardRepos, targetConf.standardRepos);
     appendUniqueVector(resultConf.coprRepos, targetConf.coprRepos);
 
-    processError(errorReport,
-                 custom_repo_handler::merge(resultConf.customRepos, targetConf.customRepos));
+    errorReport.add({custom_repo_handler::merge(resultConf.customRepos, targetConf.customRepos)});
 
     return errorReport;
 }

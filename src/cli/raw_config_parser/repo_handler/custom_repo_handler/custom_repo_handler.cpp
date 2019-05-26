@@ -30,16 +30,16 @@ std::vector<SubSectionErrorReport> parse(std::vector<toml::table> rawCustomRepos
         auto&                 tempTable = rawCustomRepos.at(i);
         CustomRepo            repo;
 
-        processError(errorReport, getTOMLVal(tempTable, "name", repo.name, false));
-        processError(errorReport, getTOMLVal(tempTable, "display_name", repo.displayName, false));
+        errorReport.add({getTOMLVal(tempTable, "name", repo.name, false)});
+        errorReport.add({getTOMLVal(tempTable, "display_name", repo.displayName, false)});
 
-        processError(errorReport, getTOMLVal(tempTable, "metalink", repo.metaLink));
-        processError(errorReport, getTOMLVal(tempTable, "baseurl", repo.baseurl));
+        errorReport.add({getTOMLVal(tempTable, "metalink", repo.metaLink)});
+        errorReport.add({getTOMLVal(tempTable, "baseurl", repo.baseurl)});
 
-        processError(errorReport, getTOMLVal(tempTable, "gpgcheck", repo.gpgcheck, false));
-        processError(errorReport, getTOMLVal(tempTable, "gpgkey", repo.gpgkey));
+        errorReport.add({getTOMLVal(tempTable, "gpgcheck", repo.gpgcheck, false)});
+        errorReport.add({getTOMLVal(tempTable, "gpgkey", repo.gpgkey)});
 
-        if (!errorReport) { processError(errorReport, sanitize(repo, tempTable)); }
+        if (!errorReport) { errorReport.add(sanitize(repo, tempTable)); }
 
         if (errorReport) {
             errorReports.push_back(errorReport);
@@ -63,11 +63,10 @@ SubSectionErrorReport merge(std::vector<CustomRepo>&       result,
                 if (resRepo != targetRepo) {
                     const auto list = findConflictRepoElement(resRepo, targetRepo);
                     for (const auto& key : list) {
-                        processError(errorReport,
-                                     std::make_shared<SectionMergeConflictError>(
-                                         key,
-                                         "repo #" + std::to_string(resRepoCnt),
-                                         "repo #" + std::to_string(targetRepoCnt)));
+                        errorReport.add({std::make_shared<SectionMergeConflictError>(
+                            key,
+                            "repo #" + std::to_string(resRepoCnt),
+                            "repo #" + std::to_string(targetRepoCnt))});
                     }
                 }
             }
