@@ -30,14 +30,14 @@ std::vector<SubSectionErrorReport> parse(std::vector<toml::table> rawCustomRepos
         auto&                 tempTable = rawCustomRepos.at(i);
         CustomRepo            repo;
 
-        errorReport.add(getTOMLVal(tempTable, "name", repo.name, false));
-        errorReport.add(getTOMLVal(tempTable, "display_name", repo.displayName, false));
+        errorReport.add({getTOMLVal(tempTable, "name", repo.name, false)});
+        errorReport.add({getTOMLVal(tempTable, "display_name", repo.displayName, false)});
 
-        errorReport.add(getTOMLVal(tempTable, "metalink", repo.metaLink));
-        errorReport.add(getTOMLVal(tempTable, "baseurl", repo.baseurl));
+        errorReport.add({getTOMLVal(tempTable, "metalink", repo.metaLink)});
+        errorReport.add({getTOMLVal(tempTable, "baseurl", repo.baseurl)});
 
-        errorReport.add(getTOMLVal(tempTable, "gpgcheck", repo.gpgcheck, false));
-        errorReport.add(getTOMLVal(tempTable, "gpgkey", repo.gpgkey));
+        errorReport.add({getTOMLVal(tempTable, "gpgcheck", repo.gpgcheck, false)});
+        errorReport.add({getTOMLVal(tempTable, "gpgkey", repo.gpgkey)});
 
         if (!errorReport) { errorReport.add(sanitize(repo, tempTable)); }
 
@@ -63,10 +63,10 @@ SubSectionErrorReport merge(std::vector<CustomRepo>&       result,
                 if (resRepo != targetRepo) {
                     const auto list = findConflictRepoElement(resRepo, targetRepo);
                     for (const auto& key : list) {
-                        errorReport.add(std::make_shared<SectionMergeConflictError>(
+                        errorReport.add({std::make_shared<SectionMergeConflictError>(
                             key,
                             "repo #" + std::to_string(resRepoCnt),
-                            "repo #" + std::to_string(targetRepoCnt)));
+                            "repo #" + std::to_string(targetRepoCnt))});
                     }
                 }
             }

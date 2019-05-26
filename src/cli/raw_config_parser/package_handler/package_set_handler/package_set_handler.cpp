@@ -24,11 +24,11 @@ SubSectionErrorReport parse(toml::table& rawConfig, PackageSet& pkgSet) {
     SubSectionErrorReport errorReport(sectionName, kSectionFormat);
 
     toml::table rawPkgSet;
-    errorReport.add(getTOMLVal(rawConfig, sectionName, rawPkgSet));
+    errorReport.add({getTOMLVal(rawConfig, sectionName, rawPkgSet)});
     if (errorReport || rawPkgSet.empty()) { return errorReport; }
 
-    errorReport.add(getTOMLVal(rawPkgSet, "install", pkgSet.installList));
-    errorReport.add(getTOMLVal(rawPkgSet, "remove", pkgSet.removeList));
+    errorReport.add({getTOMLVal(rawPkgSet, "install", pkgSet.installList)});
+    errorReport.add({getTOMLVal(rawPkgSet, "remove", pkgSet.removeList)});
 
     if (!errorReport) { errorReport.add(sanitize(pkgSet, rawPkgSet)); }
 

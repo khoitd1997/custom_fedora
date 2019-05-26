@@ -70,7 +70,7 @@ void mergeAndCheckStrConflict(TopSectionErrorReport &errorReport,
         return;
     }
     if (target != dest) {
-        errorReport.add(std::make_shared<SectionMergeConflictError>(keyName, dest, target));
+        errorReport.add({std::make_shared<SectionMergeConflictError>(keyName, dest, target)});
     }
     return;
 }

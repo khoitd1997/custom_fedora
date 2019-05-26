@@ -30,7 +30,7 @@ TEST(CommonSanitizeTest, InvalidValue_SINGLE_INPUT_POSITIVE) {
     const std::string              testType{"testType"};
     const std::vector<std::string> validVals{"allowedVal1", "allowedVal2"};
 
-    auto error = checkInvalidValue(testType, correctInvalidVals.at(0), validVals);
+    auto error = checkInvalidValue(testType, correctInvalidVals, validVals);
 
     ASSERT_EQ(error.operator bool(), true);
     EXPECT_THAT(error->invalidVals, testing::UnorderedElementsAreArray(correctInvalidVals));
@@ -41,7 +41,7 @@ TEST(CommonSanitizeTest, InvalidValue_SINGLE_INPUT_NEGATIVE) {
     const std::string              testType{"randomType"};
     const std::vector<std::string> validVals{"allowedVal1", "allowedVal2"};
 
-    auto error = checkInvalidValue(testType, validVals.at(0), validVals);
+    auto error = checkInvalidValue(testType, validVals, validVals);
     EXPECT_EQ(error.operator bool(), false);
 }
 TEST(CommonSanitizeTest, InvalidValue_SINGLE_INPUT_POSITIVE_EXTRA_MSG) {
@@ -50,7 +50,7 @@ TEST(CommonSanitizeTest, InvalidValue_SINGLE_INPUT_POSITIVE_EXTRA_MSG) {
     const std::vector<std::string> validVals{"allowedVal1", "allowedVal2"};
     const std::string              extraMessage{"somebody once told"};
 
-    auto error = checkInvalidValue(testType, correctInvalidVals.at(0), validVals, extraMessage);
+    auto error = checkInvalidValue(testType, correctInvalidVals, validVals, extraMessage);
 
     ASSERT_EQ(error.operator bool(), true);
     EXPECT_THAT(error->invalidVals, testing::UnorderedElementsAreArray(correctInvalidVals));
@@ -88,7 +88,7 @@ TEST(CommonSanitizeTest, InvalidValue_SINGLE_INPUT_CMD_POSITIVE) {
     const std::string        testType{"testType"};
     const std::string        testCmd{"echo 'allowedVal1\nallowedVal2\nallowedVal3'"};
 
-    auto error = checkInvalidValue(testType, correctInvalidVals.at(0), testCmd);
+    auto error = checkInvalidValue(testType, correctInvalidVals, testCmd);
 
     ASSERT_EQ(error.operator bool(), true);
     EXPECT_THAT(error->invalidVals, testing::UnorderedElementsAreArray(correctInvalidVals));
@@ -99,7 +99,7 @@ TEST(CommonSanitizeTest, InvalidValue_SINGLE_INPUT_CMD_NEGATIVE) {
     const std::string testType{"testType"};
     const std::string testCmd{"echo 'allowedVal1\nallowedVal2\nallowedVal3'"};
 
-    auto error = checkInvalidValue(testType, "allowedVal1", testCmd);
+    auto error = checkInvalidValue(testType, {"allowedVal1"}, testCmd);
 
     EXPECT_EQ(error.operator bool(), false);
 }
@@ -108,7 +108,7 @@ TEST(CommonSanitizeTest, InvalidValue_SINGLE_INPUT_CMD_POSITIVE_CUSTOM_DELIM) {
     const std::string        testType{"testType"};
     const std::string        testCmd{"echo 'allowedVal1, allowedVal2, allowedVal3'"};
 
-    auto error = checkInvalidValue(testType, correctInvalidVals.at(0), testCmd, ", ");
+    auto error = checkInvalidValue(testType, correctInvalidVals, testCmd, ", ");
 
     ASSERT_EQ(error.operator bool(), true);
     EXPECT_THAT(error->invalidVals, testing::UnorderedElementsAreArray(correctInvalidVals));
@@ -119,7 +119,7 @@ TEST(CommonSanitizeTest, InvalidValue_SINGLE_INPUT_CMD_NEGATIVE_CUSTOM_DELIM) {
     const std::string testType{"testType"};
     const std::string testCmd{"echo 'allowedVal1, allowedVal2, allowedVal3'"};
 
-    auto error = checkInvalidValue(testType, "allowedVal1", testCmd, ", ");
+    auto error = checkInvalidValue(testType, {"allowedVal1"}, testCmd, ", ");
 
     EXPECT_EQ(error.operator bool(), false);
 }

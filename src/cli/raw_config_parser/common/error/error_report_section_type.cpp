@@ -22,10 +22,9 @@ std::vector<std::string> SubSectionErrorReport::what() const {
 SubSectionErrorReport::operator bool() const { return (!errors.empty()); }
 void                   SubSectionErrorReport::add(
     const std::vector<std::shared_ptr<HatterParserError>>&& parserErrors) {
-    errors.insert(errors.end(), parserErrors.begin(), parserErrors.end());
-}
-void SubSectionErrorReport::add(const std::shared_ptr<HatterParserError>&& parserError) {
-    if (parserError) { errors.push_back(parserError); }
+    for (const auto& error : parserErrors) {
+        if (error) { errors.push_back(error); }
+    }
 }
 
 TopSectionErrorReport::TopSectionErrorReport(const std::string& sectionName,
@@ -53,9 +52,11 @@ TopSectionErrorReport::operator bool() const {
     return SubSectionErrorReport::operator bool() || (!errorReports.empty());
 }
 void TopSectionErrorReport::add(const std::vector<SubSectionErrorReport>& subReports) {
-    for (const auto& subReport : subReports) { this->add(subReport); }
+    for (const auto& subReport : subReports) {
+        if (subReport) { errorReports.push_back(subReport); }
+    }
 }
-void TopSectionErrorReport::add(const SubSectionErrorReport& subReport) {
-    if (subReport) { errorReports.push_back(subReport); }
-}
+// void TopSectionErrorReport::add(const SubSectionErrorReport& subReport) {
+//     if (subReport) { errorReports.push_back(subReport); }
+// }
 }  // namespace hatter

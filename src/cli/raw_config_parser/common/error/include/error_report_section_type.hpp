@@ -24,7 +24,7 @@ struct SubSectionErrorReport : public ErrorReportBase {
     virtual std::vector<std::string> what() const override;
 
     void add(const std::vector<std::shared_ptr<HatterParserError>>&& parserErrors);
-    void add(const std::shared_ptr<HatterParserError>&& parserError);
+    // void add(const std::shared_ptr<HatterParserError>&& parserError);
 };
 
 struct TopSectionErrorReport : public SubSectionErrorReport {
@@ -38,6 +38,6 @@ struct TopSectionErrorReport : public SubSectionErrorReport {
 
     using SubSectionErrorReport::add;
     void add(const std::vector<SubSectionErrorReport>& subReports);
-    void add(const SubSectionErrorReport& subReport);
+    // void add(const SubSectionErrorReport& subReport);
 };
 }  // namespace hatter
