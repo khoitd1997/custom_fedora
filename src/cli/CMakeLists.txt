@@ -5,6 +5,8 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+add_subdirectory(thirdparty)
+
 option(RUN_TEST "Run unit test as part of build" OFF)
 if(RUN_TEST)
   enable_testing()
@@ -64,7 +66,6 @@ add_subdirectory(utils)
 add_subdirectory(test_utils)
 add_subdirectory(logger)
 add_subdirectory(formatter)
-add_subdirectory(thirdparty)
 
 add_subdirectory(config_builder)
 add_subdirectory(raw_config_parser)

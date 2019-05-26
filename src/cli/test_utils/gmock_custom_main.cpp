@@ -1,4 +1,9 @@
-#include <gtest/gtest.h>
+#include <cassert>
+#include <cstdlib>
+#include <iostream>
+#include <memory>
+
+#include "gmock/gmock.h"
 
 // got this from https://gist.github.com/elliotchance/8215283
 class ConfigurableEventListener : public testing::TestEventListener {
@@ -30,7 +35,7 @@ class ConfigurableEventListener : public testing::TestEventListener {
      * Show each failure as it occurs. You will also see it at the bottom after the full suite is
      * run.
      */
-    bool showInlineFailures = false;
+    bool showInlineFailures = true;
 
     /**
      * Show the setup of the global environment.
@@ -47,7 +52,7 @@ class ConfigurableEventListener : public testing::TestEventListener {
     }
 
     virtual void OnTestIterationStart(const testing::UnitTest& unit_test, int iteration) {
-        if (showTestIterations) { eventListener->OnTestIterationStart(unit_test, iteration); };
+        if (showTestIterations) { eventListener->OnTestIterationStart(unit_test, iteration); }
     }
 
     virtual void OnEnvironmentsSetUpStart(const testing::UnitTest& unit_test) {
@@ -67,7 +72,8 @@ class ConfigurableEventListener : public testing::TestEventListener {
     }
 
     virtual void OnTestPartResult(const testing::TestPartResult& result) {
-        eventListener->OnTestPartResult(result);
+        (void)(result);
+        // eventListener->OnTestPartResult(result);
     }
 
     virtual void OnTestEnd(const testing::TestInfo& test_info) {
@@ -99,7 +105,10 @@ class ConfigurableEventListener : public testing::TestEventListener {
 };
 
 int main(int argc, char** argv) {
-    testing::InitGoogleTest(&argc, argv);
+    auto envPtr = std::getenv("GTEST_FILTER");
+
+    if (envPtr) { testing::GTEST_FLAG(filter) = envPtr; }
+    testing::InitGoogleMock(&argc, argv);
 
     // remove the default listener
     testing::TestEventListeners& listeners = testing::UnitTest::GetInstance()->listeners();

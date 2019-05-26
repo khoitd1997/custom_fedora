@@ -114,6 +114,7 @@ void FullErrorReport::what() const {
     for (const auto& errorReport : errorReports) {
         const auto errors = errorReport->what();
         for (const auto& error : errors) { logger::error(error); }
+        logger::skipLine();
     }
 }
 FullErrorReport::operator bool() const { return (!errorReports.empty()); }

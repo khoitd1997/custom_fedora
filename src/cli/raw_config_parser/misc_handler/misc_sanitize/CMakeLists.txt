@@ -10,12 +10,13 @@ target_include_directories(raw_config_parser_misc_sanitize
                            PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 include(GoogleTest)
-find_package(GTest REQUIRED)
 file(GLOB CppTestSources test/*.cpp)
 add_executable(raw_config_parser_misc_sanitize_test ${CppTestSources})
 target_link_libraries(raw_config_parser_misc_sanitize_test
                       PRIVATE raw_config_parser_misc_sanitize
                               raw_config_parser_common_sanitize
-                              gtest_custom_main)
+                              raw_config_parser_test_utils
+                              utils
+                              gmock_custom_main)
 gtest_discover_tests(raw_config_parser_misc_sanitize_test WORKING_DIRECTORY
                      ${CMAKE_CURRENT_SOURCE_DIR}/test)

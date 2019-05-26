@@ -9,6 +9,7 @@
         "*.hpp": "cpp",
         "*.ks": "shellscript",
         "*.rasi": "css",
+        "*.in": "cmake",
         "array": "cpp",
         "atomic": "cpp",
         "bit": "cpp",
@@ -68,7 +69,9 @@
         "unordered_set": "cpp",
         "filesystem": "cpp",
         "variant": "cpp",
-        "cinttypes": "cpp"
+        "cinttypes": "cpp",
+        "forward_list": "cpp",
+        "list": "cpp"
     },
     "C_Cpp.default.cppStandard": "c++17",
     "editor.formatOnSave": true
