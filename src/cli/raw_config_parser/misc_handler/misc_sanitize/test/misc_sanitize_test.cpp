@@ -135,6 +135,37 @@ TEST_F(MiscSanitizeTest, InvalidValue_COMBINE_ALL) {
             }
         });
     EXPECT_EQ(totalInvalidError, 3);
+
+    const auto totalUnknownError = checkTotalError<UnknownValueError>(errors);
+    EXPECT_EQ(totalUnknownError, 0);
+}
+
+TEST_F(MiscSanitizeTest, AllError) {
+    table["rand_key1"] = "rand_val1";
+    config.timezone    = "random_tz";
+    config.language    = "random_lang";
+    config.keyboard    = "random_keyboard";
+
+    const auto errors = sanitize(config, table);
+    const auto totalInvalidError =
+        checkTotalError<InvalidValueError>(errors, [&](InvalidValueError* error) {
+            if (error->typeName == "keyboard") {
+                EXPECT_THAT(error->invalidVals,
+                            testing::UnorderedElementsAreArray({config.keyboard}));
+            } else if (error->typeName == "language") {
+                EXPECT_THAT(error->invalidVals,
+                            testing::UnorderedElementsAreArray({config.language}));
+            } else if (error->typeName == "timezone") {
+                EXPECT_THAT(error->invalidVals,
+                            testing::UnorderedElementsAreArray({config.timezone}));
+            } else {
+                ADD_FAILURE();
+            }
+        });
+    EXPECT_EQ(totalInvalidError, 3);
+
+    const auto totalUnknownError = checkTotalError<UnknownValueError>(errors);
+    EXPECT_EQ(totalUnknownError, 1);
 }
 }  // namespace misc_handler
 }  // namespace hatter
