@@ -6,6 +6,7 @@
 
 #include "logger.hpp"
 
+#include "build_process_handler.hpp"
 #include "error_report_file_type.hpp"
 #include "misc_handler.hpp"
 #include "package_handler.hpp"
@@ -35,13 +36,16 @@ bool getFile(const std::filesystem::path& filePath,
     fileSectionReport.add(repo_handler::parse(rawConfig, fullConfig.repoConfig));
     fileSectionReport.add(package_handler::parse(rawConfig, fullConfig.packageConfig));
     fileSectionReport.add(misc_handler::parse(rawConfig, fullConfig.miscConfig));
+    fileSectionReport.add(
+        build_process_handler::parse(rawConfig, filePath.parent_path(), fullConfig.buildConfig));
     fullReport.add(std::make_shared<FileSectionErrorReport>(fileSectionReport));
     failed = failed || fileSectionReport;
 
-    std::cout << "Config:" << std::endl;
-    for (const auto& package : fullConfig.packageConfig.rpm.installList) {
-        std::cout << package << std::endl;
+    std::cout << "Mock Path:" << std::endl;
+    for (const auto& filePath : fullConfig.buildConfig.mockScriptPaths) {
+        std::cout << filePath.string() << std::endl;
     }
+    std::cout << "Cache: " << fullConfig.buildConfig.enableCustomCache << std::endl;
 
     for (const auto& childFile : includeFiles) {
         auto childPath = std::filesystem::path(

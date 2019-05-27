@@ -59,12 +59,10 @@ namespace hatter {
 //     explicit ImageInfo(const RawTOMLConfig& rawConfig);
 // };
 
-// struct BuildProcessConfig  {
-//     bool        enableCustomCache = kDefaultEnableCustomCache;
-//     std::string mockScript;
-
-//     explicit BuildProcessConfig(const RawTOMLConfig& rawConfig);
-// };
+struct BuildProcessConfig {
+    std::vector<std::filesystem::path> mockScriptPaths;
+    bool                               enableCustomCache = kDefaultEnableCustomCache;
+};
 
 struct CustomRepo {
     std::string name;
@@ -112,9 +110,10 @@ struct MiscConfig {
 };
 
 struct FullConfig {
-    RepoConfig    repoConfig;
-    PackageConfig packageConfig;
-    MiscConfig    miscConfig;
+    BuildProcessConfig buildConfig;
+    RepoConfig         repoConfig;
+    PackageConfig      packageConfig;
+    MiscConfig         miscConfig;
 };
 }  // namespace hatter
 

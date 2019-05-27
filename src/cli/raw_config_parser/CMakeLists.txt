@@ -3,6 +3,7 @@ add_subdirectory(common)
 add_subdirectory(repo_handler)
 add_subdirectory(package_handler)
 add_subdirectory(misc_handler)
+add_subdirectory(build_process_handler)
 
 file(GLOB CppSources *.cpp)
 add_library(raw_config_parser ${CppSources})
@@ -15,6 +16,7 @@ target_link_libraries(raw_config_parser
                               raw_config_parser_repo
                               raw_config_parser_misc
                               raw_config_parser_package
+                              raw_config_parser_build_process
                               logger)
 
 target_include_directories(raw_config_parser

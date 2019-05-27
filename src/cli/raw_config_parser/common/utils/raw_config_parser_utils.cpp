@@ -60,10 +60,11 @@ int ripgrepSearchCmdOutput(const std::string &searchTarget,
     return 0;
 }
 
-void mergeAndCheckStrConflict(TopSectionErrorReport &errorReport,
-                              const std::string &    keyName,
-                              std::string &          dest,
-                              const std::string &    target) {
+template <>
+void mergeAndCheckConflict(TopSectionErrorReport &errorReport,
+                           const std::string &    keyName,
+                           std::string &          dest,
+                           const std::string &    target) {
     if (target.empty()) { return; }
     if (dest.empty()) {
         dest = target;
