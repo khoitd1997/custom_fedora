@@ -31,11 +31,15 @@ TEST_F(MiscSanitizeTest, UnknownValue_POSITIVE) {
         checkTotalError<UnknownValueError>(errors, [&](UnknownValueError* error) {
             EXPECT_THAT(error->undefinedVals, testing::UnorderedElementsAreArray(invalidKeys));
         });
+
     EXPECT_EQ(totalUnknownError, 1);
+    EXPECT_EQ(checkTotalOtherError<UnknownValueError>(errors), 0);
 }
 TEST_F(MiscSanitizeTest, UnknownValue_NEGATIVE) {
     auto errors = sanitize(config, table);
+
     EXPECT_EQ(checkTotalError<UnknownValueError>(errors), 0);
+    EXPECT_EQ(checkTotalOtherError<UnknownValueError>(errors), 0);
 }
 
 TEST_F(MiscSanitizeTest, InvalidValue_LANGUAGE_POSITIVE) {
@@ -47,13 +51,17 @@ TEST_F(MiscSanitizeTest, InvalidValue_LANGUAGE_POSITIVE) {
             EXPECT_EQ(error->typeName, "language");
             EXPECT_THAT(error->invalidVals, testing::UnorderedElementsAreArray({config.language}));
         });
+
     EXPECT_EQ(totalInvalidError, 1);
+    EXPECT_EQ(checkTotalOtherError<InvalidValueError>(errors), 0);
 }
 TEST_F(MiscSanitizeTest, InvalidValue_LANGUAGE_NEGATIVE) {
     config.language = "zu_ZA.utf8";
 
     const auto errors = sanitize(config, table);
+
     EXPECT_EQ(checkTotalError<InvalidValueError>(errors), 0);
+    EXPECT_EQ(checkTotalOtherError<InvalidValueError>(errors), 0);
 }
 
 TEST_F(MiscSanitizeTest, InvalidValue_TIMEZONE_POSITIVE) {
@@ -67,13 +75,17 @@ TEST_F(MiscSanitizeTest, InvalidValue_TIMEZONE_POSITIVE) {
             EXPECT_EQ(error->typeName, "timezone");
             EXPECT_THAT(error->invalidVals, testing::UnorderedElementsAreArray({config.timezone}));
         });
+
     EXPECT_EQ(totalInvalidError, 1);
+    EXPECT_EQ(checkTotalOtherError<InvalidValueError>(errors), 0);
 }
 TEST_F(MiscSanitizeTest, InvalidValue_TIMEZONE_NEGATIVE) {
     config.timezone = "US/Pacific";
 
     const auto errors = sanitize(config, table);
+
     EXPECT_EQ(checkTotalError<InvalidValueError>(errors), 0);
+    EXPECT_EQ(checkTotalOtherError<InvalidValueError>(errors), 0);
 }
 
 TEST_F(MiscSanitizeTest, InvalidValue_KEYBOARD_POSITIVE) {
@@ -85,13 +97,17 @@ TEST_F(MiscSanitizeTest, InvalidValue_KEYBOARD_POSITIVE) {
             EXPECT_EQ(error->typeName, "keyboard");
             EXPECT_THAT(error->invalidVals, testing::UnorderedElementsAreArray({config.keyboard}));
         });
+
     EXPECT_EQ(totalInvalidError, 1);
+    EXPECT_EQ(checkTotalOtherError<InvalidValueError>(errors), 0);
 }
 TEST_F(MiscSanitizeTest, InvalidValue_KEYBOARD_NEGATIVE) {
     config.keyboard = "us";
 
     const auto errors = sanitize(config, table);
+
     EXPECT_EQ(checkTotalError<InvalidValueError>(errors), 0);
+    EXPECT_EQ(checkTotalOtherError<InvalidValueError>(errors), 0);
 }
 
 TEST_F(MiscSanitizeTest, InvalidValue_COMBINE_LANGUAGE_KEYBOARD) {
@@ -111,7 +127,9 @@ TEST_F(MiscSanitizeTest, InvalidValue_COMBINE_LANGUAGE_KEYBOARD) {
                 ADD_FAILURE();
             }
         });
+
     EXPECT_EQ(totalInvalidError, 2);
+    EXPECT_EQ(checkTotalOtherError<InvalidValueError>(errors), 0);
 }
 TEST_F(MiscSanitizeTest, InvalidValue_COMBINE_ALL) {
     config.timezone = "random_tz";
@@ -138,6 +156,7 @@ TEST_F(MiscSanitizeTest, InvalidValue_COMBINE_ALL) {
 
     const auto totalUnknownError = checkTotalError<UnknownValueError>(errors);
     EXPECT_EQ(totalUnknownError, 0);
+    EXPECT_EQ(checkTotalOtherError<InvalidValueError>(errors), 0);
 }
 
 TEST_F(MiscSanitizeTest, AllError) {
@@ -162,10 +181,10 @@ TEST_F(MiscSanitizeTest, AllError) {
                 ADD_FAILURE();
             }
         });
-    EXPECT_EQ(totalInvalidError, 3);
 
-    const auto totalUnknownError = checkTotalError<UnknownValueError>(errors);
-    EXPECT_EQ(totalUnknownError, 1);
+    EXPECT_EQ(totalInvalidError, 3);
+    EXPECT_EQ(checkTotalOtherError<InvalidValueError>(errors), 1);
+    EXPECT_EQ(checkTotalError<UnknownValueError>(errors), 1);
 }
 }  // namespace misc_handler
 }  // namespace hatter

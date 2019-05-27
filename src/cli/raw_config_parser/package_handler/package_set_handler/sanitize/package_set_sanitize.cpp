@@ -1,5 +1,6 @@
 #include "package_set_sanitize.hpp"
 
+#include <filesystem>
 #include <functional>
 
 #include "magic_enum.hpp"
@@ -15,19 +16,8 @@ namespace {
 const auto packageListPath = "/build_temp/package_list.txt";
 const auto groupListPath   = "/build_temp/group_list.txt";
 }  // namespace
-
-PackageNotFoundError::PackageNotFoundError(const PackageSet::PackageType pkgType)
-    : pkgType(pkgType) {}
-std::string PackageNotFoundError::what() const {
-    return "the following " +
-           formatter::formatImportantText(std::string(magic_enum::enum_name(pkgType))) +
-           "(s) can not be found: " + formatter::formatErrorText(strJoin(packages));
-}
-
-std::shared_ptr<PackageNotFoundError> checkPackageNotFound(const PackageSet &pkgSet) {
-    std::shared_ptr<PackageNotFoundError> error = nullptr;
-
-    std::string                                     searchFile;
+std::shared_ptr<InvalidValueError> checkPackageNotFound(const PackageSet &pkgSet) {
+    std::filesystem::path                           searchFile;
     auto                                            useRegex = false;
     std::function<std::string(const std::string &)> makeSearchTarget;
 
@@ -36,7 +26,7 @@ std::shared_ptr<PackageNotFoundError> checkPackageNotFound(const PackageSet &pkg
             makeSearchTarget = [](const std::string &pkg) -> std::string {
                 return "'^" + pkg + "\\.'";
             };
-            searchFile = packageListPath;
+            searchFile = std::filesystem::path{packageListPath};
             useRegex   = true;
             break;
 
@@ -44,7 +34,7 @@ std::shared_ptr<PackageNotFoundError> checkPackageNotFound(const PackageSet &pkg
             makeSearchTarget = [](const std::string &pkg) -> std::string {
                 return "'(" + pkg + ")'";
             };
-            searchFile = groupListPath;
+            searchFile = std::filesystem::path{groupListPath};
             break;
 
         default:
@@ -52,17 +42,10 @@ std::shared_ptr<PackageNotFoundError> checkPackageNotFound(const PackageSet &pkg
             break;
     }
 
-    for (const auto &pkg : pkgSet.installList) {
-        auto match = ripgrepSearchFile(makeSearchTarget(pkg), searchFile, useRegex);
-
-        // TODO(kd): Handle duplicate case
-        if (match < 1) {
-            if (!error) { error = std::make_shared<PackageNotFoundError>(pkgSet.packageType); }
-            error->packages.push_back(pkg);
-        }
-    }
-
-    return error;
+    return checkInvalidValue(std::string(magic_enum::enum_name(pkgSet.packageType)),
+                             pkgSet.installList,
+                             searchFile,
+                             useRegex);
 }
 
 std::vector<std::shared_ptr<HatterParserError>> sanitize(const PackageSet & pkgSet,

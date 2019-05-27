@@ -8,8 +8,8 @@ namespace hatter {
 namespace {
 std::string buildRipgrepSearchFileCommand(const std::string &searchTarget,
                                           const std::string &targetFilePath,
-                                          const bool         noRegex) {
-    const std::string regexFlag     = (noRegex) ? " " : " -F ";
+                                          const bool         useRegex) {
+    const std::string regexFlag     = (useRegex) ? " " : " -F ";
     const std::string baseRgCommand = "rg " + regexFlag + " -c ";
 
     return baseRgCommand + searchTarget + " " + targetFilePath;
@@ -17,8 +17,8 @@ std::string buildRipgrepSearchFileCommand(const std::string &searchTarget,
 
 std::string buildRipgrepSearchOutputCommand(const std::string &searchTarget,
                                             const std::string &cmd,
-                                            const bool         noRegex) {
-    const std::string regexFlag     = (noRegex) ? " " : " -F ";
+                                            const bool         useRegex) {
+    const std::string regexFlag     = (useRegex) ? " " : " -F ";
     const std::string baseRgCommand = "rg " + regexFlag + " -c ";
 
     return cmd + " | " + baseRgCommand + searchTarget;
@@ -27,9 +27,9 @@ std::string buildRipgrepSearchOutputCommand(const std::string &searchTarget,
 
 int ripgrepSearchFile(const std::string &searchTarget,
                       const std::string &targetFilePath,
-                      const bool         noRegex) {
+                      const bool         useRegex) {
     std::string output;
-    const auto  rgCommand = buildRipgrepSearchFileCommand(searchTarget, targetFilePath, noRegex);
+    const auto  rgCommand = buildRipgrepSearchFileCommand(searchTarget, targetFilePath, useRegex);
     const auto  errCode   = execCommand(rgCommand, output);
 
     if (errCode == 0) {
@@ -45,9 +45,9 @@ int ripgrepSearchFile(const std::string &searchTarget,
 int ripgrepSearchCmdOutput(const std::string &searchTarget,
                            const std::string &cmd,
                            std::string &      errorOutput,
-                           const bool         noRegex) {
+                           const bool         useRegex) {
     std::string tempOutput;
-    const auto  rgCommand = buildRipgrepSearchOutputCommand(searchTarget, cmd, noRegex);
+    const auto  rgCommand = buildRipgrepSearchOutputCommand(searchTarget, cmd, useRegex);
     const auto  errCode   = execCommand(rgCommand, tempOutput);
 
     if (errCode == 0) {

@@ -1,3 +1,5 @@
+add_subdirectory(sanitize)
+
 file(GLOB CppSources *.cpp)
 add_library(raw_config_parser_package_set ${CppSources})
 target_link_libraries(raw_config_parser_package_set
@@ -7,6 +9,7 @@ target_link_libraries(raw_config_parser_package_set
                               magic_enum
                               raw_config_parser_common_sanitize
                               raw_config_parser_utils
+                              raw_config_parser_package_set_sanitize
                               toml_utils)
 
 target_include_directories(raw_config_parser_package_set

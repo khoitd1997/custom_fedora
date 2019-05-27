@@ -52,7 +52,7 @@ sklfjlsd="flasd"
     [package.rpm]
     install=[
         "moreutils",
-        # "dklassa",
+        "dklassa",
         "jq",
         "ripgrep",
         "gnome-terminal"

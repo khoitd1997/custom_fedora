@@ -123,4 +123,5 @@ TEST(CommonSanitizeTest, InvalidValue_SINGLE_INPUT_CMD_NEGATIVE_CUSTOM_DELIM) {
 
     EXPECT_EQ(error.operator bool(), false);
 }
+// TODO(kd): Check file case
 }  // namespace hatter

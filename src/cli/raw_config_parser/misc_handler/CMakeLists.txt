@@ -1,4 +1,4 @@
-add_subdirectory(misc_sanitize)
+add_subdirectory(sanitize)
 
 file(GLOB CppSources *.cpp)
 add_library(raw_config_parser_misc ${CppSources})
