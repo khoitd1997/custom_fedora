@@ -1,3 +1,4 @@
+add_subdirectory(sanitize)
 add_subdirectory(package_set_handler)
 
 file(GLOB CppSources *.cpp)
@@ -10,6 +11,7 @@ target_link_libraries(raw_config_parser_package
                               magic_enum
                               raw_config_parser_package_set
                               raw_config_parser_common_sanitize
+                              raw_config_parser_package_sanitize
                               toml_utils)
 
 target_include_directories(raw_config_parser_package

@@ -7,12 +7,12 @@
 namespace hatter {
 int ripgrepSearchFile(const std::string& searchTarget,
                       const std::string& targetFilePath,
-                      const bool         noRegex = true);
+                      const bool         useRegex = true);
 
 int ripgrepSearchCmdOutput(const std::string& searchTarget,
                            const std::string& cmd,
                            std::string&       errorOutput,
-                           const bool         noRegex = true);
+                           const bool         useRegex = true);
 
 void mergeAndCheckStrConflict(TopSectionErrorReport& errorReport,
                               const std::string&     keyName,
