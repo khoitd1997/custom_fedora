@@ -55,4 +55,11 @@ std::shared_ptr<InvalidValueError> checkInvalidValue(const std::string&         
 
     return error;
 }
+
+struct FileNotExistError : public HatterParserError {
+    std::string fileName;
+    std::string what() const override;
+    FileNotExistError(const std::string fileName);
+};
+std::shared_ptr<FileNotExistError> checkFileNotExist(const std::filesystem::path& filePath);
 }  // namespace hatter

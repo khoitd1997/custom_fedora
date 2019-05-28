@@ -29,7 +29,7 @@ dkfalsdjl=["repo1, repo2"]
 
     # start defining custom repos here
     [[repo.custom_repos]]
-    name="rpmfusion-free"
+    name=""
     display_name="RPM Fusion for Fedora $releasever - Free" 
     metalink="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-$releasever&arch=$basearch"
     baseurl="http://download1.rpmfusion.org/free/fedora/releases/$releasever/Everything/$basearch/os/"

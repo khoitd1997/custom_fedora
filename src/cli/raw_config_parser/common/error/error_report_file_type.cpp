@@ -24,7 +24,7 @@ class PrettyPrinter {
             : errorLocation{errorLocation},
               errorDetail{errorDetail},
               reduceLength{static_cast<int>(
-                  3 * (std::count(errorLocation.begin(), errorLocation.end(), '\033') - 1))} {}
+                  3 * (std::count(errorLocation.begin(), errorLocation.end(), '\033') - 3))} {}
     };
 
     std::vector<ErrorMessage> errorMessages;

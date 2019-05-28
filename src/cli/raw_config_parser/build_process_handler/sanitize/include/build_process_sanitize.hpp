@@ -12,6 +12,6 @@
 namespace hatter {
 namespace build_process_handler {
 std::vector<std::shared_ptr<HatterParserError>> sanitize(const BuildProcessConfig& buildConf,
-                                                         const toml::table&        table);
+                                                        const toml::table&        table);
 }  // namespace build_process_handler
 }  // namespace hatter
