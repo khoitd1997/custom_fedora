@@ -14,8 +14,19 @@ int ripgrepSearchCmdOutput(const std::string& searchTarget,
                            std::string&       errorOutput,
                            const bool         useRegex = true);
 
-void mergeAndCheckStrConflict(TopSectionErrorReport& errorReport,
-                              const std::string&     keyName,
-                              std::string&           dest,
-                              const std::string&     target);
+template <typename T>
+void mergeAndCheckConflict(TopSectionErrorReport& errorReport,
+                           const std::string&     keyName,
+                           T&                     dest,
+                           const T&               target) {
+    if (dest != target) {
+        errorReport.add({std::make_shared<SectionMergeConflictError>(
+            keyName, std::string{dest}, std::string{target})});
+    }
+}
+template <>
+void mergeAndCheckConflict(TopSectionErrorReport& errorReport,
+                           const std::string&     keyName,
+                           std::string&           dest,
+                           const std::string&     target);
 }  // namespace hatter

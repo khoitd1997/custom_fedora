@@ -60,4 +60,14 @@ std::shared_ptr<InvalidValueError> checkInvalidValue(const std::string&         
     throw std::runtime_error(cmd + " failed with output: " + tempOutput);
     return nullptr;
 }
+
+FileNotExistError::FileNotExistError(const std::string fileName) : fileName{fileName} {}
+std::string FileNotExistError::what() const {
+    return formatter::formatImportantText("file ") +
+           "doesn't exist: " + formatter::formatErrorText(fileName);
+}
+std::shared_ptr<FileNotExistError> checkFileNotExist(const std::filesystem::path& filePath) {
+    if (std::filesystem::exists(filePath)) { return nullptr; }
+    return std::make_shared<FileNotExistError>(filePath.filename().string());
+}
 }  // namespace hatter
