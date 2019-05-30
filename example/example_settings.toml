@@ -12,9 +12,9 @@ os_name="fedora-kd"
 # scripts appended right first(lowest priority)
 [image_info]
 partition_size=7000
-# first_login_script=["first_login.sh"] # put in profile.d to launch at first login
-# post_build_script=["post_script.sh"] # post build script
-# post_build_script_no_chroot=["post_no_chroot_script.sh"] # post build script in no chroot
+# first_login_scripts=["first_login.sh"] # put in profile.d to launch at first login
+# post_build_scripts=["post_script.sh"] # post build script
+# post_build_script_no_chroots=["post_no_chroot_script.sh"] # post build script in no chroot
 user_files=["path_to_dir1", "path_to_dir2"] # will be put in /usr/share/hatter_user_file
 
 [build_process]

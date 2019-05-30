@@ -10,7 +10,7 @@ std::vector<std::shared_ptr<HatterParserError>> sanitize(const BuildProcessConfi
     std::vector<std::shared_ptr<HatterParserError>> errors;
 
     if (auto error = checkUnknownValue(table)) { errors.push_back(error); }
-    if (auto error = checkFileNotExist(buildConf.mockScriptPaths.at(0))) {
+    if (auto error = checkFileNotExist("custom_mock_script", buildConf.mockScriptPaths.at(0))) {
         errors.push_back(error);
     }
 
