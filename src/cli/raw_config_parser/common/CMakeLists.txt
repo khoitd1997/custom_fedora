@@ -1,0 +1,7 @@
+add_subdirectory(hatter_config_type)
+add_subdirectory(error)
+add_subdirectory(sanitize)
+add_subdirectory(get)
+add_subdirectory(toml_utils)
+add_subdirectory(utils)
+add_subdirectory(test_utils)

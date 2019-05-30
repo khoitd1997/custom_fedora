@@ -4,9 +4,13 @@
 #include <limits.h>
 #include <unistd.h>
 
+#include <cstdio>
+#include <cstdlib>
+#include <fstream>
 #include <iostream>
 #include <regex>
 #include <string>
+#include <vector>
 
 namespace hatter {
 void writeFile(const std::string& s, const std::string& path) {
@@ -53,5 +57,54 @@ std::string toUpper(std::string_view str) {
     std::string ret(str);
     std::transform(ret.begin(), ret.end(), ret.begin(), ::toupper);
     return ret;
+}
+
+std::string strJoin(const std::vector<std::string>& strings, const std::string& delimiter) {
+    std::string out;
+    size_t      count = 0;
+
+    for (const auto& str : strings) {
+        out += str;
+        if (count < strings.size() - 1) { out += delimiter; }
+        ++count;
+    }
+
+    return out;
+}
+
+bool inStr(const std::string& strToLookFor, const std::string& strToSearchIn) {
+    if (strToSearchIn.find(strToLookFor) != std::string::npos) { return true; }
+    return false;
+}
+
+std::vector<std::string> strSplit(std::string str, const std::string& delimiter, int limit) {
+    std::vector<std::string> ret;
+    size_t                   pos = 0;
+
+    if (limit == 0) { limit = static_cast<int>(str.length()) + 2; }
+
+    while (((pos = str.find(delimiter)) != std::string::npos) && (limit > 0)) {
+        ret.push_back(str.substr(0, pos));
+        str.erase(0, pos + delimiter.length());
+        --limit;
+    }
+    ret.push_back(str);
+
+    return ret;
+}
+
+int execCommand(const std::string& cmd, std::string& output, const size_t outputBufferSize) {
+    std::vector<char> buffer(outputBufferSize);
+    auto              pipe = popen(cmd.c_str(), "r");
+
+    if (!pipe) { throw std::runtime_error("popen() failed on command: " + cmd); }
+
+    while (!feof(pipe)) {
+        if (fgets(buffer.data(), static_cast<int>(buffer.size()), pipe) != nullptr) {
+            output += buffer.data();
+        }
+    }
+
+    return WEXITSTATUS(pclose(pipe));
 }
 }  // namespace hatter

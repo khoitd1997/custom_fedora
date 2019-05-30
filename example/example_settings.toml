@@ -1,59 +1,46 @@
 # order of inclusion from left to right, may override or raise error depending on the options
 # top level and then left to right high to low priority
 # NOTE: relative path will be relative to the main config file
-include_files=["file1.toml", "dir1/file2.toml"]
-# [basic]
-# image_fedora_version="29"
-# image_fedora_arch="x86_64" 
-# base_kickstart_tag="latest" 
-# os_name="fedora-kd" 
-# base_spin="cinnamon"
-# lang="en_US.UTF-8" # locale -a
-# keyboard="us" # localectl list-x11-keymap-layouts
-# timezone="US/Pacific" # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-# partition_size=7000
-# first_login_script="first_login.sh" # put in profile.d to launch at first login
-# post_build_script="post_script.sh" # post build script
-# post_build_script_no_chroot="post_no_chroot_script.sh" # post build script in no chroot
-# user_files=["path_to_dir1", "path_to_dir2"] # will be put in /usr/share/hatter_user_file
+include_files=["child_setting_1.toml", "child_path/child_setting_2.toml"]
+# include_files=["child_setting_1.toml"]
 
 [distro_info]
-image_fedora_version="29"
-# random_stuffs="29"
-image_fedora_arch="x86_64" 
 base_kickstart_tag="latest" 
 base_spin="cinnamon"
 os_name="fedora-kd" 
 
+# scripts appended right first(lowest priority)
 [image_info]
 partition_size=7000
-first_login_script="first_login.sh" # put in profile.d to launch at first login
-post_build_script="post_script.sh" # post build script
-post_build_script_no_chroot="post_no_chroot_script.sh" # post build script in no chroot
+# first_login_script=["first_login.sh"] # put in profile.d to launch at first login
+# post_build_script=["post_script.sh"] # post build script
+# post_build_script_no_chroot=["post_no_chroot_script.sh"] # post build script in no chroot
 user_files=["path_to_dir1", "path_to_dir2"] # will be put in /usr/share/hatter_user_file
 
 [build_process]
-custom_mock_script="script.sh" # custom script to run in mock env
+custom_mock_script=["script.sh"] # custom script to run in mock env
 enable_custom_cache=true
 
 # define list of repos
 # $releasever and $basearch will be replaced when doing build
 [repo]
 standard_repos=["google-chrome", "nvidia", "vscode"]
-copr_repos=["repo1, repo2"]
+copr_repos=["khoitd1997/toml11"]
+sklfjlsd="flasd"
 
     # start defining custom repos here
     [[repo.custom_repos]]
     name="rpmfusion-free"
     display_name="RPM Fusion for Fedora $releasever - Free" 
-    metalink="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-$releasever&arch=$basearch"
+    metalink="lsjfdasl"
     baseurl="http://download1.rpmfusion.org/free/fedora/releases/$releasever/Everything/$basearch/os/"
-    # gpgcheck=true
-    gpgcheck=1
+    gpgcheck=true
     gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"
 
+
     [[repo.custom_repos]]
-    name="test"
+    # name="test"
+    name=""
     display_name="RPM Fusion for Fedora $releasever - Free" 
     metalink="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-$releasever&arch=$basearch"
     baseurl="http://download1.rpmfusion.org/free/fedora/releases/$releasever/Everything/$basearch/os/"
@@ -62,13 +49,16 @@ copr_repos=["repo1, repo2"]
 
 # define multiple types of packages to be included
 [package]
+# something="fsdkl"
     [package.rpm]
     install=[
         "moreutils",
+        "dklassa",
         "jq",
         "ripgrep",
         "gnome-terminal"
     ]
+    # install=2
 
     remove=[
         "gnome-calculator"
@@ -78,6 +68,7 @@ copr_repos=["repo1, repo2"]
     [package.rpm_group]
     install=[
         "multimedia",
+        # "fkasjklfjasdklfjasdklfjaklsdjfadkljsd",
         "sound-and-video"
     ]
 
@@ -86,7 +77,9 @@ copr_repos=["repo1, repo2"]
     ]
 
 [misc]
-language="en_US.UTF-8" # locale -a
-keyboard="us" # localectl list-x11-keymap-layouts
-timezone="US/Pacific" # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-
+language="en_US.utf8" # locale -a
+# sdlfkas="lasd"
+# daksf="lasd"
+# keyboard="us" # localectl list-x11-keymap-layouts
+# keyboard="fdsasdfasdlkfasdlsdajls" # localectl list-x11-keymap-layouts
+timezone="US/Pacific" # cd /usr/share/zoneinfo/posix && find * -type f -or -type l

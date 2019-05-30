@@ -10,9 +10,35 @@ Maybe /libexec for all other files and just the main one in /usr/bin
 
 Support classic kickstart file but with additional settings through the TOML file like caching.
 
-## Dependency list
+## Building from Source
 
-sudo dnf install spdlog
+### Dependency
+
+The project uses C++17 features so to compile it, the newer gcc/clang are needed. The project uses gtest for unit testing as well as cppcheck and cpplint for extra linting, the default cmake won't turn these options on.
+
+```shell
+# library
+sudo dnf install spdlog libasan
+
+# for bare minimum build tool
+sudo dnf install ninja-build cmake gcc-c++ clang
+
+# for extra stuffs
+sudo dnf install cppcheck gtest-devel gtest
+pip3 install cpplint
+```
+
+### Build
+
+```shell
+# assume in source directory
+mkdir -p build
+cd build
+cmake -G Ninja .. && ninja # bare minimum build
+cmake -G Ninja -DUSE_CPPLINT=ON -DUSE_CPPCHECK=ON .. && ninja  # full build with unit test and linting
+
+cd bin
+```
 
 ## Build Stages
 
@@ -36,3 +62,12 @@ Sample:
 env_os_name="fedora-kd"
 env_enable_custom_cache=true
 ```
+
+- Commandline argument:
+  - Rebuild flag
+  - Clear cache flag
+  - Parse/Sanitize only
+  - Build output dir
+  - Config file/dir
+  - Fedora version(default current system)
+  - Fedora arch(default current arch)

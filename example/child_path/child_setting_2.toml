@@ -1,0 +1,3 @@
+[repo]
+standard_repos=["child_2", "nvi"]
+copr_repos=["child2_copr_repo1, child2_copr_repo2"]

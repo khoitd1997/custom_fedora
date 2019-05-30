@@ -5,7 +5,5 @@
 
 #include "raw_config_parser.hpp"
 
-namespace hatter {
-bool buildMockConfig(const DistroInfo& buildEnvConfig, const std::string& buildDir);
-}  // namespace hatter
+namespace hatter {}  // namespace hatter
 #endif
