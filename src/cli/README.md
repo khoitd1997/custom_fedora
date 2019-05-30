@@ -49,6 +49,20 @@ cd bin
 - Second stage: Inside mock
   - Sanitize packages, repo
   - Control build scripts, enable caching, etc
+
+## Format of generated env file from parser
+
+The file will be called ```toml_parsed_env``` and will contain env variables used for building the final image
+
+Sample:
+
+```shell
+# inside toml_parsed_env
+
+env_os_name="fedora-kd"
+env_enable_custom_cache=true
+```
+
 - Commandline argument:
   - Rebuild flag
   - Clear cache flag
