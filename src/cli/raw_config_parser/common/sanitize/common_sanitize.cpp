@@ -17,6 +17,16 @@ std::shared_ptr<UnknownValueError> checkUnknownValue(const toml::table& table) {
     return nullptr;
 }
 
+NotPositiveError::NotPositiveError(const std::string& keyName) : keyName{keyName} {}
+std::string NotPositiveError::what() const {
+    return "key must be " + formatter::formatImportantText("positive") + ": " +
+           formatter::formatErrorText(keyName);
+}
+std::shared_ptr<NotPositiveError> checkNotPositive(const std::string& keyName, const int value) {
+    if (value <= 0) { return std::make_shared<NotPositiveError>(keyName); }
+    return nullptr;
+}
+
 InvalidValueError::InvalidValueError(const std::string& typeName, const std::string& extraMessage)
     : typeName{typeName}, extraMessage{extraMessage} {}
 InvalidValueError::InvalidValueError(const std::string& typeName,
@@ -27,8 +37,8 @@ InvalidValueError::InvalidValueError(const std::string& typeName,
 }
 std::string InvalidValueError::what() const {
     const auto invalidStr = formatter::formatErrorText(strJoin(invalidVals));
-    return "invalid " + formatter::formatImportantText(typeName) + "(s): " + invalidStr + ". " +
-           extraMessage;
+    return "invalid " + formatter::formatImportantText(typeName) + "(s): " + invalidStr +
+           ((extraMessage.empty() ? "" : ". " + extraMessage));
 }
 std::shared_ptr<InvalidValueError> checkInvalidValue(const std::string&              typeName,
                                                      const std::vector<std::string>& values,

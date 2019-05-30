@@ -37,8 +37,8 @@ TOMLError::~TOMLError() {}
 TOMLTypeError::TOMLTypeError(const std::string& keyName, const std::string& correctType)
     : TOMLError{keyName}, correctType{correctType} {}
 std::string TOMLTypeError::what() const {
-    return formatter::formatImportantText(keyName) + " should have type " +
-           formatter::formatImportantText(correctType);
+    return "type " + formatter::formatImportantText(correctType) +
+           " is needed for: " + formatter::formatErrorText(keyName);
 }
 
 TOMLExistentError::TOMLExistentError(const std::string& keyName) : TOMLError{keyName} {}
@@ -48,7 +48,8 @@ std::string TOMLExistentError::what() const {
 
 TOMLEmptyStringError::TOMLEmptyStringError(const std::string& keyName) : TOMLError{keyName} {}
 std::string TOMLEmptyStringError::what() const {
-    return "key has " + formatter::formatImportantText("empty") + " value";
+    return "key has " + formatter::formatImportantText("empty") +
+           " value: " + formatter::formatErrorText(keyName);
 }
 
 template <>

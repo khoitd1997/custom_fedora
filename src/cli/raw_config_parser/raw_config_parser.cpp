@@ -8,6 +8,7 @@
 
 #include "build_process_handler.hpp"
 #include "error_report_file_type.hpp"
+#include "image_info_handler.hpp"
 #include "misc_handler.hpp"
 #include "package_handler.hpp"
 #include "repo_handler.hpp"
@@ -38,14 +39,15 @@ bool getFile(const std::filesystem::path& filePath,
     fileSectionReport.add(misc_handler::parse(rawConfig, fullConfig.miscConfig));
     fileSectionReport.add(
         build_process_handler::parse(rawConfig, filePath.parent_path(), fullConfig.buildConfig));
+    fileSectionReport.add(
+        image_info_handler::parse(rawConfig, filePath.parent_path(), fullConfig.imageInfo));
     fullReport.add(std::make_shared<FileSectionErrorReport>(fileSectionReport));
     failed = failed || fileSectionReport;
 
-    std::cout << "Mock Path:" << std::endl;
-    for (const auto& filePath : fullConfig.buildConfig.mockScriptPaths) {
+    std::cout << "First Login Path:" << std::endl;
+    for (const auto& filePath : fullConfig.imageInfo.firstLoginScripts) {
         std::cout << filePath.string() << std::endl;
     }
-    std::cout << "Cache: " << fullConfig.buildConfig.enableCustomCache << std::endl;
 
     for (const auto& childFile : includeFiles) {
         auto childPath = std::filesystem::path(

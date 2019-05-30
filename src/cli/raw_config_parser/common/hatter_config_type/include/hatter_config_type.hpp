@@ -48,16 +48,13 @@ namespace hatter {
 //     explicit DistroInfo(const RawTOMLConfig& rawConfig);
 // };
 
-// struct ImageInfo  {
-//     int                      partitionSize;
-//     std::string              firstLoginScript;
-//     std::string              postBuildScript;
-//     std::string              postBuildNoRootScript;
-//     std::vector<std::string> userFiles;
-
-//     bool merge(const ImageInfo& target);
-//     explicit ImageInfo(const RawTOMLConfig& rawConfig);
-// };
+struct ImageInfo {
+    int                                partitionSize;
+    std::vector<std::filesystem::path> firstLoginScripts;
+    std::vector<std::filesystem::path> postBuildScripts;
+    std::vector<std::filesystem::path> postBuildNoRootScripts;
+    std::vector<std::filesystem::path> userFiles;
+};
 
 struct BuildProcessConfig {
     std::vector<std::filesystem::path> mockScriptPaths;
@@ -110,6 +107,7 @@ struct MiscConfig {
 };
 
 struct FullConfig {
+    ImageInfo          imageInfo;
     BuildProcessConfig buildConfig;
     RepoConfig         repoConfig;
     PackageConfig      packageConfig;

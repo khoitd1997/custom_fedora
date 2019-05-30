@@ -18,12 +18,20 @@ struct UnknownValueError : public HatterParserError {
 };
 std::shared_ptr<UnknownValueError> checkUnknownValue(const toml::table& table);
 
+struct NotPositiveError : public HatterParserError {
+    std::string keyName;
+
+    explicit NotPositiveError(const std::string& keyName);
+    std::string what() const override;
+};
+std::shared_ptr<NotPositiveError> checkNotPositive(const std::string& keyName, const int value);
+
 struct InvalidValueError : public HatterParserError {
     std::vector<std::string> invalidVals;
     const std::string        typeName;
     const std::string        extraMessage;
 
-    explicit InvalidValueError(const std::string& typeName, const std::string& extraMessage);
+    InvalidValueError(const std::string& typeName, const std::string& extraMessage);
     InvalidValueError(const std::string& typeName,
                       const std::string& invalidVal,
                       const std::string& extraMessage);
@@ -59,7 +67,7 @@ std::shared_ptr<InvalidValueError> checkInvalidValue(const std::string&         
 struct FileNotExistError : public HatterParserError {
     std::string fileName;
     std::string what() const override;
-    FileNotExistError(const std::string fileName);
+    explicit FileNotExistError(const std::string fileName);
 };
 std::shared_ptr<FileNotExistError> checkFileNotExist(const std::filesystem::path& filePath);
 }  // namespace hatter

@@ -8,8 +8,16 @@ struct HatterParserError {
     virtual ~HatterParserError();
 };
 
-struct SectionMergeConflictError : public HatterParserError {
+struct SingleKeyError : public HatterParserError {
     const std::string keyName;
+
+    SingleKeyError(const std::string& keyName);
+    virtual ~SingleKeyError();
+
+    virtual std::string what() const = 0;
+};
+
+struct SectionMergeConflictError : public SingleKeyError {
     const std::string val1;
     const std::string val2;
 
