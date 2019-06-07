@@ -11,7 +11,7 @@ namespace hatter {
 struct FileErrorReportBase : public ErrorReportBase {
     std::vector<TopSectionErrorReport> errorReports;
 
-    void             add(const TopSectionErrorReport& errorReport);
+    void             add(const std::vector<TopSectionErrorReport>& errorReps);
     virtual explicit operator bool() const override;
 };
 

@@ -93,6 +93,17 @@ std::vector<std::string> strSplit(std::string str, const std::string& delimiter,
     return ret;
 }
 
+template <>
+void appendUniqueVector(std::vector<std::filesystem::path>&       dest,
+                        const std::vector<std::filesystem::path>& src) {
+    for (const auto& target : dest) {
+        for (const auto& result : src) {
+            if (target.string() == result.string()) { break; }
+        }
+        dest.push_back(target);
+    }
+}
+
 int execCommand(const std::string& cmd, std::string& output, const size_t outputBufferSize) {
     std::vector<char> buffer(outputBufferSize);
     auto              pipe = popen(cmd.c_str(), "r");

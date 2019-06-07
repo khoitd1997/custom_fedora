@@ -39,16 +39,6 @@ namespace hatter {
 //                               const std::string& colorCode = "");
 // };
 
-// struct DistroInfo  {
-//     std::string kickstartTag = kDefaultKickstartTag;
-//     std::string baseSpin;
-//     std::string osName;
-
-//     bool merge(const DistroInfo& target);
-
-//     explicit DistroInfo(const RawTOMLConfig& rawConfig);
-// };
-
 struct ConfigSectionBase {
     std::string keyName;
 
@@ -61,6 +51,14 @@ struct ConfigMember {
     std::string keyName;
     T           value      = {};
     bool        isOptional = true;
+};
+
+struct DistroInfo : public ConfigSectionBase {
+    ConfigMember<std::string> kickstartTag{"base_kickstart_tag", .value = kDefaultKickstartTag};
+    ConfigMember<std::string> baseSpin{"base_spin"};
+    ConfigMember<std::string> osName{"os_name"};
+
+    DistroInfo() : ConfigSectionBase{"distro_info"} {}
 };
 
 struct ImageInfo : public ConfigSectionBase {
@@ -140,6 +138,7 @@ struct MiscConfig : public ConfigSectionBase {
 };
 
 struct FullConfig {
+    DistroInfo         distroInfo;
     ImageInfo          imageInfo;
     BuildProcessConfig buildConfig;
     RepoConfig         repoConfig;

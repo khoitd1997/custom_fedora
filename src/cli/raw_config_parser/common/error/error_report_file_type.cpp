@@ -69,8 +69,10 @@ class PrettyPrinter {
 };
 }  // namespace
 FileErrorReportBase::operator bool() const { return (!errorReports.empty()); }
-void                 FileErrorReportBase::add(const TopSectionErrorReport& errorReport) {
-    if (errorReport) { errorReports.push_back(errorReport); }
+void                 FileErrorReportBase::add(const std::vector<TopSectionErrorReport>& errorReps) {
+    for (const auto& errorReport : errorReps) {
+        if (errorReport) { errorReports.push_back(errorReport); }
+    }
 }
 
 FileSectionErrorReport::FileSectionErrorReport(const std::string& fileName,

@@ -6,13 +6,15 @@
 
 #include "logger.hpp"
 
-#include "build_process_handler.hpp"
 #include "error_report_file_type.hpp"
+#include "toml_utils.hpp"
+
+#include "build_process_handler.hpp"
+#include "distro_info_handler.hpp"
 #include "image_info_handler.hpp"
 #include "misc_handler.hpp"
 #include "package_handler.hpp"
 #include "repo_handler.hpp"
-#include "toml_utils.hpp"
 
 namespace hatter {
 namespace {
@@ -34,13 +36,14 @@ bool getFile(const std::filesystem::path& filePath,
 
     FileSectionErrorReport fileSectionReport(currFileName, parentFileName);
 
-    fileSectionReport.add(repo_handler::parse(rawConfig, fullConfig.repoConfig));
-    fileSectionReport.add(package_handler::parse(rawConfig, fullConfig.packageConfig));
-    fileSectionReport.add(misc_handler::parse(rawConfig, fullConfig.miscConfig));
     fileSectionReport.add(
-        build_process_handler::parse(rawConfig, filePath.parent_path(), fullConfig.buildConfig));
-    fileSectionReport.add(
-        image_info_handler::parse(rawConfig, filePath.parent_path(), fullConfig.imageInfo));
+        {distro_info_handler::parse(rawConfig, fullConfig.distroInfo),
+         repo_handler::parse(rawConfig, fullConfig.repoConfig),
+         package_handler::parse(rawConfig, fullConfig.packageConfig),
+         misc_handler::parse(rawConfig, fullConfig.miscConfig),
+         build_process_handler::parse(rawConfig, filePath.parent_path(), fullConfig.buildConfig),
+         image_info_handler::parse(rawConfig, filePath.parent_path(), fullConfig.imageInfo)});
+
     fullReport.add(std::make_shared<FileSectionErrorReport>(fileSectionReport));
     failed = failed || fileSectionReport;
 
@@ -61,10 +64,13 @@ bool getFile(const std::filesystem::path& filePath,
         if (!failed) {
             FileMergeErrorReport mergeReport(currFileName, childFileName);
 
-            mergeReport.add(repo_handler::merge(fullConfig.repoConfig, childConf.repoConfig));
             mergeReport.add(
-                package_handler::merge(fullConfig.packageConfig, childConf.packageConfig));
-            mergeReport.add(misc_handler::merge(fullConfig.miscConfig, childConf.miscConfig));
+                {distro_info_handler::merge(fullConfig.distroInfo, childConf.distroInfo),
+                 image_info_handler::merge(fullConfig.imageInfo, childConf.imageInfo),
+                 repo_handler::merge(fullConfig.repoConfig, childConf.repoConfig),
+                 package_handler::merge(fullConfig.packageConfig, childConf.packageConfig),
+                 misc_handler::merge(fullConfig.miscConfig, childConf.miscConfig)});
+
             fullReport.add(std::make_shared<FileMergeErrorReport>(mergeReport));
             failed = failed || mergeReport;
         } else {

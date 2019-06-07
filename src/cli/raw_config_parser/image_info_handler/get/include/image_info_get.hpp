@@ -13,6 +13,7 @@ namespace image_info_handler {
 TopSectionErrorReport get(toml::table&                 rawConfig,
                           const std::filesystem::path& fileDir,
                           ImageInfo&                   outConf,
-                          toml::table&                 outRawConf);
+                          toml::table&                 outRawConf,
+                          bool&                        isEmpty);
 }  // namespace image_info_handler
 }  // namespace hatter
