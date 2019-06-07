@@ -63,10 +63,10 @@ std::shared_ptr<InvalidValueError> checkInvalidValue(const std::string&         
 }
 
 struct FileNotExistError : public SingleKeyError {
-    std::string fileName;
-    std::string what() const override;
-    explicit FileNotExistError(const std::string& keyName, const std::string& fileName);
+    std::vector<std::string> fileNames;
+    std::string              what() const override;
+    explicit FileNotExistError(const std::string& keyName);
 };
-std::shared_ptr<FileNotExistError> checkFileNotExist(const std::string&           keyName,
-                                                     const std::filesystem::path& filePath);
+std::shared_ptr<FileNotExistError> checkFileNotExist(
+    const std::string& keyName, const std::vector<std::filesystem::path>& filePaths);
 }  // namespace hatter

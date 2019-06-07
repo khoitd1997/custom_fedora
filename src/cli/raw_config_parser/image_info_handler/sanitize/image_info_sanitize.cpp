@@ -10,7 +10,7 @@ std::vector<std::shared_ptr<HatterParserError>> sanitize(const ImageInfo&   imag
     std::vector<std::shared_ptr<HatterParserError>> errors;
 
     if (auto error = checkUnknownValue(table)) { errors.push_back(error); }
-    if (auto error = checkNotPositive("partition_size", imageConf.partitionSize)) {
+    if (auto error = checkNotPositive(imageConf.keyName, imageConf.partitionSize.value)) {
         errors.push_back(error);
     }
     // if (auto error = checkFileNotExist(imageConf.)) { errors.push_back(error); }

@@ -79,33 +79,37 @@ std::string getTypeName(const T& variable) {
 
 namespace internal {
 enum class TOMLValStatus { NOT_PRESENT, PRESENT, PRESENT_TYPE_ERROR };
+
 template <typename T>
-TOMLValStatus getTOMLValHelper(toml::table& t, const std::string& keyName, T& storage) {
-    auto ret = TOMLValStatus::PRESENT;
-    try {
-        storage = toml::get<T>(t.at(keyName));
-    } catch (const toml::type_error& e) {
-        ret = TOMLValStatus::PRESENT_TYPE_ERROR;
-    } catch (const std::out_of_range& e) { ret = TOMLValStatus::NOT_PRESENT; }
-    t.erase(keyName);
-    return ret;
+std::shared_ptr<TOMLError> getTOMLValBase(toml::table& t, ConfigMember<T>& conf) {
+    TOMLValStatus status;
+    auto          error = getTOMLValBase(t, conf, status);
+    (void)status;
+    return error;
 }
 
 template <typename T>
-std::shared_ptr<TOMLError> getTOMLErrorPtr(const TOMLValStatus status,
-                                           const std::string&  keyName,
-                                           const T&            storage,
-                                           const bool          isOptional = true) {
+std::shared_ptr<TOMLError> getTOMLValBase(toml::table&     t,
+                                          ConfigMember<T>& conf,
+                                          TOMLValStatus&   status) {
+    status = TOMLValStatus::PRESENT;
+    try {
+        conf.value = toml::get<T>(t.at(conf.keyName));
+    } catch (const toml::type_error& e) {
+        status = TOMLValStatus::PRESENT_TYPE_ERROR;
+    } catch (const std::out_of_range& e) { status = TOMLValStatus::NOT_PRESENT; }
+    t.erase(conf.keyName);
+
     switch (status) {
         case TOMLValStatus::NOT_PRESENT:
-            if (isOptional) { return nullptr; }
-            return std::make_shared<TOMLExistentError>(keyName);
+            if (conf.isOptional) { return nullptr; }
+            return std::make_shared<TOMLExistentError>(conf.keyName);
             break;
         case TOMLValStatus::PRESENT:
             return nullptr;
             break;
         case TOMLValStatus::PRESENT_TYPE_ERROR:
-            return std::make_shared<TOMLTypeError>(keyName, getTypeName(storage));
+            return std::make_shared<TOMLTypeError>(conf.keyName, getTypeName(conf.value));
             break;
         default:
             return nullptr;
@@ -113,33 +117,37 @@ std::shared_ptr<TOMLError> getTOMLErrorPtr(const TOMLValStatus status,
     }
 }
 
-template <typename T>
-std::shared_ptr<TOMLError> getTOMLValBase(toml::table&       t,
-                                          const std::string& keyName,
-                                          T&                 storage,
-                                          const bool         isOptional = true) {
-    auto status = getTOMLValHelper(t, keyName, storage);
-    return getTOMLErrorPtr(status, keyName, storage, isOptional);
-}
 };  // namespace internal
+template <typename T>
+std::shared_ptr<TOMLError> getNonMemberTOMLVal(toml::table&       t,
+                                               const std::string& keyName,
+                                               T&                 out,
+                                               const bool         isOptional = true) {
+    ConfigMember<T> tempConf{keyName, .isOptional = isOptional};
+    auto            error = internal::getTOMLValBase(t, tempConf);
+    out                   = tempConf.value;
+    return error;
+}
 
 template <typename T>
-std::shared_ptr<TOMLError> getTOMLVal(toml::table&       t,
-                                      const std::string& keyName,
-                                      T&                 storage,
-                                      const bool         isOptional = true) {
-    return internal::getTOMLValBase(t, keyName, storage, isOptional);
+std::shared_ptr<TOMLError> getTOMLVal(toml::table& t, ConfigMember<T>& conf) {
+    return internal::getTOMLValBase(t, conf);
 }
 
 template <>
-std::shared_ptr<TOMLError> getTOMLVal(toml::table&       t,
-                                      const std::string& keyName,
-                                      std::string&       storage,
-                                      const bool         isOptional);
+std::shared_ptr<TOMLError> getTOMLVal(toml::table& t, ConfigMember<std::string>& conf);
+
+std::shared_ptr<TOMLError> getBaseTable(toml::table&             t,
+                                        const ConfigSectionBase& confSection,
+                                        toml::table&             out);
+std::shared_ptr<TOMLError> getBaseTable(toml::table&              t,
+                                        const ConfigSectionBase&  confSection,
+                                        std::vector<toml::table>& out);
 
 template <>
-std::shared_ptr<TOMLError> getTOMLVal(toml::table&              t,
-                                      const std::string&        keyName,
-                                      std::vector<std::string>& storage,
-                                      const bool                isOptional);
+std::shared_ptr<TOMLError> getTOMLVal(toml::table& t, ConfigMember<std::vector<std::string>>& conf);
+
+std::shared_ptr<TOMLError> getTOMLVal(toml::table&                                      rawConf,
+                                      ConfigMember<std::vector<std::filesystem::path>>& conf,
+                                      const std::filesystem::path&                      parentDir);
 }  // namespace hatter

@@ -20,7 +20,7 @@ std::string StandardRepoNotSupportedError::what() const {
 std::shared_ptr<StandardRepoNotSupportedError> checkStandardRepo(const RepoConfig& repoConf) {
     std::shared_ptr<StandardRepoNotSupportedError> error = nullptr;
 
-    for (const auto& standardRepo : repoConf.standardRepos) {
+    for (const auto& standardRepo : repoConf.standardRepos.value) {
         if (!inVector(standardRepo, supportedStandardRepos)) {
             if (!error) { error = std::make_shared<StandardRepoNotSupportedError>(); }
             error->repos.push_back(standardRepo);
@@ -40,7 +40,7 @@ std::shared_ptr<CoprRepoNotFoundError> checkCoprRepo(const RepoConfig& repoConf)
     auto error    = std::make_shared<CoprRepoNotFoundError>();
     auto hasError = false;
 
-    for (const auto& coprRepo : repoConf.coprRepos) {
+    for (const auto& coprRepo : repoConf.coprRepos.value) {
         const auto temp = strSplit(coprRepo, "/");
         if (temp.size() != 2) {
             error->repos.push_back(coprRepo);

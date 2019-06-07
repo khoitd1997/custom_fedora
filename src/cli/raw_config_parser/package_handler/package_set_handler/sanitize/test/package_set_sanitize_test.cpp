@@ -41,10 +41,10 @@ TEST(PackageSetSanitizeTest, InvalidVal_RPM_POSITIVE) {
     PackageSet  config{PackageSet::PackageType::rpm};
     toml::table table;
 
-    config.installList.push_back("bat");
-    config.installList.push_back("non_existent_package1");
-    config.installList.push_back("non_existent_package2");
-    config.installList.push_back("neovim");
+    config.installList.value.push_back("bat");
+    config.installList.value.push_back("non_existent_package1");
+    config.installList.value.push_back("non_existent_package2");
+    config.installList.value.push_back("neovim");
 
     const auto errors = sanitize(config, table);
 
@@ -62,9 +62,9 @@ TEST(PackageSetSanitizeTest, InvalidVal_RPM_NEGATIVE) {
     PackageSet  config{PackageSet::PackageType::rpm};
     toml::table table;
 
-    config.installList.push_back("bat");
-    config.installList.push_back("zzuf");
-    config.installList.push_back("neovim");
+    config.installList.value.push_back("bat");
+    config.installList.value.push_back("zzuf");
+    config.installList.value.push_back("neovim");
 
     const auto errors = sanitize(config, table);
 
@@ -76,10 +76,10 @@ TEST(PackageSetSanitizeTest, InvalidVal_RPM_GROUP_POSITIVE) {
     PackageSet  config{PackageSet::PackageType::rpm_group};
     toml::table table;
 
-    config.installList.push_back("xmonad-mate");
-    config.installList.push_back("non_existent_group1");
-    config.installList.push_back("non_existent_group2");
-    config.installList.push_back("system-tools");
+    config.installList.value.push_back("xmonad-mate");
+    config.installList.value.push_back("non_existent_group1");
+    config.installList.value.push_back("non_existent_group2");
+    config.installList.value.push_back("system-tools");
 
     const auto errors = sanitize(config, table);
 
@@ -97,9 +97,9 @@ TEST(PackageSetSanitizeTest, InvalidVal_RPM_GROUP_NEGATIVE) {
     PackageSet  config{PackageSet::PackageType::rpm_group};
     toml::table table;
 
-    config.installList.push_back("xmonad-mate");
-    config.installList.push_back("tomcat");
-    config.installList.push_back("system-tools");
+    config.installList.value.push_back("xmonad-mate");
+    config.installList.value.push_back("tomcat");
+    config.installList.value.push_back("system-tools");
 
     const auto errors = sanitize(config, table);
 
@@ -115,9 +115,9 @@ TEST(PackageSetSanitizeTest, InvalidVal_UnknownVal) {
     }
 
     PackageSet config{PackageSet::PackageType::rpm_group};
-    config.installList.push_back("xmonad-mate");
-    config.installList.push_back("non_existent_group2");
-    config.installList.push_back("system-tools");
+    config.installList.value.push_back("xmonad-mate");
+    config.installList.value.push_back("non_existent_group2");
+    config.installList.value.push_back("system-tools");
 
     const auto errors = sanitize(config, table);
 

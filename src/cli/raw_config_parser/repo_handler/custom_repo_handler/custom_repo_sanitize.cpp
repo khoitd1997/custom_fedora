@@ -10,7 +10,7 @@ std::string RepoNoLinkError::what() const {
     return "either baseurl or metalink needs to be defined";
 }
 std::shared_ptr<RepoNoLinkError> checkRepoNoLink(const CustomRepo& repo) {
-    if (repo.baseurl.empty() && repo.metaLink.empty()) {
+    if (repo.baseurl.value.empty() && repo.metaLink.value.empty()) {
         return std::make_shared<RepoNoLinkError>();
     }
     return nullptr;
@@ -21,7 +21,9 @@ std::string RepoNoGPGKeyError::what() const {
            formatter::formatImportantText("gpgcheck") + " is true";
 }
 std::shared_ptr<RepoNoGPGKeyError> checkRepoNoGPGKey(const CustomRepo& repo) {
-    if (repo.gpgcheck && repo.gpgkey.empty()) { return std::make_shared<RepoNoGPGKeyError>(); }
+    if (repo.gpgcheck.value && repo.gpgkey.value.empty()) {
+        return std::make_shared<RepoNoGPGKeyError>();
+    }
     return nullptr;
 }
 

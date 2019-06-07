@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "magic_enum.hpp"
 #include "toml11/toml.hpp"
 
 #include "default_config.hpp"
@@ -48,42 +49,47 @@ namespace hatter {
 //     explicit DistroInfo(const RawTOMLConfig& rawConfig);
 // };
 
-template <typename T>
-struct ConfigMember {
-    const std::string keyName;
-    T                 value;
-    bool              isOptional;
+struct ConfigSectionBase {
+    std::string keyName;
 
-    ConfigMember(const std::string &keyName) : ConfigMember{keyName, {}, true} {}
-    ConfigMember(const std::string &keyName, const T &defaultValue)
-        : ConfigMember{keyName, defaultValue, true} {}
-    ConfigMember(const std::string &keyName, const T &defaultValue, const bool isOptional)
-        : keyName{keyName}, value{defaultValue}, isOptional{isOptional} {}
+    ConfigSectionBase(const std::string &keyName) : keyName{keyName} {}
+    virtual ~ConfigSectionBase() = 0;
 };
 
-struct ImageInfo {
+template <typename T>
+struct ConfigMember {
+    std::string keyName;
+    T           value      = {};
+    bool        isOptional = true;
+};
+
+struct ImageInfo : public ConfigSectionBase {
     ConfigMember<int>                                partitionSize{"partition_size"};
     ConfigMember<std::vector<std::filesystem::path>> firstLoginScripts{"first_login_script"};
     ConfigMember<std::vector<std::filesystem::path>> postBuildScripts{"post_build_scripts"};
     ConfigMember<std::vector<std::filesystem::path>> postBuildNoRootScripts{
         "post_build_script_no_chroots"};
     ConfigMember<std::vector<std::filesystem::path>> userFiles{"user_files"};
+
+    ImageInfo() : ConfigSectionBase{"image_info"} {}
 };
 
-struct BuildProcessConfig {
+struct BuildProcessConfig : public ConfigSectionBase {
     ConfigMember<std::vector<std::filesystem::path>> mockScriptPaths{"custom_mock_script"};
-    ConfigMember<bool> enableCustomCache{"enable_custom_cache", kDefaultEnableCustomCache};
+    ConfigMember<bool> enableCustomCache{"enable_custom_cache", .value = kDefaultEnableCustomCache};
+
+    BuildProcessConfig() : ConfigSectionBase{"build_process"} {}
 };
 
 // TODO: move this inside Repo
-struct CustomRepo {
+struct CustomRepo : public ConfigSectionBase {
     ConfigMember<std::string> name{"name"};
     ConfigMember<std::string> displayName{"display_name"};
 
     ConfigMember<std::string> metaLink{"metalink"};
     ConfigMember<std::string> baseurl{"baseurl"};
 
-    ConfigMember<bool>        gpgcheck{"gpgcheck", false};
+    ConfigMember<bool>        gpgcheck{"gpgcheck", .isOptional = false};
     ConfigMember<std::string> gpgkey{"gpgkey"};
 
     bool operator==(const CustomRepo &r) const {
@@ -94,15 +100,19 @@ struct CustomRepo {
                (this->gpgcheck.value == r.gpgcheck.value) && (this->gpgkey.value == r.gpgkey.value);
     }
     bool operator!=(const CustomRepo &r) const { return !(this->operator==(r)); }
+
+    CustomRepo() : ConfigSectionBase{"custom_repo"} {}
 };
 
-struct RepoConfig {
+struct RepoConfig : public ConfigSectionBase {
     ConfigMember<std::vector<std::string>> standardRepos{"standard_repos"};
     ConfigMember<std::vector<std::string>> coprRepos{"copr_repos"};
-    ConfigMember<std::vector<CustomRepo>>  customRepos{"custom_repos"};
+    std::vector<CustomRepo>                customRepos;
+
+    RepoConfig() : ConfigSectionBase{"repo"} {}
 };
 
-struct PackageSet {
+struct PackageSet : public ConfigSectionBase {
     enum class PackageType { rpm, rpm_group };
 
     PackageType packageType;
@@ -110,18 +120,23 @@ struct PackageSet {
     ConfigMember<std::vector<std::string>> installList{"install"};
     ConfigMember<std::vector<std::string>> removeList{"remove"};
 
-    explicit PackageSet(const PackageType pkgType) : packageType(pkgType) {}
+    explicit PackageSet(const PackageType pkgType)
+        : ConfigSectionBase{std::string(magic_enum::enum_name(pkgType))}, packageType{pkgType} {}
 };
 
-struct PackageConfig {
-    ConfigMember<PackageSet> rpm{"rpm", PackageSet{PackageSet::PackageType::rpm}};
-    ConfigMember<PackageSet> rpmGroup{"rpm_group", PackageSet{PackageSet::PackageType::rpm_group}};
+struct PackageConfig : public ConfigSectionBase {
+    PackageSet rpm{PackageSet{PackageSet::PackageType::rpm}};
+    PackageSet rpmGroup{PackageSet{PackageSet::PackageType::rpm_group}};
+
+    PackageConfig() : ConfigSectionBase{"package"} {}
 };
 
-struct MiscConfig {
-    ConfigMember<std::string> language{"language", kDefaultLanguage};
+struct MiscConfig : public ConfigSectionBase {
+    ConfigMember<std::string> language{"language", .value = kDefaultLanguage};
     ConfigMember<std::string> keyboard{"keyboard"};
     ConfigMember<std::string> timezone{"timezone"};
+
+    MiscConfig() : ConfigSectionBase{"misc"} {}
 };
 
 struct FullConfig {

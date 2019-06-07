@@ -25,7 +25,7 @@ TopSectionErrorReport parse(toml::table& rawConfig, PackageConfig& pkgConfig) {
     TopSectionErrorReport errorReport(kSectionName);
 
     toml::table rawPkgConf;
-    errorReport.add({getTOMLVal(rawConfig, kSectionName, rawPkgConf)});
+    errorReport.add({getBaseTable(rawConfig, pkgConfig, rawPkgConf)});
     if (errorReport || rawPkgConf.empty()) { return errorReport; }
 
     errorReport.add({package_set_handler::parse(rawPkgConf, pkgConfig.rpm)});
@@ -39,11 +39,8 @@ TopSectionErrorReport parse(toml::table& rawConfig, PackageConfig& pkgConfig) {
 TopSectionErrorReport merge(PackageConfig& resultConf, const PackageConfig& targetConf) {
     TopSectionErrorReport errorReport(kSectionName);
 
-    appendUniqueVector(resultConf.rpm.installList, targetConf.rpm.installList);
-    appendUniqueVector(resultConf.rpm.removeList, targetConf.rpm.removeList);
-
-    appendUniqueVector(resultConf.rpmGroup.installList, targetConf.rpmGroup.installList);
-    appendUniqueVector(resultConf.rpmGroup.removeList, targetConf.rpmGroup.removeList);
+    errorReport.add({package_set_handler::merge(resultConf.rpm, targetConf.rpm),
+                     package_set_handler::merge(resultConf.rpmGroup, targetConf.rpmGroup)});
 
     return errorReport;
 }

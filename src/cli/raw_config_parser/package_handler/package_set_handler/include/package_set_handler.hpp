@@ -11,5 +11,7 @@
 namespace hatter {
 namespace package_set_handler {
 SubSectionErrorReport parse(toml::table& rawConfig, PackageSet& pkgSet);
+
+SubSectionErrorReport merge(PackageSet& resultConf, const PackageSet& targetConf);
 }  // namespace package_set_handler
 }  // namespace hatter

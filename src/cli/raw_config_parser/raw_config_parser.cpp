@@ -29,7 +29,7 @@ bool getFile(const std::filesystem::path& filePath,
 
     // TODO(kd): error handling here
     std::vector<std::string> includeFiles;
-    getTOMLVal(rawConfig, "include_files", includeFiles);
+    getNonMemberTOMLVal(rawConfig, "include_files", includeFiles);
     std::cout << "current file: " << filePath << std::endl;
 
     FileSectionErrorReport fileSectionReport(currFileName, parentFileName);
@@ -45,7 +45,7 @@ bool getFile(const std::filesystem::path& filePath,
     failed = failed || fileSectionReport;
 
     std::cout << "First Login Path:" << std::endl;
-    for (const auto& filePath : fullConfig.imageInfo.firstLoginScripts) {
+    for (const auto& filePath : fullConfig.imageInfo.firstLoginScripts.value) {
         std::cout << filePath.string() << std::endl;
     }
 

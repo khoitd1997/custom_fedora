@@ -12,17 +12,14 @@ TopSectionErrorReport get(toml::table&                 rawConfig,
                           toml::table&                 outRawConf) {
     TopSectionErrorReport errorReport(kSectionName);
 
-    errorReport.add({getTOMLVal(rawConfig, kSectionName, outRawConf)});
+    errorReport.add({getBaseTable(rawConfig, outConf, outRawConf)});
     if (errorReport || outRawConf.empty()) { return errorReport; }
 
-    errorReport.add({getTOMLVal(outRawConf, "partition_size", outConf.partitionSize)});
-    errorReport.add(
-        {getFilePath(outRawConf, "first_login_script", fileDir, outConf.firstLoginScripts)});
-    errorReport.add(
-        {getFilePath(outRawConf, "post_build_script", fileDir, outConf.postBuildScripts)});
-    errorReport.add({getFilePath(
-        outRawConf, "post_build_script_no_chroot", fileDir, outConf.postBuildNoRootScripts)});
-    errorReport.add({getFilePath(outRawConf, "user_files", fileDir, outConf.userFiles, false)});
+    errorReport.add({getTOMLVal(outRawConf, outConf.partitionSize)});
+    errorReport.add({getTOMLVal(outRawConf, outConf.firstLoginScripts, fileDir)});
+    errorReport.add({getTOMLVal(outRawConf, outConf.postBuildScripts, fileDir)});
+    errorReport.add({getTOMLVal(outRawConf, outConf.postBuildNoRootScripts, fileDir)});
+    errorReport.add({getTOMLVal(outRawConf, outConf.userFiles, fileDir)});
 
     return errorReport;
 }
