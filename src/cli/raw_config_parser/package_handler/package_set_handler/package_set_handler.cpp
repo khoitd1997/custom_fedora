@@ -29,8 +29,8 @@ SubSectionErrorReport parse(toml::table& rawConfig, PackageSet& pkgSet) {
     errorReport.add({getBaseTable(rawConfig, pkgSet, rawPkgSet)});
     if (errorReport || rawPkgSet.empty()) { return errorReport; }
 
-    errorReport.add({getTOMLVal(rawPkgSet, pkgSet.installList)});
-    errorReport.add({getTOMLVal(rawPkgSet, pkgSet.removeList)});
+    errorReport.add(
+        {getTOMLVal(rawPkgSet, pkgSet.installList), getTOMLVal(rawPkgSet, pkgSet.removeList)});
 
     if (!errorReport) { errorReport.add(sanitize(pkgSet, rawPkgSet)); }
 

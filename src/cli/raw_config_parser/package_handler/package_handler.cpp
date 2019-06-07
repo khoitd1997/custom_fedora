@@ -28,8 +28,8 @@ TopSectionErrorReport parse(toml::table& rawConfig, PackageConfig& pkgConfig) {
     errorReport.add({getBaseTable(rawConfig, pkgConfig, rawPkgConf)});
     if (errorReport || rawPkgConf.empty()) { return errorReport; }
 
-    errorReport.add({package_set_handler::parse(rawPkgConf, pkgConfig.rpm)});
-    errorReport.add({package_set_handler::parse(rawPkgConf, pkgConfig.rpmGroup)});
+    errorReport.add({package_set_handler::parse(rawPkgConf, pkgConfig.rpm),
+                     package_set_handler::parse(rawPkgConf, pkgConfig.rpmGroup)});
 
     if (!errorReport) { errorReport.add(sanitize(pkgConfig, rawPkgConf)); }
 

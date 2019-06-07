@@ -28,8 +28,8 @@ TopSectionErrorReport parse(toml::table& rawConfig, RepoConfig& repoConfig) {
     errorReport.add({getBaseTable(rawConfig, repoConfig, rawRepoConfig)});
     if (errorReport || rawRepoConfig.empty()) { return errorReport; }
 
-    errorReport.add({getTOMLVal(rawRepoConfig, repoConfig.standardRepos)});
-    errorReport.add({getTOMLVal(rawRepoConfig, repoConfig.coprRepos)});
+    errorReport.add({getTOMLVal(rawRepoConfig, repoConfig.standardRepos),
+                     getTOMLVal(rawRepoConfig, repoConfig.coprRepos)});
 
     // parse custom repos
     std::vector<toml::table> rawCustomRepos;

@@ -25,9 +25,9 @@ TopSectionErrorReport parse(toml::table& rawConfig, MiscConfig& outConf) {
     errorReport.add({getBaseTable(rawConfig, outConf, rawMiscConf)});
     if (errorReport || rawMiscConf.empty()) { return errorReport; }
 
-    errorReport.add({getTOMLVal(rawMiscConf, outConf.language)});
-    errorReport.add({getTOMLVal(rawMiscConf, outConf.keyboard)});
-    errorReport.add({getTOMLVal(rawMiscConf, outConf.timezone)});
+    errorReport.add({getTOMLVal(rawMiscConf, outConf.language),
+                     getTOMLVal(rawMiscConf, outConf.keyboard),
+                     getTOMLVal(rawMiscConf, outConf.timezone)});
 
     if (!errorReport) { errorReport.add(sanitize(outConf, rawMiscConf)); }
 

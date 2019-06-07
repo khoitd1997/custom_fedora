@@ -15,11 +15,11 @@ TopSectionErrorReport get(toml::table&                 rawConfig,
     errorReport.add({getBaseTable(rawConfig, outConf, outRawConf)});
     if (errorReport || outRawConf.empty()) { return errorReport; }
 
-    errorReport.add({getTOMLVal(outRawConf, outConf.partitionSize)});
-    errorReport.add({getTOMLVal(outRawConf, outConf.firstLoginScripts, fileDir)});
-    errorReport.add({getTOMLVal(outRawConf, outConf.postBuildScripts, fileDir)});
-    errorReport.add({getTOMLVal(outRawConf, outConf.postBuildNoRootScripts, fileDir)});
-    errorReport.add({getTOMLVal(outRawConf, outConf.userFiles, fileDir)});
+    errorReport.add({getTOMLVal(outRawConf, outConf.partitionSize),
+                     getTOMLVal(outRawConf, outConf.firstLoginScripts, fileDir),
+                     getTOMLVal(outRawConf, outConf.postBuildScripts, fileDir),
+                     getTOMLVal(outRawConf, outConf.postBuildNoRootScripts, fileDir),
+                     getTOMLVal(outRawConf, outConf.userFiles, fileDir)});
 
     return errorReport;
 }
