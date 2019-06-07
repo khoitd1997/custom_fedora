@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -48,10 +49,14 @@ void removeDuplicateVector(std::vector<T>& v) {
 }
 
 template <typename T>
-void appendUniqueVector(std::vector<T>& resultVec, const std::vector<T>& targetVec) {
-    appendVector(resultVec, targetVec);
-    removeDuplicateVector(resultVec);
+void appendUniqueVector(std::vector<T>& dest, const std::vector<T>& src) {
+    appendVector(dest, src);
+    removeDuplicateVector(dest);
 }
+
+template <>
+void appendUniqueVector(std::vector<std::filesystem::path>&       dest,
+                        const std::vector<std::filesystem::path>& src);
 
 int execCommand(const std::string& cmd, std::string& output, const size_t outputBufferSize = 1000);
 }  // namespace hatter

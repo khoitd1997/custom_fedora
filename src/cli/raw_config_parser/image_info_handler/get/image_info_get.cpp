@@ -9,10 +9,12 @@ extern const std::string kSectionName;
 TopSectionErrorReport get(toml::table&                 rawConfig,
                           const std::filesystem::path& fileDir,
                           ImageInfo&                   outConf,
-                          toml::table&                 outRawConf) {
+                          toml::table&                 outRawConf,
+                          bool&                        isEmpty) {
     TopSectionErrorReport errorReport(kSectionName);
 
     errorReport.add({getBaseTable(rawConfig, outConf, outRawConf)});
+    isEmpty = outRawConf.empty();
     if (errorReport || outRawConf.empty()) { return errorReport; }
 
     errorReport.add({getTOMLVal(outRawConf, outConf.partitionSize),

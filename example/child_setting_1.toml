@@ -1,11 +1,8 @@
-[distro_info]
-# TODO(kd): Pull these two to command line, also rename
-image_fedora_version="29"
-image_fedora_arch="x86_64" 
-
-base_kickstart_tag="latest" 
-base_spin="cinnamon"
-os_name="fedora-kd" 
+# [distro_info]
+# # TODO(kd): Pull these two to command line, also rename
+# base_kickstart_tag="latest" 
+# base_spin="cinnamon"
+# os_name="fedora-kd" 
 
 [image_info]
 partition_size=7000
