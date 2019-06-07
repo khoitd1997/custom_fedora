@@ -42,10 +42,7 @@ std::shared_ptr<InvalidValueError> checkPackageNotFound(const PackageSet &pkgSet
             break;
     }
 
-    return checkInvalidValue(std::string(magic_enum::enum_name(pkgSet.packageType)),
-                             pkgSet.installList,
-                             searchFile,
-                             useRegex);
+    return checkInvalidValue(pkgSet.keyName, pkgSet.installList.value, searchFile, useRegex);
 }
 
 std::vector<std::shared_ptr<HatterParserError>> sanitize(const PackageSet & pkgSet,

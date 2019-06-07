@@ -17,7 +17,7 @@ std::shared_ptr<UnknownValueError> checkUnknownValue(const toml::table& table) {
     return nullptr;
 }
 
-NotPositiveError::NotPositiveError(const std::string& keyName) : keyName{keyName} {}
+NotPositiveError::NotPositiveError(const std::string& keyName) : SingleKeyError{keyName} {}
 std::string NotPositiveError::what() const {
     return "key must be " + formatter::formatImportantText("positive") + ": " +
            formatter::formatErrorText(keyName);
@@ -71,13 +71,20 @@ std::shared_ptr<InvalidValueError> checkInvalidValue(const std::string&         
     return nullptr;
 }
 
-FileNotExistError::FileNotExistError(const std::string fileName) : fileName{fileName} {}
+FileNotExistError::FileNotExistError(const std::string& keyName) : SingleKeyError{keyName} {}
 std::string FileNotExistError::what() const {
-    return formatter::formatImportantText("file ") +
-           "doesn't exist: " + formatter::formatErrorText(fileName);
+    return formatter::formatImportantText(keyName) +
+           "(s) don't exist: " + formatter::formatErrorText(strJoin(fileNames));
 }
-std::shared_ptr<FileNotExistError> checkFileNotExist(const std::filesystem::path& filePath) {
-    if (std::filesystem::exists(filePath)) { return nullptr; }
-    return std::make_shared<FileNotExistError>(filePath.filename().string());
+std::shared_ptr<FileNotExistError> checkFileNotExist(
+    const std::string& keyName, const std::vector<std::filesystem::path>& filePaths) {
+    std::shared_ptr<FileNotExistError> error = nullptr;
+    for (const auto& filePath : filePaths) {
+        if (!std::filesystem::exists(filePath)) {
+            if (!error) { error = std::make_shared<FileNotExistError>(keyName); }
+            error->fileNames.push_back(filePath.string());
+        }
+    }
+    return error;
 }
 }  // namespace hatter

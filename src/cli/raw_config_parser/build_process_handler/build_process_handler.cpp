@@ -25,14 +25,11 @@ TopSectionErrorReport parse(toml::table&                 rawConfig,
     TopSectionErrorReport errorReport(kSectionName);
 
     toml::table rawBuildConf;
-    errorReport.add({getTOMLVal(rawConfig, kSectionName, rawBuildConf)});
+    errorReport.add({getBaseTable(rawConfig, outConf, rawBuildConf)});
     if (errorReport || rawBuildConf.empty()) { return errorReport; }
 
-    std::string tempStr;
-    errorReport.add({getTOMLVal(rawBuildConf, "custom_mock_script", tempStr)});
-    outConf.mockScriptPaths.push_back(fileDir / tempStr);
-
-    errorReport.add({getTOMLVal(rawBuildConf, "enable_custom_cache", outConf.enableCustomCache)});
+    errorReport.add({getTOMLVal(rawBuildConf, outConf.mockScriptPaths, fileDir),
+                     getTOMLVal(rawBuildConf, outConf.enableCustomCache)});
 
     if (!errorReport) { errorReport.add(sanitize(outConf, rawBuildConf)); }
 
@@ -42,20 +39,17 @@ TopSectionErrorReport parse(toml::table&                 rawConfig,
 TopSectionErrorReport merge(BuildProcessConfig& resultConf, const BuildProcessConfig& targetConf) {
     TopSectionErrorReport errorReport(kSectionName);
 
-    for (const auto& filePath : targetConf.mockScriptPaths) {
+    for (const auto& filePath : targetConf.mockScriptPaths.value) {
         auto isDup = false;
-        for (const auto& resFilePath : resultConf.mockScriptPaths) {
+        for (const auto& resFilePath : resultConf.mockScriptPaths.value) {
             if (resFilePath.string() == filePath.string()) {
                 isDup = true;
                 break;
             }
         }
-        if (!isDup) { resultConf.mockScriptPaths.push_back(filePath); }
+        if (!isDup) { resultConf.mockScriptPaths.value.push_back(filePath); }
     }
-    mergeAndCheckConflict(errorReport,
-                          "enable_custom_cache",
-                          resultConf.enableCustomCache,
-                          targetConf.enableCustomCache);
+    mergeAndCheckConflict(errorReport, resultConf.enableCustomCache, targetConf.enableCustomCache);
 
     return errorReport;
 }

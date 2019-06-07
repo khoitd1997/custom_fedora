@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "magic_enum.hpp"
 #include "toml11/toml.hpp"
 
 #include "default_config.hpp"
@@ -48,62 +49,94 @@ namespace hatter {
 //     explicit DistroInfo(const RawTOMLConfig& rawConfig);
 // };
 
-struct ImageInfo {
-    int                                partitionSize;
-    std::vector<std::filesystem::path> firstLoginScripts;
-    std::vector<std::filesystem::path> postBuildScripts;
-    std::vector<std::filesystem::path> postBuildNoRootScripts;
-    std::vector<std::filesystem::path> userFiles;
+struct ConfigSectionBase {
+    std::string keyName;
+
+    ConfigSectionBase(const std::string &keyName) : keyName{keyName} {}
+    virtual ~ConfigSectionBase() = 0;
 };
 
-struct BuildProcessConfig {
-    std::vector<std::filesystem::path> mockScriptPaths;
-    bool                               enableCustomCache = kDefaultEnableCustomCache;
+template <typename T>
+struct ConfigMember {
+    std::string keyName;
+    T           value      = {};
+    bool        isOptional = true;
 };
 
-struct CustomRepo {
-    std::string name;
-    std::string displayName;
+struct ImageInfo : public ConfigSectionBase {
+    ConfigMember<int>                                partitionSize{"partition_size"};
+    ConfigMember<std::vector<std::filesystem::path>> firstLoginScripts{"first_login_script"};
+    ConfigMember<std::vector<std::filesystem::path>> postBuildScripts{"post_build_scripts"};
+    ConfigMember<std::vector<std::filesystem::path>> postBuildNoRootScripts{
+        "post_build_script_no_chroots"};
+    ConfigMember<std::vector<std::filesystem::path>> userFiles{"user_files"};
 
-    std::string metaLink;
-    std::string baseurl;
+    ImageInfo() : ConfigSectionBase{"image_info"} {}
+};
 
-    bool        gpgcheck = false;
-    std::string gpgkey;
+struct BuildProcessConfig : public ConfigSectionBase {
+    ConfigMember<std::vector<std::filesystem::path>> mockScriptPaths{"custom_mock_script"};
+    ConfigMember<bool> enableCustomCache{"enable_custom_cache", .value = kDefaultEnableCustomCache};
 
-    bool operator==(const CustomRepo& r) const {
-        return (this->name == r.name) && (this->displayName == r.displayName) &&
-               (this->metaLink == r.metaLink) && (this->baseurl == r.baseurl) &&
-               (this->gpgcheck == r.gpgcheck) && (this->gpgkey == r.gpgkey);
+    BuildProcessConfig() : ConfigSectionBase{"build_process"} {}
+};
+
+// TODO: move this inside Repo
+struct CustomRepo : public ConfigSectionBase {
+    ConfigMember<std::string> name{"name"};
+    ConfigMember<std::string> displayName{"display_name"};
+
+    ConfigMember<std::string> metaLink{"metalink"};
+    ConfigMember<std::string> baseurl{"baseurl"};
+
+    ConfigMember<bool>        gpgcheck{"gpgcheck", .isOptional = false};
+    ConfigMember<std::string> gpgkey{"gpgkey"};
+
+    bool operator==(const CustomRepo &r) const {
+        return (this->name.value == r.name.value) &&
+               (this->displayName.value == r.displayName.value) &&
+               (this->metaLink.value == r.metaLink.value) &&
+               (this->baseurl.value == r.baseurl.value) &&
+               (this->gpgcheck.value == r.gpgcheck.value) && (this->gpgkey.value == r.gpgkey.value);
     }
-    bool operator!=(const CustomRepo& r) const { return !(this->operator==(r)); }
+    bool operator!=(const CustomRepo &r) const { return !(this->operator==(r)); }
+
+    CustomRepo() : ConfigSectionBase{"custom_repo"} {}
 };
 
-struct RepoConfig {
-    std::vector<std::string> standardRepos;
-    std::vector<std::string> coprRepos;
-    std::vector<CustomRepo>  customRepos;
+struct RepoConfig : public ConfigSectionBase {
+    ConfigMember<std::vector<std::string>> standardRepos{"standard_repos"};
+    ConfigMember<std::vector<std::string>> coprRepos{"copr_repos"};
+    std::vector<CustomRepo>                customRepos;
+
+    RepoConfig() : ConfigSectionBase{"repo"} {}
 };
 
-struct PackageSet {
+struct PackageSet : public ConfigSectionBase {
     enum class PackageType { rpm, rpm_group };
 
-    PackageType              packageType;
-    std::vector<std::string> installList;
-    std::vector<std::string> removeList;
+    PackageType packageType;
 
-    explicit PackageSet(const PackageType pkgType) : packageType(pkgType) {}
+    ConfigMember<std::vector<std::string>> installList{"install"};
+    ConfigMember<std::vector<std::string>> removeList{"remove"};
+
+    explicit PackageSet(const PackageType pkgType)
+        : ConfigSectionBase{std::string(magic_enum::enum_name(pkgType))}, packageType{pkgType} {}
 };
 
-struct PackageConfig {
-    PackageSet rpm{PackageSet::PackageType::rpm};
-    PackageSet rpmGroup{PackageSet::PackageType::rpm_group};
+struct PackageConfig : public ConfigSectionBase {
+    PackageSet rpm{PackageSet{PackageSet::PackageType::rpm}};
+    PackageSet rpmGroup{PackageSet{PackageSet::PackageType::rpm_group}};
+
+    PackageConfig() : ConfigSectionBase{"package"} {}
 };
 
-struct MiscConfig {
-    std::string language = kDefaultLanguage;
-    std::string keyboard;
-    std::string timezone;
+struct MiscConfig : public ConfigSectionBase {
+    ConfigMember<std::string> language{"language", .value = kDefaultLanguage};
+    ConfigMember<std::string> keyboard{"keyboard"};
+    ConfigMember<std::string> timezone{"timezone"};
+
+    MiscConfig() : ConfigSectionBase{"misc"} {}
 };
 
 struct FullConfig {
@@ -118,6 +151,8 @@ struct FullConfig {
 namespace std {
 template <>
 struct hash<hatter::CustomRepo> {
-    size_t operator()(const hatter::CustomRepo& r) const { return hash<std::string>()(r.name); }
+    size_t operator()(const hatter::CustomRepo &r) const {
+        return hash<std::string>()(r.name.value);
+    }
 };
 }  // namespace std

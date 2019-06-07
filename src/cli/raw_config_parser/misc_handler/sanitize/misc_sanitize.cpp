@@ -10,16 +10,18 @@ std::vector<std::shared_ptr<HatterParserError>> sanitize(const MiscConfig&  misc
     std::vector<std::shared_ptr<HatterParserError>> errors;
 
     if (auto error = checkUnknownValue(table)) { errors.push_back(error); }
-    if (auto error = checkInvalidValue(
-            "keyboard", {miscConf.keyboard}, "localectl list-x11-keymap-layouts")) {
-        errors.push_back(error);
-    }
-    if (auto error = checkInvalidValue("language", {miscConf.language}, "locale -a")) {
+    if (auto error = checkInvalidValue(miscConf.keyboard.keyName,
+                                       {miscConf.keyboard.value},
+                                       "localectl list-x11-keymap-layouts")) {
         errors.push_back(error);
     }
     if (auto error =
-            checkInvalidValue("timezone",
-                              {miscConf.timezone},
+            checkInvalidValue(miscConf.language.keyName, {miscConf.language.value}, "locale -a")) {
+        errors.push_back(error);
+    }
+    if (auto error =
+            checkInvalidValue(miscConf.timezone.keyName,
+                              {miscConf.timezone.value},
                               "cd /usr/share/zoneinfo/posix && find * -type f -or -type l")) {
         errors.push_back(error);
     }

@@ -3,6 +3,7 @@
 #include <string>
 
 #include "error_report_section_type.hpp"
+#include "hatter_config_type.hpp"
 
 namespace hatter {
 int ripgrepSearchFile(const std::string& searchTarget,
@@ -16,17 +17,15 @@ int ripgrepSearchCmdOutput(const std::string& searchTarget,
 
 template <typename T>
 void mergeAndCheckConflict(TopSectionErrorReport& errorReport,
-                           const std::string&     keyName,
-                           T&                     dest,
-                           const T&               target) {
-    if (dest != target) {
+                           ConfigMember<T>&       dest,
+                           const ConfigMember<T>& target) {
+    if (dest.value != target.value) {
         errorReport.add({std::make_shared<SectionMergeConflictError>(
-            keyName, std::string{dest}, std::string{target})});
+            dest.keyName, std::string{dest.value}, std::string{target.value})});
     }
 }
 template <>
-void mergeAndCheckConflict(TopSectionErrorReport& errorReport,
-                           const std::string&     keyName,
-                           std::string&           dest,
-                           const std::string&     target);
+void mergeAndCheckConflict(TopSectionErrorReport&           errorReport,
+                           ConfigMember<std::string>&       dest,
+                           const ConfigMember<std::string>& target);
 }  // namespace hatter

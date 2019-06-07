@@ -52,34 +52,52 @@ std::string TOMLEmptyStringError::what() const {
            " value: " + formatter::formatErrorText(keyName);
 }
 
+std::shared_ptr<TOMLError> getBaseTable(toml::table&             t,
+                                        const ConfigSectionBase& confSection,
+                                        toml::table&             out) {
+    return getNonMemberTOMLVal(t, confSection.keyName, out);
+}
+std::shared_ptr<TOMLError> getBaseTable(toml::table&              t,
+                                        const ConfigSectionBase&  confSection,
+                                        std::vector<toml::table>& out) {
+    return getNonMemberTOMLVal(t, confSection.keyName, out);
+}
+
 template <>
-std::shared_ptr<TOMLError> getTOMLVal(toml::table&       t,
-                                      const std::string& keyName,
-                                      std::string&       storage,
-                                      const bool         isOptional) {
-    auto status = internal::getTOMLValHelper(t, keyName, storage);
-    auto error  = internal::getTOMLErrorPtr(status, keyName, storage, isOptional);
+std::shared_ptr<TOMLError> getTOMLVal(toml::table& t, ConfigMember<std::string>& conf) {
+    internal::TOMLValStatus status;
+    auto                    error = internal::getTOMLValBase(t, conf, status);
 
     if (!error) {
-        if (status == internal::TOMLValStatus::PRESENT && storage.empty()) {
-            return std::make_shared<TOMLEmptyStringError>(keyName);
+        if (status == internal::TOMLValStatus::PRESENT && conf.value.empty()) {
+            return std::make_shared<TOMLEmptyStringError>(conf.keyName);
         }
     }
     return error;
 }
 
 template <>
-std::shared_ptr<TOMLError> getTOMLVal(toml::table&              t,
-                                      const std::string&        keyName,
-                                      std::vector<std::string>& storage,
-                                      const bool                isOptional) {
-    auto error = internal::getTOMLValBase(t, keyName, storage, isOptional);
-    if (!error && !(storage.empty())) {
-        if (std::any_of(storage.cbegin(), storage.cend(), [](std::string str) -> bool {
+std::shared_ptr<TOMLError> getTOMLVal(toml::table&                            t,
+                                      ConfigMember<std::vector<std::string>>& conf) {
+    auto error = internal::getTOMLValBase(t, conf);
+    if (!error && !(conf.value.empty())) {
+        if (std::any_of(conf.value.cbegin(), conf.value.cend(), [](std::string str) -> bool {
                 return str.empty();
             })) {
-            return std::make_shared<TOMLEmptyStringError>(keyName);
+            return std::make_shared<TOMLEmptyStringError>(conf.keyName);
         }
+    }
+    return error;
+}
+
+std::shared_ptr<TOMLError> getTOMLVal(toml::table&                                      rawConf,
+                                      ConfigMember<std::vector<std::filesystem::path>>& conf,
+                                      const std::filesystem::path&                      parentDir) {
+    ConfigMember<std::vector<std::string>> tempConf{conf.keyName, .isOptional = conf.isOptional};
+    auto                                   error = getTOMLVal(rawConf, tempConf);
+
+    if (!error) {
+        for (const auto& tempStr : tempConf.value) { conf.value.push_back(parentDir / tempStr); }
     }
     return error;
 }

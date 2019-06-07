@@ -22,12 +22,12 @@ TopSectionErrorReport parse(toml::table& rawConfig, MiscConfig& outConf) {
     TopSectionErrorReport errorReport(kSectionName);
 
     toml::table rawMiscConf;
-    errorReport.add({getTOMLVal(rawConfig, kSectionName, rawMiscConf)});
+    errorReport.add({getBaseTable(rawConfig, outConf, rawMiscConf)});
     if (errorReport || rawMiscConf.empty()) { return errorReport; }
 
-    errorReport.add({getTOMLVal(rawMiscConf, "language", outConf.language)});
-    errorReport.add({getTOMLVal(rawMiscConf, "keyboard", outConf.keyboard)});
-    errorReport.add({getTOMLVal(rawMiscConf, "timezone", outConf.timezone)});
+    errorReport.add({getTOMLVal(rawMiscConf, outConf.language),
+                     getTOMLVal(rawMiscConf, outConf.keyboard),
+                     getTOMLVal(rawMiscConf, outConf.timezone)});
 
     if (!errorReport) { errorReport.add(sanitize(outConf, rawMiscConf)); }
 
@@ -37,9 +37,9 @@ TopSectionErrorReport parse(toml::table& rawConfig, MiscConfig& outConf) {
 TopSectionErrorReport merge(MiscConfig& resultConf, const MiscConfig& targetConf) {
     TopSectionErrorReport errorReport(kSectionName);
 
-    mergeAndCheckConflict(errorReport, "language", resultConf.language, targetConf.language);
-    mergeAndCheckConflict(errorReport, "keyboard", resultConf.keyboard, targetConf.keyboard);
-    mergeAndCheckConflict(errorReport, "timezone", resultConf.timezone, targetConf.timezone);
+    mergeAndCheckConflict(errorReport, resultConf.language, targetConf.language);
+    mergeAndCheckConflict(errorReport, resultConf.keyboard, targetConf.keyboard);
+    mergeAndCheckConflict(errorReport, resultConf.timezone, targetConf.timezone);
 
     return errorReport;
 }

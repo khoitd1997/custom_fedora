@@ -61,17 +61,17 @@ int ripgrepSearchCmdOutput(const std::string &searchTarget,
 }
 
 template <>
-void mergeAndCheckConflict(TopSectionErrorReport &errorReport,
-                           const std::string &    keyName,
-                           std::string &          dest,
-                           const std::string &    target) {
-    if (target.empty()) { return; }
-    if (dest.empty()) {
-        dest = target;
+void mergeAndCheckConflict(TopSectionErrorReport &          errorReport,
+                           ConfigMember<std::string> &      dest,
+                           const ConfigMember<std::string> &target) {
+    if (target.value.empty()) { return; }
+    if (dest.value.empty()) {
+        dest.value = target.value;
         return;
     }
-    if (target != dest) {
-        errorReport.add({std::make_shared<SectionMergeConflictError>(keyName, dest, target)});
+    if (target.value != dest.value) {
+        errorReport.add(
+            {std::make_shared<SectionMergeConflictError>(dest.keyName, dest.value, target.value)});
     }
     return;
 }

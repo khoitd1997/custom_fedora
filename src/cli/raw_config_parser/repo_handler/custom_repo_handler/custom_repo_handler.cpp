@@ -12,11 +12,11 @@ namespace {
 std::vector<std::string> findConflictRepoElement(const CustomRepo& repo1, const CustomRepo& repo2) {
     std::vector<std::string> out;
 
-    if (repo1.displayName != repo2.displayName) { out.push_back("display_name"); }
-    if (repo1.metaLink != repo2.metaLink) { out.push_back("metaLink"); }
-    if (repo1.baseurl != repo2.baseurl) { out.push_back("baseurl"); }
-    if (repo1.gpgcheck != repo2.gpgcheck) { out.push_back("gpgcheck"); }
-    if (repo1.gpgkey != repo2.gpgkey) { out.push_back("gpgkey"); }
+    if (repo1.displayName.value != repo2.displayName.value) { out.push_back("display_name"); }
+    if (repo1.metaLink.value != repo2.metaLink.value) { out.push_back("metaLink"); }
+    if (repo1.baseurl.value != repo2.baseurl.value) { out.push_back("baseurl"); }
+    if (repo1.gpgcheck.value != repo2.gpgcheck.value) { out.push_back("gpgcheck"); }
+    if (repo1.gpgkey.value != repo2.gpgkey.value) { out.push_back("gpgkey"); }
 
     return out;
 }
@@ -30,14 +30,12 @@ std::vector<SubSectionErrorReport> parse(std::vector<toml::table> rawCustomRepos
         auto&                 tempTable = rawCustomRepos.at(i);
         CustomRepo            repo;
 
-        errorReport.add({getTOMLVal(tempTable, "name", repo.name, false)});
-        errorReport.add({getTOMLVal(tempTable, "display_name", repo.displayName, false)});
-
-        errorReport.add({getTOMLVal(tempTable, "metalink", repo.metaLink)});
-        errorReport.add({getTOMLVal(tempTable, "baseurl", repo.baseurl)});
-
-        errorReport.add({getTOMLVal(tempTable, "gpgcheck", repo.gpgcheck, false)});
-        errorReport.add({getTOMLVal(tempTable, "gpgkey", repo.gpgkey)});
+        errorReport.add({getTOMLVal(tempTable, repo.name),
+                         getTOMLVal(tempTable, repo.displayName),
+                         getTOMLVal(tempTable, repo.metaLink),
+                         getTOMLVal(tempTable, repo.baseurl),
+                         getTOMLVal(tempTable, repo.gpgcheck),
+                         getTOMLVal(tempTable, repo.gpgkey)});
 
         if (!errorReport) { errorReport.add(sanitize(repo, tempTable)); }
 
@@ -59,7 +57,7 @@ SubSectionErrorReport merge(std::vector<CustomRepo>&       result,
     for (const auto& resRepo : result) {
         auto targetRepoCnt = 1;
         for (const auto& targetRepo : target) {
-            if (resRepo.name == targetRepo.name) {
+            if (resRepo.name.value == targetRepo.name.value) {
                 if (resRepo != targetRepo) {
                     const auto list = findConflictRepoElement(resRepo, targetRepo);
                     for (const auto& key : list) {

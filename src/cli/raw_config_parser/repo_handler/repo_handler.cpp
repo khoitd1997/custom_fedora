@@ -25,15 +25,15 @@ TopSectionErrorReport parse(toml::table& rawConfig, RepoConfig& repoConfig) {
     TopSectionErrorReport errorReport(kSectionName, kSectionFormat);
 
     toml::table rawRepoConfig;
-    errorReport.add({getTOMLVal(rawConfig, kSectionName, rawRepoConfig)});
+    errorReport.add({getBaseTable(rawConfig, repoConfig, rawRepoConfig)});
     if (errorReport || rawRepoConfig.empty()) { return errorReport; }
 
-    errorReport.add({getTOMLVal(rawRepoConfig, "standard_repos", repoConfig.standardRepos)});
-    errorReport.add({getTOMLVal(rawRepoConfig, "copr_repos", repoConfig.coprRepos)});
+    errorReport.add({getTOMLVal(rawRepoConfig, repoConfig.standardRepos),
+                     getTOMLVal(rawRepoConfig, repoConfig.coprRepos)});
 
     // parse custom repos
     std::vector<toml::table> rawCustomRepos;
-    errorReport.add({getTOMLVal(rawRepoConfig, "custom_repos", rawCustomRepos)});
+    errorReport.add({getBaseTable(rawRepoConfig, repoConfig, rawCustomRepos)});
     errorReport.add({custom_repo_handler::parse(rawCustomRepos, repoConfig.customRepos)});
 
     if (!errorReport) { errorReport.add(sanitize(repoConfig, rawRepoConfig)); }
@@ -44,8 +44,8 @@ TopSectionErrorReport parse(toml::table& rawConfig, RepoConfig& repoConfig) {
 TopSectionErrorReport merge(RepoConfig& resultConf, const RepoConfig& targetConf) {
     TopSectionErrorReport errorReport(kSectionName, kSectionFormat);
 
-    appendUniqueVector(resultConf.standardRepos, targetConf.standardRepos);
-    appendUniqueVector(resultConf.coprRepos, targetConf.coprRepos);
+    appendUniqueVector(resultConf.standardRepos.value, targetConf.standardRepos.value);
+    appendUniqueVector(resultConf.coprRepos.value, targetConf.coprRepos.value);
 
     errorReport.add({custom_repo_handler::merge(resultConf.customRepos, targetConf.customRepos)});
 

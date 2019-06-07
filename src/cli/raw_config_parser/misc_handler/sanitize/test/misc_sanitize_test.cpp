@@ -43,20 +43,21 @@ TEST_F(MiscSanitizeTest, UnknownValue_NEGATIVE) {
 }
 
 TEST_F(MiscSanitizeTest, InvalidValue_LANGUAGE_POSITIVE) {
-    config.language = "random_lang";
+    config.language.value = "random_lang";
 
     const auto errors = sanitize(config, table);
     const auto totalInvalidError =
         checkTotalError<InvalidValueError>(errors, [&](InvalidValueError* error) {
             EXPECT_EQ(error->typeName, "language");
-            EXPECT_THAT(error->invalidVals, testing::UnorderedElementsAreArray({config.language}));
+            EXPECT_THAT(error->invalidVals,
+                        testing::UnorderedElementsAreArray({config.language.value}));
         });
 
     EXPECT_EQ(totalInvalidError, 1);
     EXPECT_EQ(checkTotalOtherError<InvalidValueError>(errors), 0);
 }
 TEST_F(MiscSanitizeTest, InvalidValue_LANGUAGE_NEGATIVE) {
-    config.language = "zu_ZA.utf8";
+    config.language.value = "zu_ZA.utf8";
 
     const auto errors = sanitize(config, table);
 
@@ -65,22 +66,23 @@ TEST_F(MiscSanitizeTest, InvalidValue_LANGUAGE_NEGATIVE) {
 }
 
 TEST_F(MiscSanitizeTest, InvalidValue_TIMEZONE_POSITIVE) {
-    config.timezone = "random_time";
+    config.timezone.value = "random_time";
     std::vector<std::string> correctInvalidVals;
-    correctInvalidVals.push_back(config.timezone);
+    correctInvalidVals.push_back(config.timezone.value);
 
     const auto errors = sanitize(config, table);
     const auto totalInvalidError =
         checkTotalError<InvalidValueError>(errors, [&](InvalidValueError* error) {
             EXPECT_EQ(error->typeName, "timezone");
-            EXPECT_THAT(error->invalidVals, testing::UnorderedElementsAreArray({config.timezone}));
+            EXPECT_THAT(error->invalidVals,
+                        testing::UnorderedElementsAreArray({config.timezone.value}));
         });
 
     EXPECT_EQ(totalInvalidError, 1);
     EXPECT_EQ(checkTotalOtherError<InvalidValueError>(errors), 0);
 }
 TEST_F(MiscSanitizeTest, InvalidValue_TIMEZONE_NEGATIVE) {
-    config.timezone = "US/Pacific";
+    config.timezone.value = "US/Pacific";
 
     const auto errors = sanitize(config, table);
 
@@ -89,20 +91,21 @@ TEST_F(MiscSanitizeTest, InvalidValue_TIMEZONE_NEGATIVE) {
 }
 
 TEST_F(MiscSanitizeTest, InvalidValue_KEYBOARD_POSITIVE) {
-    config.keyboard = "random_keyboard";
+    config.keyboard.value = "random_keyboard";
 
     const auto errors = sanitize(config, table);
     const auto totalInvalidError =
         checkTotalError<InvalidValueError>(errors, [&](InvalidValueError* error) {
             EXPECT_EQ(error->typeName, "keyboard");
-            EXPECT_THAT(error->invalidVals, testing::UnorderedElementsAreArray({config.keyboard}));
+            EXPECT_THAT(error->invalidVals,
+                        testing::UnorderedElementsAreArray({config.keyboard.value}));
         });
 
     EXPECT_EQ(totalInvalidError, 1);
     EXPECT_EQ(checkTotalOtherError<InvalidValueError>(errors), 0);
 }
 TEST_F(MiscSanitizeTest, InvalidValue_KEYBOARD_NEGATIVE) {
-    config.keyboard = "us";
+    config.keyboard.value = "us";
 
     const auto errors = sanitize(config, table);
 
@@ -111,18 +114,18 @@ TEST_F(MiscSanitizeTest, InvalidValue_KEYBOARD_NEGATIVE) {
 }
 
 TEST_F(MiscSanitizeTest, InvalidValue_COMBINE_LANGUAGE_KEYBOARD) {
-    config.language = "random_lang";
-    config.keyboard = "random_keyboard";
+    config.language.value = "random_lang";
+    config.keyboard.value = "random_keyboard";
 
     const auto errors = sanitize(config, table);
     const auto totalInvalidError =
         checkTotalError<InvalidValueError>(errors, [&](InvalidValueError* error) {
             if (error->typeName == "keyboard") {
                 EXPECT_THAT(error->invalidVals,
-                            testing::UnorderedElementsAreArray({config.keyboard}));
+                            testing::UnorderedElementsAreArray({config.keyboard.value}));
             } else if (error->typeName == "language") {
                 EXPECT_THAT(error->invalidVals,
-                            testing::UnorderedElementsAreArray({config.language}));
+                            testing::UnorderedElementsAreArray({config.language.value}));
             } else {
                 ADD_FAILURE();
             }
@@ -132,22 +135,22 @@ TEST_F(MiscSanitizeTest, InvalidValue_COMBINE_LANGUAGE_KEYBOARD) {
     EXPECT_EQ(checkTotalOtherError<InvalidValueError>(errors), 0);
 }
 TEST_F(MiscSanitizeTest, InvalidValue_COMBINE_ALL) {
-    config.timezone = "random_tz";
-    config.language = "random_lang";
-    config.keyboard = "random_keyboard";
+    config.timezone.value = "random_tz";
+    config.language.value = "random_lang";
+    config.keyboard.value = "random_keyboard";
 
     const auto errors = sanitize(config, table);
     const auto totalInvalidError =
         checkTotalError<InvalidValueError>(errors, [&](InvalidValueError* error) {
             if (error->typeName == "keyboard") {
                 EXPECT_THAT(error->invalidVals,
-                            testing::UnorderedElementsAreArray({config.keyboard}));
+                            testing::UnorderedElementsAreArray({config.keyboard.value}));
             } else if (error->typeName == "language") {
                 EXPECT_THAT(error->invalidVals,
-                            testing::UnorderedElementsAreArray({config.language}));
+                            testing::UnorderedElementsAreArray({config.language.value}));
             } else if (error->typeName == "timezone") {
                 EXPECT_THAT(error->invalidVals,
-                            testing::UnorderedElementsAreArray({config.timezone}));
+                            testing::UnorderedElementsAreArray({config.timezone.value}));
             } else {
                 ADD_FAILURE();
             }
@@ -160,23 +163,23 @@ TEST_F(MiscSanitizeTest, InvalidValue_COMBINE_ALL) {
 }
 
 TEST_F(MiscSanitizeTest, AllError) {
-    table["rand_key1"] = "rand_val1";
-    config.timezone    = "random_tz";
-    config.language    = "random_lang";
-    config.keyboard    = "random_keyboard";
+    table["rand_key1"]    = "rand_val1";
+    config.timezone.value = "random_tz";
+    config.language.value = "random_lang";
+    config.keyboard.value = "random_keyboard";
 
     const auto errors = sanitize(config, table);
     const auto totalInvalidError =
         checkTotalError<InvalidValueError>(errors, [&](InvalidValueError* error) {
             if (error->typeName == "keyboard") {
                 EXPECT_THAT(error->invalidVals,
-                            testing::UnorderedElementsAreArray({config.keyboard}));
+                            testing::UnorderedElementsAreArray({config.keyboard.value}));
             } else if (error->typeName == "language") {
                 EXPECT_THAT(error->invalidVals,
-                            testing::UnorderedElementsAreArray({config.language}));
+                            testing::UnorderedElementsAreArray({config.language.value}));
             } else if (error->typeName == "timezone") {
                 EXPECT_THAT(error->invalidVals,
-                            testing::UnorderedElementsAreArray({config.timezone}));
+                            testing::UnorderedElementsAreArray({config.timezone.value}));
             } else {
                 ADD_FAILURE();
             }
