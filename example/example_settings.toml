@@ -7,7 +7,6 @@ include_files=["child_setting_1.toml", "child_path/child_setting_2.toml"]
 [distro_info]
 base_kickstart_tag="0.23.1" 
 base_spin="xfce"
-os_name="fedora-kd" 
 
 # scripts appended right first(lowest priority)
 [image_info]
@@ -26,7 +25,6 @@ enable_custom_cache=true
 [repo]
 standard_repos=["google-chrome", "nvidia", "vscode"]
 copr_repos=["khoitd1997/toml11"]
-sklfjlsd="flasd"
 
     # start defining custom repos here
     [[repo.custom_repos]]
@@ -53,7 +51,6 @@ sklfjlsd="flasd"
     [package.rpm]
     install=[
         "moreutils",
-        "dklassa",
         "jq",
         "ripgrep",
         "gnome-terminal"
@@ -68,7 +65,6 @@ sklfjlsd="flasd"
     [package.rpm_group]
     install=[
         "multimedia",
-        # "fkasjklfjasdklfjasdklfjaklsdjfadkljsd",
         "sound-and-video"
     ]
 

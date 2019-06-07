@@ -14,7 +14,7 @@ Support classic kickstart file but with additional settings through the TOML fil
 
 ### Dependency
 
-The project uses C++17 features so to compile it, the newer gcc/clang are needed. The project uses gtest for unit testing as well as cppcheck and cpplint for extra linting, the default cmake won't turn these options on.
+The project uses C++17 features so to compile it, the newer g++ are needed. The project uses gtest for unit testing as well as cppcheck and cpplint for extra linting, the default cmake won't turn these options on.
 
 ```shell
 # library
@@ -50,24 +50,27 @@ cd bin
   - Sanitize packages, repo
   - Control build scripts, enable caching, etc
 
-## Format of generated env file from parser
+## Mock building directory structure
 
-The file will be called ```toml_parsed_env``` and will contain env variables used for building the final image
+For example building an OS called ```fedora_kd```, the main config file will be called ```fedora_kd.toml```
 
-Sample:
-
-```shell
-# inside toml_parsed_env
-
-env_os_name="fedora-kd"
-env_enable_custom_cache=true
-```
-
-- Commandline argument:
-  - Rebuild flag
-  - Clear cache flag
-  - Parse/Sanitize only
-  - Build output dir
-  - Config file/dir
-  - Fedora version(default current system)
-  - Fedora arch(default current arch)
+- /
+  - build_shared/
+    - fedora-kickstarts/
+        - git clone of fedora-kickstarts repo
+    - package_cache/: cache of all packages
+  - builddir/
+    - fedora_kd/ <- mock_env_build_dir
+      - script files
+      - user_supplied/
+        - all user input files
+      - build/
+        - repos/
+            - all repo files for this os
+        - package_list.txt: all possible packages
+        - toml_parsed_env.sh: env variable file
+        - group_list.txt: all possible groups
+        - fedora_kd_prev.toml: last successful toml file
+        - fedora_kd.ks
+      - out/
+        - iso files and logs

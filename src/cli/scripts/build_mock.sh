@@ -37,7 +37,8 @@ module_platform_id=platform:f30
 EOF
 
 set +e
-# sed -i 's|^reposdir=.*|reposdir=/etc/yum.repos.d/|g' /etc/dnf/dnf.conf
+# TODO(kd): Fill in repo dir here
+# sed -i 's|^reposdir=.*|reposdir=/etc/yum.repos.d/, curr_build_repo_dir |g' /etc/dnf/dnf.conf
 # dnf check-update -y -q
 # dnf_status=$?
 # total_try=0
@@ -74,8 +75,8 @@ log_dir=${out_dir}/log
 mkdir ${log_dir}
 
 cd ${conf_dir}
-# launch parser here and generate a file called toml_parsed_env
-# source ./toml_parsed_env
+# launch parser here and generate a file called toml_parsed_env.sh
+# source ./toml_parsed_env.sh
 # if parser succeed then move on
 # mv parser log to log_dir
 

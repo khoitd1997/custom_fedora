@@ -10,35 +10,6 @@
 #include "default_config.hpp"
 
 namespace hatter {
-// struct RawTOMLConfig {
-//     toml::table config;
-//     explicit    operator bool() const { return isValid_; }
-
-//     explicit RawTOMLConfig(const std::string& filePath);
-
-//    private:
-//     bool isValid_ = false;
-// };
-
-// struct BaseConfig {
-//    public:
-//     virtual ~BaseConfig() = 0;
-
-//     explicit operator bool() const { return isValid_; }
-//     bool     isPresent() const { return isPresent_; }
-
-//    protected:
-//     bool isValid_   = true;
-//     bool isPresent_ = false;
-
-//     toml::table getBaseTable_(const RawTOMLConfig& rawConfig,
-//                               const std::string&   tableName,
-//                               const std::string&   colorCode = "");
-//     toml::table getBaseTable_(const toml::table& rawConfig,
-//                               const std::string& tableName,
-//                               const std::string& colorCode = "");
-// };
-
 struct ConfigSectionBase {
     std::string keyName;
 
@@ -56,7 +27,6 @@ struct ConfigMember {
 struct DistroInfo : public ConfigSectionBase {
     ConfigMember<std::string> kickstartTag{"base_kickstart_tag", .value = kDefaultKickstartTag};
     ConfigMember<std::string> baseSpin{"base_spin"};
-    ConfigMember<std::string> osName{"os_name"};
 
     DistroInfo() : ConfigSectionBase{"distro_info"} {}
 };

@@ -35,7 +35,6 @@ TopSectionErrorReport merge(DistroInfo& resultConf, const DistroInfo& targetConf
 
     mergeAndCheckConflict(errorReport, resultConf.kickstartTag, targetConf.kickstartTag);
     mergeAndCheckConflict(errorReport, resultConf.baseSpin, targetConf.baseSpin);
-    mergeAndCheckConflict(errorReport, resultConf.osName, targetConf.osName);
 
     return errorReport;
 }

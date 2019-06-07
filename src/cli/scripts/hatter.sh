@@ -199,8 +199,10 @@ config_opts['plugin_conf']['ccache_enable'] = True
 EOF
 
 # generate env variable for build script inside mock
+os_name=${input_config##*.}
 cat > ${mock_build_file_dir}/env << EOF
 env_input_config=${input_config}
+env_os_name=${os_name}
 env_input_dir=${input_dir}
 
 env_releasever=${releasever}

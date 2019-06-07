@@ -5,7 +5,7 @@ script_dir="$(dirname "$(readlink -f "$0")")"
 source ${script_dir}/exit_code.sh
 
 mock_software_list=" lorax-lmc-novirt nano pykickstart git bash genisoimage squashfs-tools nano vim dnf-plugins-core dnf createrepo cpp bat "
-mock_env_build_dir="/build_dir" # build directory once in mock env
+mock_env_build_dir="/build_dir/"${os_name} # build directory once in mock env
 mock_cfg_path=${build_working_dir}/mock.cfg
 
 clear_mock_env() {
@@ -23,8 +23,9 @@ bootstrap_mock_env() {
 prepare_mock_build() {
     # wipe previous build stuffs and generate directories
     mock -r ${mock_cfg_path} --chroot "rm -rf ${mock_env_build_dir}"
-    mock -r ${mock_cfg_path} --chroot "mkdir ${mock_env_build_dir}"
-    mock -r ${mock_cfg_path} --chroot "mkdir ${mock_env_build_dir}/user_supplied"
+    mock -r ${mock_cfg_path} --chroot "mkdir -p ${mock_env_build_dir}/user_supplied"
+    mock -r ${mock_cfg_path} --chroot "mkdir -p ${mock_env_build_dir}/build"
+    mock -r ${mock_cfg_path} --chroot "mkdir -p ${mock_env_build_dir}/out"
 
     # copy build scripts
     mock -r ${mock_cfg_path} --copyin ${script_dir}/exit_code.sh ${mock_env_build_dir}
