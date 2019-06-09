@@ -201,15 +201,14 @@ EOF
 # generate env variable for build script inside mock
 os_name=${input_config##*.}
 cat > ${mock_build_file_dir}/env << EOF
-env_input_config=${input_config}
-env_os_name=${os_name}
-env_input_dir=${input_dir}
+export env_input_config=${input_config}
+export env_os_name=${os_name}
 
-env_releasever=${releasever}
-env_arch=${arch}
+export env_releasever=${releasever}
+export env_arch=${arch}
 
-env_clear_cache=${clear_cache}
-env_parser_mode=${parser_mode}
+export env_clear_cache=${clear_cache}
+export env_parser_mode=${parser_mode}
 EOF
 
 # source here once all variables have been set

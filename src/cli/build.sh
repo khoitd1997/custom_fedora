@@ -30,7 +30,19 @@ set -e
 # export GTEST_FILTER="CommonSanitizeTest_*" # MUST SPECIFY HERE BEFORE THE TESTS ARE DISCOVERED
 cmake -G Ninja -DUSE_CPPLINT=ON -DUSE_CPPCHECK=ON -DRUN_TEST=ON .. && ninja 
 
-GTEST_BREAK_ON_FAILURE=1 GTEST_COLOR=1 ctest --verbose --gtest_print_time=0 
+# GTEST_BREAK_ON_FAILURE=1 GTEST_COLOR=1 ctest --verbose --gtest_print_time=0 
 cd bin
+cat > ./toml_parsed_env.sh << EOF
+export env_input_config=fedora_kd.toml
+export env_os_name=fedora_kd
+
+export env_releasever=29
+export env_arch=x86_64
+
+export env_clear_cache=true
+export env_parser_mode=true
+EOF
+source ./toml_parsed_env.sh
+printf "env_os_name: "${env_os_name}
 ./tomlparser example_settings.toml
 # cmake -G Ninja .. && ninja && ./bin/tomlparser ./bin/random.toml

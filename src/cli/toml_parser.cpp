@@ -18,6 +18,7 @@
 
 #include "toml11/toml.hpp"
 
+#include "build_variable_manager.hpp"
 #include "config_builder.hpp"
 #include "logger.hpp"
 #include "raw_config_parser.hpp"
@@ -36,9 +37,12 @@ int main(int argc, char** argv) {
     hatter::logger::init();
     std::cout << std::endl;
 
-    auto               filePath = std::filesystem::path(std::string(argv[1]));
-    hatter::FullConfig fullConfig;
-    hatter::getFullConfig(filePath, fullConfig);
+    hatter::logger::info("The os name is " +
+                         std::to_string(hatter::build_variable_manager::kClearCache));
+
+    // auto               filePath = std::filesystem::path(std::string(argv[1]));
+    // hatter::FullConfig fullConfig;
+    // hatter::getFullConfig(filePath, fullConfig);
 
     // hatter::TOMLConfigFile conf(fileName);
 

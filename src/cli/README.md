@@ -59,9 +59,9 @@ For example building an OS called ```fedora_kd```, the main config file will be 
     - fedora-kickstarts/
         - git clone of fedora-kickstarts repo
     - package_cache/: cache of all packages
+    - scripts/: shared scripts
   - builddir/
-    - fedora_kd/ <- mock_env_build_dir
-      - script files
+    - fedora_kd/ <- mock_env_build_dir, exe working dir
       - user_supplied/
         - all user input files
       - build/
@@ -73,4 +73,5 @@ For example building an OS called ```fedora_kd```, the main config file will be 
         - fedora_kd_prev.toml: last successful toml file
         - fedora_kd.ks
       - out/
+        - logs/
         - iso files and logs
