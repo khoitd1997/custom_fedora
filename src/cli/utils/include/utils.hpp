@@ -21,6 +21,7 @@ std::string getExeDir(void);
 std::string toUpper(std::string_view str);
 
 std::string strJoin(const std::vector<std::string>& strings, const std::string& delimiter = ", ");
+void        strAddLine(std::string& dest, const std::vector<std::string>& src);
 
 bool inStr(const std::string& strToLookFor, const std::string& strToSearchIn);
 

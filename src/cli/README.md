@@ -62,16 +62,18 @@ For example building an OS called ```fedora_kd```, the main config file will be 
     - scripts/: shared scripts
   - builddir/
     - fedora_kd/ <- mock_env_build_dir, exe working dir
-      - user_supplied/
-        - all user input files
       - build/
+        - user_supplied/
+            - fedora_kd.toml
+            - all user input files
         - repos/
             - all repo files for this os
         - package_list.txt: all possible packages
         - toml_parsed_env.sh: env variable file
         - group_list.txt: all possible groups
-        - fedora_kd_prev.toml: last successful toml file
-        - fedora_kd.ks
+        - prev_toml_parsed_env.sh: previous env variable file
+        - prev_config.toml: last successful toml file
       - out/
         - logs/
-        - iso files and logs
+        - fedora_kd.ks
+        - fedora_kd.iso

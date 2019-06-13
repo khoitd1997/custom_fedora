@@ -72,6 +72,10 @@ std::string strJoin(const std::vector<std::string>& strings, const std::string& 
     return out;
 }
 
+void strAddLine(std::string& dest, const std::vector<std::string>& src) {
+    for (const auto& str : src) { dest += str + "\n"; }
+}
+
 bool inStr(const std::string& strToLookFor, const std::string& strToSearchIn) {
     if (strToSearchIn.find(strToLookFor) != std::string::npos) { return true; }
     return false;

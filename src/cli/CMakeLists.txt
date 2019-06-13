@@ -67,7 +67,7 @@ add_subdirectory(test_utils)
 add_subdirectory(logger)
 add_subdirectory(formatter)
 
-add_subdirectory(build_variable_manager)
+add_subdirectory(build_variable)
 add_subdirectory(config_builder)
 add_subdirectory(raw_config_parser)
 
@@ -75,7 +75,7 @@ add_executable(tomlparser toml_parser.cpp ${PROJECT_SOURCES})
 target_link_libraries(tomlparser
                       PRIVATE toml11
                               utils
-                              build_variable_manager
+                              build_variable
                               raw_config_parser
                               config_builder
                               logger)

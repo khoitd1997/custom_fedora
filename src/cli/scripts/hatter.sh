@@ -200,8 +200,8 @@ EOF
 
 # generate env variable for build script inside mock
 os_name=${input_config##*.}
-cat > ${mock_build_file_dir}/env << EOF
-export env_input_config=${input_config}
+cat > ${mock_build_file_dir}/toml_parsed_env << EOF
+export env_parent_config=${input_config}
 export env_os_name=${os_name}
 
 export env_releasever=${releasever}

@@ -33,7 +33,7 @@ cmake -G Ninja -DUSE_CPPLINT=ON -DUSE_CPPCHECK=ON -DRUN_TEST=ON .. && ninja
 # GTEST_BREAK_ON_FAILURE=1 GTEST_COLOR=1 ctest --verbose --gtest_print_time=0 
 cd bin
 cat > ./toml_parsed_env.sh << EOF
-export env_input_config=fedora_kd.toml
+export env_parent_config=fedora_kd.toml
 export env_os_name=fedora_kd
 
 export env_releasever=29

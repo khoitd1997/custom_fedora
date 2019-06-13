@@ -118,7 +118,7 @@ if [ "${env_parser_mode}" = false ]; then
     fi
 
     livemedia-creator --ks flat-${generated_ks}.ks --no-virt \
-    --resultdir ${iso_dir} --project ${os_name} --make-iso --volid ${os_name} \
+    --resultdir ${iso_dir} --project ${env_os_name} --make-iso --volid ${env_os_name} \
     --iso-only --iso-name ${generated_ks}.iso --releasever ${env_releasever} \
     --title ${env_os_name} --macboot
 fi
