@@ -33,7 +33,7 @@ TopSectionErrorReport parse(toml::table& rawConfig, RepoConfig& repoConfig) {
 
     // parse custom repos
     std::vector<toml::table> rawCustomRepos;
-    errorReport.add({getBaseTable(rawRepoConfig, repoConfig, rawCustomRepos)});
+    errorReport.add({getBaseTables(rawRepoConfig, "custom_repos", rawCustomRepos)});
     errorReport.add({custom_repo_handler::parse(rawCustomRepos, repoConfig.customRepos)});
 
     if (!errorReport) { errorReport.add(sanitize(repoConfig, rawRepoConfig)); }

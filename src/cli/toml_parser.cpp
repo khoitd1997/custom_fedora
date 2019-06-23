@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
     hatter::FullConfig fullConfig;
     hatter::getFullConfig(filePath, fullConfig);
 
-    // hatter::logger::info(hatter::config_builder::generateIncludeKickstart(fullConfig.distroInfo));
+    hatter::logger::info(hatter::config_builder::generateIncludeKickstart(fullConfig.distroInfo));
     hatter::logger::info(hatter::config_builder::generatePackageList(fullConfig.packageConfig));
     hatter::logger::info(hatter::config_builder::generateMisc(fullConfig.miscConfig));
     const auto repoList = hatter::config_builder::generateRepoList(fullConfig.repoConfig);

@@ -25,7 +25,7 @@ struct ConfigMember {
 };
 
 struct DistroInfo : public ConfigSectionBase {
-    ConfigMember<std::string> kickstartTag{"base_kickstart_tag", .value = kDefaultKickstartTag};
+    ConfigMember<std::string> kickstartTag{"base_kickstart_tag"};
     ConfigMember<std::string> baseSpin{"base_spin"};
 
     DistroInfo() : ConfigSectionBase{"distro_info"} {}

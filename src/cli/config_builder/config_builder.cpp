@@ -20,6 +20,34 @@ std::string generateKickstartRepo(const std::string& repoName,
 
     return ret;
 }
+
+std::string generateCommandWithListParam(const std::string&              cmd,
+                                         const std::vector<std::string>& params,
+                                         const std::string&              endLine,
+                                         const std::string&              beginComment = "") {
+    std::string ret;
+    std::string align(cmd.length(), ' ');
+
+    if (!beginComment.empty()) { strAddLine(ret, {"# " + beginComment}); }
+    for (auto param = params.cbegin(); param != params.cend(); ++param) {
+        std::string tempLine;
+        if (param == params.cbegin()) {
+            tempLine += cmd + " " + *param;
+        } else {
+            tempLine += align + " " + *param;
+        }
+
+        if (param == params.cend() - 1) {
+            tempLine += " " + endLine;
+        } else {
+            tempLine += " \\";
+        }
+        strAddLine(ret, {tempLine});
+    }
+
+    return ret;
+}
+
 std::string getCOPRBaseURL(std::string coprRepo) {
     std::string ret;
     std::replace(coprRepo.begin(), coprRepo.end(), '/', ':');
@@ -47,10 +75,10 @@ std::string generateIncludeKickstart(const DistroInfo& distroInfo) {
 
 std::pair<std::string, std::string> generateRepoList(const RepoConfig& repoConfig) {
     std::string ksStr;
-    std::string postStr;
+    std::string postScriptStr;
 
     if (!repoConfig.standardRepos.value.empty()) {
-        strAddLine(postStr, {"sudo dnf install fedora-workstation-repositories -y"});
+        strAddLine(postScriptStr, {"sudo dnf install fedora-workstation-repositories -y"});
     }
     for (const auto& stdRepo : repoConfig.standardRepos.value) {
         std::string ksRepoName;
@@ -61,21 +89,21 @@ std::pair<std::string, std::string> generateRepoList(const RepoConfig& repoConfi
             ksRepoName = "google-chrome";
             ksBaseURL  = "http://dl.google.com/linux/chrome/rpm/stable/$basearch";
 
-            strAddLine(postStr, {"sudo dnf config-manager --set-enabled " + ksRepoName});
+            strAddLine(postScriptStr, {"sudo dnf config-manager --set-enabled " + ksRepoName});
         } else if (stdRepo == "nvidia") {
             ksRepoName = "rpmfusion-nonfree-nvidia-driver";
             ksMetaLink =
                 "https://mirrors.rpmfusion.org/"
                 "metalink?repo=nonfree-fedora-nvidia-driver-$releasever&arch=$basearch";
 
-            strAddLine(postStr, {"sudo dnf config-manager --set-enabled " + ksRepoName});
+            strAddLine(postScriptStr, {"sudo dnf config-manager --set-enabled " + ksRepoName});
         } else if (stdRepo == "vscode") {
             // source: https://code.visualstudio.com/docs/setup/linux
             ksRepoName = "code";
             ksBaseURL  = "https://packages.microsoft.com/yumrepos/vscode";
 
             strAddLine(
-                postStr,
+                postScriptStr,
                 {"sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc",
                  "sudo sh -c 'echo -e \"[code]\\nname=Visual Studio "
                  "Code\\nbaseurl=https://packages.microsoft.com/yumrepos/"
@@ -89,20 +117,27 @@ std::pair<std::string, std::string> generateRepoList(const RepoConfig& repoConfi
         strAddLine(ksStr, {generateKickstartRepo(ksRepoName, ksBaseURL, ksMetaLink)});
     }
 
+    strAddLine(postScriptStr,
+               {generateCommandWithListParam(
+                   "sudo dnf copr enable", repoConfig.coprRepos.value, "-y", "copr repos")});
     for (const auto& coprRepo : repoConfig.coprRepos.value) {
         strAddLine(ksStr, {generateKickstartRepo(coprRepo, getCOPRBaseURL(coprRepo), "")});
-        strAddLine(postStr, {"sudo dnf copr enable " + coprRepo + " -y"});
     }
 
+    // TODO(kd): Recheck custom repo handling
+    std::vector<std::string> customRepoNames;
     for (const auto& customRepo : repoConfig.customRepos) {
         strAddLine(
             ksStr,
             {generateKickstartRepo(
                 customRepo.name.value, customRepo.baseurl.value, customRepo.metaLink.value)});
-        strAddLine(postStr, {"sudo dnf config-manager --set-enabled " + customRepo.name.value});
+        customRepoNames.push_back(customRepo.name.value);
     }
+    strAddLine(postScriptStr,
+               {generateCommandWithListParam(
+                   "sudo dnf config-manager --set-enabled", customRepoNames, "", "custom repos")});
 
-    return std::make_pair(ksStr, postStr);
+    return std::make_pair(ksStr, postScriptStr);
 }
 std::string generatePackageList(const PackageConfig& pkgConfig) {
     std::string ret;
