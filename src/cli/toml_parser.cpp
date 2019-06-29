@@ -13,6 +13,7 @@
 #include <cstdlib>
 #include <filesystem>
 #include <iostream>
+#include <regex>
 #include <stdexcept>
 #include <string>
 
@@ -24,10 +25,6 @@
 #include "raw_config_parser.hpp"
 #include "utils.hpp"
 
-// bool parseInputTOMLFile(const std::string& filePath, toml::table& out) {
-//     // TODO(kd): Investigate cleaner error message
-// }
-
 int main(int argc, char** argv) {
     if (argc < 2) {
         std::cout << "Usage: " << argv[0] << " filename" << std::endl;
@@ -38,16 +35,27 @@ int main(int argc, char** argv) {
     std::cout << std::endl;
 
     auto               filePath = std::filesystem::path(std::string(argv[1]));
-    hatter::FullConfig fullConfig;
-    hatter::getFullConfig(filePath, fullConfig);
+    hatter::FullConfig currConfig;
+    auto               hasError = hatter::getFullConfig(filePath, currConfig);
 
-    hatter::logger::info(hatter::config_builder::generateIncludeKickstart(fullConfig.distroInfo));
-    hatter::logger::info(hatter::config_builder::generatePackageList(fullConfig.packageConfig));
-    hatter::logger::info(hatter::config_builder::generateMisc(fullConfig.miscConfig));
-    const auto repoList = hatter::config_builder::generateRepoList(fullConfig.repoConfig);
-    hatter::logger::info(repoList.first);
-    hatter::logger::info(repoList.second);
+    const hatter::build_variable::CLIBuildVariable currBuildVar;
+    hatter::build_variable::CLIBuildVariable       prevBuildVar;
 
+    if (!currBuildVar.parserMode) {
+        if (!hasError) {
+            hatter::FullConfig prevConfig;
+            if (!hatter::build_variable::kIsFirstBuild) {
+                prevBuildVar = hatter::build_variable::CLIBuildVariable{"prev"};
+                hatter::getFullConfig(hatter::build_variable::kPrevParentConfigPath, prevConfig);
+            }
+            hatter::config_builder::build(currConfig, prevConfig, currBuildVar, prevBuildVar);
+        } else {
+            hatter::logger::error("failed to parse");
+            return 1;
+        }
+    }
+
+    return 0;
     // hatter::TOMLConfigFile conf(fileName);
 
     // if (!conf) { std::cout << "Failed to get conf file" << std::endl; }
@@ -153,6 +161,4 @@ int main(int argc, char** argv) {
     //     std::cerr << "Failed to parse setting file: " << argv[1] << ": " << e.what() <<
     //     std::endl; return 1;
     // }
-
-    return 0;
 }

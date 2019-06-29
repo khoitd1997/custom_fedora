@@ -75,8 +75,8 @@ log_dir=${out_dir}/log
 mkdir ${log_dir}
 
 cd ${conf_dir}
-# launch parser here and generate a file called toml_parsed_env.sh
-# source ./toml_parsed_env.sh
+# launch parser here and generate a file called env_var.sh
+# source ./env_var.sh
 # if parser succeed then move on
 # mv parser log to log_dir
 

@@ -21,12 +21,7 @@ TopSectionErrorReport parse(toml::table& rawConfig, DistroInfo& outConf) {
     toml::table rawConf;
     bool        isEmpty;
     auto        errorReport = get(rawConfig, outConf, rawConf, isEmpty);
-    if (!errorReport && !isEmpty) {
-        errorReport.add(sanitize(outConf, rawConf));
-    } else {
-        std::cout << "get failed" << std::endl;
-    }
-
+    if (!errorReport && !isEmpty) { errorReport.add(sanitize(outConf, rawConf)); }
     return errorReport;
 }
 

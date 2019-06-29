@@ -4,34 +4,32 @@
 # base_spin="cinnamon"
 # os_name="fedora-kd" 
 
-[image_info]
-partition_size=7000
-# path relative to the file defining it
-first_login_script="first_login.sh" # put in profile.d to launch at first login
-post_build_script="post_script.sh" # post build script
-post_build_script_no_chroot="post_no_chroot_script.sh" # post build script in no chroot
-user_files=["path_to_dir1", "path_to_dir2"] # will be put in /usr/share/hatter_user_file
+# [image_info]
+# partition_size=7000
+# # path relative to the file defining it
+# first_login_script="first_login.sh" # put in profile.d to launch at first login
+# post_build_script="post_script.sh" # post build script
+# post_build_script_no_chroot="post_no_chroot_script.sh" # post build script in no chroot
+# user_files=["path_to_dir1", "path_to_dir2"] # will be put in /usr/share/hatter_user_file
 
-[build_process]
-custom_mock_script="script.sh" # custom script to run in mock env
-enable_custom_cache=true
+# [build_process]
+# custom_mock_script="script.sh" # custom script to run in mock env
+# enable_custom_cache=true
 
 # define list of repos
 # $releasever and $basearch will be replaced when doing build
 [repo]
 # TODO(kd): Change these to set
 standard_repos=["google-chrome", "nvidia", "vscode"]
-copr_repos=["repo1, repo2"]
-dkfalsdjl=["repo1, repo2"]
 
     # start defining custom repos here
-    [[repo.custom_repos]]
-    name=""
-    display_name="RPM Fusion for Fedora $releasever - Free" 
-    metalink="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-$releasever&arch=$basearch"
-    baseurl="http://download1.rpmfusion.org/free/fedora/releases/$releasever/Everything/$basearch/os/"
-    gpgcheck=true
-    gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"
+    # [[repo.custom_repos]]
+    # name=""
+    # display_name="RPM Fusion for Fedora $releasever - Free" 
+    # metalink="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-$releasever&arch=$basearch"
+    # baseurl="http://download1.rpmfusion.org/free/fedora/releases/$releasever/Everything/$basearch/os/"
+    # gpgcheck=true
+    # gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"
 
     [[repo.custom_repos]]
     name="test"

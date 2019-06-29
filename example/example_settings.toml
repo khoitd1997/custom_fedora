@@ -17,14 +17,14 @@ partition_size=7000
 user_files=["path_to_dir1", "path_to_dir2"] # will be put in /usr/share/hatter_user_file
 
 [build_process]
-custom_mock_script=["script.sh"] # custom script to run in mock env
+# custom_mock_script=["script.sh"] # custom script to run in mock env
 enable_custom_cache=true
 
 # define list of repos
 # $releasever and $basearch will be replaced when doing build
 [repo]
 standard_repos=["google-chrome", "nvidia", "vscode"]
-copr_repos=["khoitd1997/toml11"]
+copr_repos=["khoitd1997/toml11", "khoitd1997/toml11","khoitd1997/toml11"]
 
     # start defining custom repos here
     [[repo.custom_repos]]
@@ -36,14 +36,14 @@ copr_repos=["khoitd1997/toml11"]
     gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"
 
 
-    [[repo.custom_repos]]
-    # name="test"
-    name=""
-    display_name="RPM Fusion for Fedora $releasever - Free" 
-    metalink="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-$releasever&arch=$basearch"
-    baseurl="http://download1.rpmfusion.org/free/fedora/releases/$releasever/Everything/$basearch/os/"
-    gpgcheck=true
-    gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"
+    # [[repo.custom_repos]]
+    # # name="test"
+    # name=""
+    # display_name="RPM Fusion for Fedora $releasever - Free" 
+    # metalink="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-$releasever&arch=$basearch"
+    # baseurl="http://download1.rpmfusion.org/free/fedora/releases/$releasever/Everything/$basearch/os/"
+    # gpgcheck=true
+    # gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"
 
 # define multiple types of packages to be included
 [package]
@@ -51,7 +51,6 @@ copr_repos=["khoitd1997/toml11"]
     [package.rpm]
     install=[
         "moreutils",
-        "jq",
         "ripgrep",
         "gnome-terminal"
     ]

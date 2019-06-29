@@ -7,5 +7,5 @@
 #include "hatter_config_type.hpp"
 
 namespace hatter {
-bool getFullConfig(std::filesystem::path& filePath, FullConfig& fullConfig);
+bool getFullConfig(const std::filesystem::path& filePath, FullConfig& fullConfig);
 }  // namespace hatter

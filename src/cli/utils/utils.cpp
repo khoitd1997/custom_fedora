@@ -13,26 +13,44 @@
 #include <vector>
 
 namespace hatter {
-void writeFile(const std::string& s, const std::string& path) {
-    std::ofstream file(path, std::ofstream::trunc);
-    file << s;
-    file.close();
+void writeFile(const std::string& s, const std::filesystem::path& path) {
+    if (std::filesystem::exists(path.parent_path())) {
+        std::cout << "writing to " + path.string() << std::endl;
+        std::ofstream file(path.string(), std::ofstream::trunc);
+        file << s;
+    } else {
+        throw std::runtime_error("file " + path.string() + " doesn't exist");
+    }
 }
 
-void writeFile(const std::vector<std::string>& lines, const std::string& path) {
-    std::ofstream file(path, std::ofstream::trunc);
-    for (const auto line : lines) { file << line << std::endl; }
-    file.close();
+void writeFile(const std::vector<std::string>& lines, const std::filesystem::path& path) {
+    if (std::filesystem::exists(path.parent_path())) {
+        std::ofstream file(path.string(), std::ofstream::trunc);
+        for (const auto line : lines) { file << line << std::endl; }
+    } else {
+        throw std::runtime_error("file " + path.string() + " doesn't exist");
+    }
 }
 
-bool readFile(std::vector<std::string>& lines, const std::string& path) {
-    std::ifstream inFile(path);
-    if (inFile.fail()) { return false; }
+void appendFile(const std::string& s, const std::filesystem::path& path) {
+    if (std::filesystem::exists(path)) {
+        std::ofstream file(path.string(), std::ofstream::app);
+        file << s;
+    } else {
+        throw std::runtime_error("file " + path.string() + " doesn't exist");
+    }
+}
+
+std::string readFile(const std::filesystem::path& path) {
+    std::string ret;
+
+    std::ifstream inFile(path.string());
+    if (inFile.fail()) { throw std::runtime_error("failed to read file " + path.string()); }
 
     std::string line;
-    while (std::getline(inFile, line)) { lines.push_back(line); }
+    while (std::getline(inFile, line)) { strAddLine(ret, {line}); }
 
-    return true;
+    return ret;
 }
 
 void replacePattern(std::vector<std::string>& lines,
@@ -72,8 +90,12 @@ std::string strJoin(const std::vector<std::string>& strings, const std::string& 
     return out;
 }
 
+void strAddLine(std::string& dest, const std::string& src) { dest += src + "\n"; }
 void strAddLine(std::string& dest, const std::vector<std::string>& src) {
-    for (const auto& str : src) { dest += str + "\n"; }
+    for (const auto& str : src) { strAddLine(dest, str); }
+}
+void strAddLine(std::string& dest, const std::initializer_list<std::string>& src) {
+    strAddLine(dest, std::vector<std::string>{src});
 }
 
 bool inStr(const std::string& strToLookFor, const std::string& strToSearchIn) {
@@ -108,6 +130,11 @@ void appendUniqueVector(std::vector<std::filesystem::path>&       dest,
     }
 }
 
+int execCommand(const std::string& cmd) {
+    std::string temp;
+    (void)temp;
+    return execCommand(cmd, temp);
+}
 int execCommand(const std::string& cmd, std::string& output, const size_t outputBufferSize) {
     std::vector<char> buffer(outputBufferSize);
     auto              pipe = popen(cmd.c_str(), "r");

@@ -81,7 +81,7 @@ bool getFile(const std::filesystem::path& filePath,
 }
 }  // namespace
 
-bool getFullConfig(std::filesystem::path& filePath, FullConfig& fullConfig) {
+bool getFullConfig(const std::filesystem::path& filePath, FullConfig& fullConfig) {
     FullErrorReport fullReport;
     getFile(filePath, "", fullConfig, fullReport);
     if (fullReport) {

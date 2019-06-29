@@ -5,17 +5,21 @@
 
 namespace hatter {
 namespace build_variable {
-extern const std::string kOSName;
-extern const std::string kInputConfig;
+struct CLIBuildVariable {
+    std::string osName;
+    int         releasever;
+    std::string arch;
 
-extern const int         kReleasever;
-extern const std::string kArch;
+    bool parserMode;
 
-extern const bool kClearCache;
-extern const bool kParserMode;
+    explicit CLIBuildVariable(const std::string& prefix = "");
+};
 
+extern const bool kIsFirstBuild;
+
+// path variables
 extern const std::filesystem::path kBaseSharedDir;
-extern const std::filesystem::path kFedoraKickstartDir;
+extern const std::filesystem::path kStockKickstartDir;
 
 extern const std::filesystem::path kBaseWorkingDir;
 extern const std::filesystem::path kBuildDir;
@@ -24,10 +28,22 @@ extern const std::filesystem::path kRepoDir;
 extern const std::filesystem::path kPackageListPath;
 extern const std::filesystem::path kGroupListPath;
 
+// out
 extern const std::filesystem::path kBaseOutDir;
+extern const std::filesystem::path kConfigBuilderEnvVar;
+extern const std::filesystem::path kMainKickstartPath;
+extern const std::filesystem::path kFirstLoginScriptPath;
+extern const std::filesystem::path kPostBuildScriptPath;
+extern const std::filesystem::path kPostBuildScriptNoRootPath;
+
+// log dir
+extern const std::filesystem::path kKickstartLogDir;
+extern const std::filesystem::path kLogDir;
 
 extern const std::filesystem::path kBaseUserFileDir;
 extern const std::filesystem::path kPrevParentConfigPath;
 extern const std::filesystem::path kParentConfigPath;
+
+extern const std::filesystem::path kUserFileDest;
 }  // namespace build_variable
 }  // namespace hatter

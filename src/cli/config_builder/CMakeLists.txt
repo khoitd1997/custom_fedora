@@ -3,6 +3,6 @@ add_library(config_builder ${CppSources})
 target_link_libraries(config_builder
                       PRIVATE utils
                       PUBLIC raw_config_parser
-                      PRIVATE build_variable)
+                      PRIVATE build_variable logger)
 target_include_directories(config_builder
                            PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

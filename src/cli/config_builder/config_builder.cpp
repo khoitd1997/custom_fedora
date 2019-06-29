@@ -1,17 +1,18 @@
 #include "config_builder.hpp"
 
 #include <algorithm>
+#include <regex>
 
-#include "build_variable.hpp"
+#include "logger.hpp"
 #include "utils.hpp"
 
 namespace hatter {
 namespace config_builder {
 namespace {
-std::string generateKickstartRepo(const std::string& repoName,
-                                  const std::string& repoBaseURL,
-                                  const std::string& repoMetaLink,
-                                  const int          cost = 50) {
+std::string buildKickstartRepo(const std::string& repoName,
+                               const std::string& repoBaseURL,
+                               const std::string& repoMetaLink,
+                               const int          cost = 50) {
     std::string ret;
     ret += "repo --name=" + repoName;
     ret += repoBaseURL.empty() ? "" : " --baseurl=" + repoBaseURL;
@@ -21,14 +22,14 @@ std::string generateKickstartRepo(const std::string& repoName,
     return ret;
 }
 
-std::string generateCommandWithListParam(const std::string&              cmd,
-                                         const std::vector<std::string>& params,
-                                         const std::string&              endLine,
-                                         const std::string&              beginComment = "") {
+std::string buildCommandWithListParam(const std::string&              cmd,
+                                      const std::vector<std::string>& params,
+                                      const std::string&              endLine,
+                                      const std::string&              beginComment = "") {
     std::string ret;
     std::string align(cmd.length(), ' ');
 
-    if (!beginComment.empty()) { strAddLine(ret, {"# " + beginComment}); }
+    if (!beginComment.empty()) { strAddLine(ret, "# " + beginComment); }
     for (auto param = params.cbegin(); param != params.cend(); ++param) {
         std::string tempLine;
         if (param == params.cbegin()) {
@@ -63,22 +64,71 @@ std::string getCOPRBaseURL(std::string coprRepo) {
 
     return ret;
 }
-}  // namespace
-
-std::string generateIncludeKickstart(const DistroInfo& distroInfo) {
+std::string joinFile(const std::vector<std::filesystem::path>& files) {
     std::string ret;
-    strAddLine(ret,
-               {"%include " + build_variable::kFedoraKickstartDir.string() + "/fedora-live-" +
-                distroInfo.baseSpin.value});
+
+    for (const auto& file : files) { strAddLine(ret, readFile(file)); }
+
     return ret;
 }
+std::string buildKickstartSection(const std::string& header, const std::string& content) {
+    return "\n\%" + header + "\n" + content + "\n\%end\n";
+}
+}  // namespace
 
-std::pair<std::string, std::string> generateRepoList(const RepoConfig& repoConfig) {
+std::string buildBaseKickstartGitTag(const int releasever, const std::string& targetTag) {
+    std::string       finalTag;
+    const std::string releaseverStr = std::to_string(releasever);
+    const std::string baseGitCmd = "git -C " + hatter::build_variable::kStockKickstartDir.string();
+
+    if (targetTag == "latest") {
+        std::string temp;
+        hatter::execCommand(
+            "curl -sS https://pagure.io/api/0/fedora-kickstarts/git/tags | jq -r '.tags | .[]' ",
+            temp);
+        const auto allTags = hatter::strSplit(temp, "\n");
+
+        int        maxTag = -1;
+        const auto regex  = std::regex("0." + releaseverStr + ".([0-9]+)");
+        for (const auto& tag : allTags) {
+            std::smatch match;
+            if (std::regex_match(tag, match, regex)) {
+                maxTag = std::max(maxTag, std::stoi(match[0].str()));
+            }
+        }
+
+        if (maxTag < 0) {
+            throw std::runtime_error("can't find latest git tag for releasever " + releaseverStr);
+        }
+        finalTag = "0." + releaseverStr + "." + std::to_string(maxTag);
+    } else {
+        finalTag = targetTag;
+    }
+
+    return finalTag;
+}
+std::string buildBaseKickstartName(const std::string& baseSpin) {
+    return "fedora-live-" + baseSpin;
+}
+
+std::string buildUserFileTransferCommand(const std::vector<std::filesystem::path> userFiles) {
+    std::string ret;
+
+    std::string userFileStr;
+    for (const auto& userFile : userFiles) { userFileStr += userFile.string() + " "; }
+
+    strAddLine(ret,
+               {"cp -r " + userFileStr + " " + build_variable::kUserFileDest.string(),
+                "chmod -R a+r+x " + build_variable::kUserFileDest.string()});
+
+    return ret;
+}
+std::pair<std::string, std::string> buildRepoList(const RepoConfig& repoConfig) {
     std::string ksStr;
-    std::string postScriptStr;
+    std::string firstBootStr;
 
     if (!repoConfig.standardRepos.value.empty()) {
-        strAddLine(postScriptStr, {"sudo dnf install fedora-workstation-repositories -y"});
+        strAddLine(firstBootStr, "sudo dnf install fedora-workstation-repositories -y");
     }
     for (const auto& stdRepo : repoConfig.standardRepos.value) {
         std::string ksRepoName;
@@ -89,21 +139,21 @@ std::pair<std::string, std::string> generateRepoList(const RepoConfig& repoConfi
             ksRepoName = "google-chrome";
             ksBaseURL  = "http://dl.google.com/linux/chrome/rpm/stable/$basearch";
 
-            strAddLine(postScriptStr, {"sudo dnf config-manager --set-enabled " + ksRepoName});
+            strAddLine(firstBootStr, {"sudo dnf config-manager --set-enabled " + ksRepoName});
         } else if (stdRepo == "nvidia") {
             ksRepoName = "rpmfusion-nonfree-nvidia-driver";
             ksMetaLink =
                 "https://mirrors.rpmfusion.org/"
                 "metalink?repo=nonfree-fedora-nvidia-driver-$releasever&arch=$basearch";
 
-            strAddLine(postScriptStr, {"sudo dnf config-manager --set-enabled " + ksRepoName});
+            strAddLine(firstBootStr, {"sudo dnf config-manager --set-enabled " + ksRepoName});
         } else if (stdRepo == "vscode") {
             // source: https://code.visualstudio.com/docs/setup/linux
             ksRepoName = "code";
             ksBaseURL  = "https://packages.microsoft.com/yumrepos/vscode";
 
             strAddLine(
-                postScriptStr,
+                firstBootStr,
                 {"sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc",
                  "sudo sh -c 'echo -e \"[code]\\nname=Visual Studio "
                  "Code\\nbaseurl=https://packages.microsoft.com/yumrepos/"
@@ -114,14 +164,14 @@ std::pair<std::string, std::string> generateRepoList(const RepoConfig& repoConfi
         } else {
             throw std::runtime_error("unknown standard repo");
         }
-        strAddLine(ksStr, {generateKickstartRepo(ksRepoName, ksBaseURL, ksMetaLink)});
+        strAddLine(ksStr, {buildKickstartRepo(ksRepoName, ksBaseURL, ksMetaLink)});
     }
 
-    strAddLine(postScriptStr,
-               {generateCommandWithListParam(
-                   "sudo dnf copr enable", repoConfig.coprRepos.value, "-y", "copr repos")});
+    strAddLine(firstBootStr,
+               buildCommandWithListParam(
+                   "sudo dnf copr enable", repoConfig.coprRepos.value, "-y", "copr repos"));
     for (const auto& coprRepo : repoConfig.coprRepos.value) {
-        strAddLine(ksStr, {generateKickstartRepo(coprRepo, getCOPRBaseURL(coprRepo), "")});
+        strAddLine(ksStr, {buildKickstartRepo(coprRepo, getCOPRBaseURL(coprRepo), "")});
     }
 
     // TODO(kd): Recheck custom repo handling
@@ -129,45 +179,55 @@ std::pair<std::string, std::string> generateRepoList(const RepoConfig& repoConfi
     for (const auto& customRepo : repoConfig.customRepos) {
         strAddLine(
             ksStr,
-            {generateKickstartRepo(
+            {buildKickstartRepo(
                 customRepo.name.value, customRepo.baseurl.value, customRepo.metaLink.value)});
         customRepoNames.push_back(customRepo.name.value);
     }
-    strAddLine(postScriptStr,
-               {generateCommandWithListParam(
-                   "sudo dnf config-manager --set-enabled", customRepoNames, "", "custom repos")});
+    strAddLine(firstBootStr,
+               buildCommandWithListParam(
+                   "sudo dnf config-manager --set-enabled", customRepoNames, "", "custom repos"));
 
-    return std::make_pair(ksStr, postScriptStr);
+    return std::make_pair(ksStr, firstBootStr);
 }
-std::string generatePackageList(const PackageConfig& pkgConfig) {
-    std::string ret;
-    strAddLine(ret, {"%packages"});
+std::pair<std::string, std::string> buildPackageCommand(const PackageConfig& currPkgConfig,
+                                                        const PackageConfig& prevPkgConfig,
+                                                        const bool           isFullBuild) {
+    std::string install;
+    std::string remove;
 
-    strAddLine(ret, {"# rpm package"});
-    strAddLine(ret, {"# install"});
-    for (const auto& installRPM : pkgConfig.rpm.installList.value) {
-        strAddLine(ret, {installRPM});
-    }
-    strAddLine(ret, {"", "# remove"});
-    for (const auto& removeRPM : pkgConfig.rpm.removeList.value) {
-        strAddLine(ret, {"-" + removeRPM});
-    }
-    strAddLine(ret, {""});
-
-    strAddLine(ret, {"# rpm group"});
-    strAddLine(ret, {"# install"});
-    for (const auto& groupInstall : pkgConfig.rpmGroup.installList.value) {
-        strAddLine(ret, {"@" + groupInstall});
-    }
-    strAddLine(ret, {"", "# remove"});
-    for (const auto& groupRemove : pkgConfig.rpmGroup.removeList.value) {
-        strAddLine(ret, {"-@" + groupRemove});
+    strAddLine(install, "# rpm package");
+    strAddLine(install, currPkgConfig.rpm.installList.value);
+    strAddLine(install, {"", "# rpm group"});
+    for (const auto& groupInstall : currPkgConfig.rpmGroup.installList.value) {
+        strAddLine(install, "@" + groupInstall);
     }
 
-    strAddLine(ret, {"%end"});
-    return ret;
+    strAddLine(remove,
+               {buildCommandWithListParam(
+                    "dnf remove", currPkgConfig.rpm.removeList.value, "-y", "remove rpm package"),
+                buildCommandWithListParam("dnf group remove",
+                                          currPkgConfig.rpmGroup.removeList.value,
+                                          "-y",
+                                          "remove rpm group")});
+
+    if (!isFullBuild) {
+        strAddLine(
+            remove,
+            {buildCommandWithListParam("dnf remove",
+                                       subtractVector(prevPkgConfig.rpm.installList.value,
+                                                      currPkgConfig.rpm.installList.value),
+                                       "-y",
+                                       "diff remove rpm package"),
+             buildCommandWithListParam("dnf group remove",
+                                       subtractVector(prevPkgConfig.rpmGroup.installList.value,
+                                                      currPkgConfig.rpmGroup.installList.value),
+                                       "-y",
+                                       "diff remove rpm group")});
+    }
+
+    return std::make_pair(install, remove);
 }
-std::string generateMisc(const MiscConfig& miscConfig) {
+std::string buildMisc(const MiscConfig& miscConfig) {
     std::string ret;
 
     strAddLine(ret,
@@ -177,5 +237,83 @@ std::string generateMisc(const MiscConfig& miscConfig) {
 
     return ret;
 }
+
+bool needRebuild(const FullConfig&                       currConfig,
+                 const FullConfig&                       prevConfig,
+                 const build_variable::CLIBuildVariable& currBuildVar,
+                 const build_variable::CLIBuildVariable& prevBuildVar) {
+    if ((currBuildVar.arch != prevBuildVar.arch) ||
+        (currBuildVar.releasever != prevBuildVar.releasever) ||
+        (currConfig.distroInfo != prevConfig.distroInfo)) {
+        return true;
+    }
+    return false;
+}
+
+void buildBaseLayer(const FullConfig&                       currConfig,
+                    const build_variable::CLIBuildVariable& currBuildVar) {
+    std::string configBuilderEnvFile;
+
+    strAddLine(configBuilderEnvFile,
+               {"export env_base_kickstart_name=" +
+                    buildBaseKickstartName(currConfig.distroInfo.baseSpin.value),
+                "export env_base_kickstart_tag=" +
+                    buildBaseKickstartGitTag(currBuildVar.releasever,
+                                             currConfig.distroInfo.kickstartTag.value)});
+
+    writeFile(configBuilderEnvFile, build_variable::kConfigBuilderEnvVar);
+}
+void buildVolatileLayer(const FullConfig& currConfig,
+                        const FullConfig& prevConfig,
+                        const bool        isFullBuild) {
+    std::string kickstartFile;
+
+    std::string firstLoginScript;
+    std::string postBuildScript;
+    std::string postBuildNoRootScript;
+
+    strAddLine(kickstartFile, buildMisc(currConfig.miscConfig));
+
+    const auto packageCmd =
+        buildPackageCommand(currConfig.packageConfig, prevConfig.packageConfig, isFullBuild);
+    strAddLine(kickstartFile, buildKickstartSection("packages", packageCmd.first));
+    strAddLine(postBuildScript, packageCmd.second);
+
+    const auto repoList = buildRepoList(currConfig.repoConfig);
+    strAddLine(kickstartFile, repoList.first);
+    strAddLine(firstLoginScript, repoList.second);
+
+    strAddLine(firstLoginScript, joinFile(currConfig.imageInfo.firstLoginScripts.value));
+    strAddLine(postBuildScript, joinFile(currConfig.imageInfo.postBuildScripts.value));
+
+    strAddLine(postBuildNoRootScript,
+               {buildUserFileTransferCommand(currConfig.imageInfo.userFiles.value),
+                joinFile(currConfig.imageInfo.postBuildNoRootScripts.value)});
+
+    strAddLine(
+        kickstartFile,
+        {buildKickstartSection(
+             "post --erroronfail --log=" + build_variable::kKickstartLogDir.string(),
+             postBuildScript),
+         buildKickstartSection("post --nochroot --log=" + build_variable::kKickstartLogDir.string(),
+                               postBuildNoRootScript)});
+    writeFile(kickstartFile, build_variable::kMainKickstartPath);
+
+    writeFile(firstLoginScript, build_variable::kFirstLoginScriptPath);
+    writeFile(postBuildScript, build_variable::kPostBuildScriptPath);
+    writeFile(postBuildNoRootScript, build_variable::kPostBuildScriptNoRootPath);
+}
+
+void build(const FullConfig&                       currConfig,
+           const FullConfig&                       prevConfig,
+           const build_variable::CLIBuildVariable& currBuildVar,
+           const build_variable::CLIBuildVariable& prevBuildVar) {
+    const auto isFullBuild = build_variable::kIsFirstBuild ||
+                             needRebuild(currConfig, prevConfig, currBuildVar, prevBuildVar);
+
+    if (isFullBuild) { buildBaseLayer(currConfig, currBuildVar); }
+    buildVolatileLayer(currConfig, prevConfig, isFullBuild);
+}
+
 }  // namespace config_builder
 }  // namespace hatter

@@ -29,6 +29,11 @@ struct DistroInfo : public ConfigSectionBase {
     ConfigMember<std::string> baseSpin{"base_spin"};
 
     DistroInfo() : ConfigSectionBase{"distro_info"} {}
+
+    bool operator!=(const DistroInfo &d) const {
+        return ((this->kickstartTag.value) != d.kickstartTag.value) ||
+               ((this->baseSpin.value) != d.baseSpin.value);
+    }
 };
 
 struct ImageInfo : public ConfigSectionBase {

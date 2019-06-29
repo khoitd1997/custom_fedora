@@ -32,7 +32,15 @@ cmake -G Ninja -DUSE_CPPLINT=ON -DUSE_CPPCHECK=ON -DRUN_TEST=ON .. && ninja
 
 # GTEST_BREAK_ON_FAILURE=1 GTEST_COLOR=1 ctest --verbose --gtest_print_time=0 
 cd bin
-cat > ./toml_parsed_env.sh << EOF
+mkdir -p out
+set -e
+if [ -f "build/prev_env_var.sh" ]; then 
+    source build/prev_env_var.sh
+    export env_is_first_build=false
+else
+    export env_is_first_build=true
+fi
+cat > ./build/env_var.sh << EOF
 export env_parent_config=fedora_kd.toml
 export env_os_name=fedora_kd
 
@@ -40,9 +48,17 @@ export env_releasever=29
 export env_arch=x86_64
 
 export env_clear_cache=true
-export env_parser_mode=true
+export env_parser_mode=false
 EOF
-source ./toml_parsed_env.sh
-printf "env_os_name: "${env_os_name}
+source ./build/env_var.sh
 ./tomlparser example_settings.toml
+if [ $? -ne 0 ]; then
+    echo "toml parser failed"
+else
+    echo "toml parser succeeded"
+    cp build/env_var.sh build/prev_env_var.sh
+    sed '/env_/s/env_/prev_env_/' -i build/prev_env_var.sh
+
+    cp example_settings.toml build/prev_config.toml
+fi
 # cmake -G Ninja .. && ninja && ./bin/tomlparser ./bin/random.toml

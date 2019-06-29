@@ -121,6 +121,6 @@ void FullErrorReport::what() const {
 }
 FullErrorReport::operator bool() const { return (!errorReports.empty()); }
 void             FullErrorReport::add(const std::shared_ptr<FileErrorReportBase>& errorReport) {
-    if (errorReport) { errorReports.push_back(errorReport); }
+    if (*errorReport) { errorReports.push_back(errorReport); }
 }
 }  // namespace hatter
