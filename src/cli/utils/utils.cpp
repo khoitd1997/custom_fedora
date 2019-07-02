@@ -81,7 +81,8 @@ std::string readFile(const std::filesystem::path& path) {
     std::string ret;
 
     std::ifstream inFile(path.string());
-    if (inFile.fail()) { throw std::runtime_error("failed to read file " + path.string()); }
+    std::cout << "reading file named " << path.string() << std::endl;
+    if (inFile.fail()) { throw std::runtime_error("failed to read file named " + path.string()); }
 
     std::string line;
     while (std::getline(inFile, line)) { strAddLine(ret, line); }

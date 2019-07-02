@@ -20,17 +20,20 @@
 
 namespace hatter {
 namespace {
-bool depthFirstSearch(
-    const std::filesystem::path&                                           filePath,
-    const std::string&                                                     parentFileName,
-    FullConfig&                                                            fullConfig,
-    FullErrorReport&                                                       fullReport,
-    std::function<std::vector<TopSectionErrorReport>(
-        toml::table&, const std::filesystem::path& filePath, FullConfig&)> parseFunc,
-    std::function<std::vector<TopSectionErrorReport>(FullConfig&, const FullConfig&)> mergeFunc) {
+typedef std::function<std::vector<TopSectionErrorReport>(
+    toml::table&, const std::filesystem::path& filePath, FullConfig&)>
+    ParseFunc;
+
+typedef std::function<std::vector<TopSectionErrorReport>(FullConfig&, const FullConfig&)> MergeFunc;
+
+bool depthFirstSearch(const std::filesystem::path& filePath,
+                      const std::string&           parentFileName,
+                      FullConfig&                  fullConfig,
+                      FullErrorReport&             fullReport,
+                      ParseFunc                    parseFunc,
+                      MergeFunc                    mergeFunc) {
     auto currDirectory = filePath.parent_path().string();
     auto currFileName  = filePath.filename().string();
-    auto failed        = false;
 
     // TODO(kd): error handling here
     auto rawConfig = toml::get<toml::table>(toml::parse(filePath));
@@ -45,7 +48,6 @@ bool depthFirstSearch(
     fileSectionReport.add(parseFunc(rawConfig, filePath, fullConfig));
 
     fullReport.add(std::make_shared<FileSectionErrorReport>(fileSectionReport));
-    failed = failed || fileSectionReport;
 
     // std::cout << "First Login Path:" << std::endl;
     // for (const auto& filePath : fullConfig.imageInfo.firstLoginScripts.value) {
@@ -59,58 +61,81 @@ bool depthFirstSearch(
         auto childTable    = toml::parse(childPath.string());
 
         FullConfig childConf;
-        failed |=
-            depthFirstSearch(childPath, currFileName, childConf, fullReport, parseFunc, mergeFunc);
+        depthFirstSearch(childPath, currFileName, childConf, fullReport, parseFunc, mergeFunc);
 
-        if (!failed) {
+        if (!fullReport) {
+            std::cout << "Merging" << std::endl;
             FileMergeErrorReport mergeReport(currFileName, childFileName);
 
             mergeReport.add(mergeFunc(fullConfig, childConf));
 
             fullReport.add(std::make_shared<FileMergeErrorReport>(mergeReport));
-            failed = failed || mergeReport;
         } else {
         }
     }
 
-    return failed;
+    return fullReport.operator bool();
 }
 
 bool getFile(const std::filesystem::path& filePath,
              const std::string&           parentFileName,
              FullConfig&                  fullConfig,
-             FullErrorReport&             fullReport) {
-    auto parseFunc = std::function<std::vector<TopSectionErrorReport>(
-        toml::table&, const std::filesystem::path& filePath, FullConfig&)>{
-        [](toml::table& rawConfig, const std::filesystem::path& filePath, FullConfig& fullConfig) {
-            return std::vector<TopSectionErrorReport>{
-                distro_info_handler::parse(rawConfig, fullConfig.distroInfo),
-                repo_handler::parse(rawConfig, fullConfig.repoConfig),
-                package_handler::parse(rawConfig, fullConfig.packageConfig),
-                misc_handler::parse(rawConfig, fullConfig.miscConfig),
-                build_process_handler::parse(
-                    rawConfig, filePath.parent_path(), fullConfig.buildConfig),
-                image_info_handler::parse(rawConfig, filePath.parent_path(), fullConfig.imageInfo)};
-        }};
-    auto mergeFunc =
-        std::function<std::vector<TopSectionErrorReport>(FullConfig&, const FullConfig&)>{
-            [](FullConfig& parentConfig, const FullConfig& childConfig) {
-                return std::vector<TopSectionErrorReport>{
-                    distro_info_handler::merge(parentConfig.distroInfo, childConfig.distroInfo),
-                    image_info_handler::merge(parentConfig.imageInfo, childConfig.imageInfo),
-                    repo_handler::merge(parentConfig.repoConfig, childConfig.repoConfig),
-                    package_handler::merge(parentConfig.packageConfig, childConfig.packageConfig),
-                    misc_handler::merge(parentConfig.miscConfig, childConfig.miscConfig)};
-            }};
+             FullErrorReport&             fullReport,
+             const bool                   getRepoFailed) {
+    auto parseFunc = ParseFunc{[getRepoFailed](toml::table&                 rawConfig,
+                                               const std::filesystem::path& filePath,
+                                               FullConfig&                  fullConfig) {
+        auto ret = std::vector<TopSectionErrorReport>{
+            distro_info_handler::parse(rawConfig, fullConfig.distroInfo),
+            image_info_handler::parse(rawConfig, filePath.parent_path(), fullConfig.imageInfo),
+            build_process_handler::parse(rawConfig, filePath.parent_path(), fullConfig.buildConfig),
+            misc_handler::parse(rawConfig, fullConfig.miscConfig)};
+
+        if (!getRepoFailed) {
+            ret.push_back(package_handler::parse(rawConfig, fullConfig.packageConfig));
+        }
+
+        return ret;
+    }};
+    auto mergeFunc = MergeFunc{[](FullConfig& parentConfig, const FullConfig& childConfig) {
+        return std::vector<TopSectionErrorReport>{
+            distro_info_handler::merge(parentConfig.distroInfo, childConfig.distroInfo),
+            image_info_handler::merge(parentConfig.imageInfo, childConfig.imageInfo),
+            build_process_handler::merge(parentConfig.buildConfig, childConfig.buildConfig),
+            package_handler::merge(parentConfig.packageConfig, childConfig.packageConfig),
+            misc_handler::merge(parentConfig.miscConfig, childConfig.miscConfig)};
+    }};
     return depthFirstSearch(filePath, parentFileName, fullConfig, fullReport, parseFunc, mergeFunc);
 }
+bool getRepo(const std::filesystem::path& filePath,
+             const std::string&           parentFileName,
+             FullConfig&                  fullConfig,
+             FullErrorReport&             fullReport) {
+    auto parseFunc = ParseFunc{
+        [](toml::table& rawConfig, const std::filesystem::path& filePath, FullConfig& fullConfig) {
+            (void)(filePath);
+            return std::vector<TopSectionErrorReport>{
+                repo_handler::parse(rawConfig, fullConfig.repoConfig)};
+        }};
+    auto       mergeFunc = MergeFunc{[](FullConfig& parentConfig, const FullConfig& childConfig) {
+        return std::vector<TopSectionErrorReport>{
+            repo_handler::merge(parentConfig.repoConfig, childConfig.repoConfig)};
+    }};
+    const auto failed =
+        depthFirstSearch(filePath, parentFileName, fullConfig, fullReport, parseFunc, mergeFunc);
+    // TODO(kd): Add repo command here
+    return failed;
+}
+
 }  // namespace
 
 bool getFullConfig(const std::filesystem::path& filePath,
                    FullConfig&                  fullConfig,
                    const bool                   suppressOuput) {
     FullErrorReport fullReport;
-    getFile(filePath, "", fullConfig, fullReport);
+
+    const auto getRepoFailed = getRepo(filePath, "", fullConfig, fullReport);
+    getFile(filePath, "", fullConfig, fullReport, getRepoFailed);
     if (fullReport) {
         if (!suppressOuput) {
             // std::cout << "Printing out error" << std::endl;

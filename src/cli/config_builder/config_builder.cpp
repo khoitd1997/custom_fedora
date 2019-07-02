@@ -297,6 +297,11 @@ void buildVolatileLayer(const FullConfig& currConfig,
     strAddNonEmptyLine(kickstartFile, repoList.first);
     strAddNonEmptyLine(firstLoginScript, repoList.second);
 
+    std::cout << "All first logins script" << std::endl;
+    for (const auto scr : currConfig.imageInfo.firstLoginScripts.value) {
+        std::cout << scr.string() << std::endl;
+    }
+    std::cout << "Done" << std::endl;
     strAddNonEmptyLine(firstLoginScript,
                        buildUserScript(currConfig.imageInfo.firstLoginScripts.value));
     strAddNonEmptyLine(postBuildScript,
