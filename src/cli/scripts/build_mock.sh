@@ -9,7 +9,7 @@ script_dir="$(dirname "$(readlink -f "$0")")"
 cd ${script_dir}
 source ${script_dir}/exit_code.sh
 source ${script_dir}/general_utils.sh
-source ${script_dir}/env
+source ${script_dir}/env_var.sh
 
 # function error_callback {
 #     exit ${error_build_failed}
@@ -37,7 +37,8 @@ module_platform_id=platform:f30
 EOF
 
 set +e
-# sed -i 's|^reposdir=.*|reposdir=/etc/yum.repos.d/|g' /etc/dnf/dnf.conf
+# TODO(kd): Fill in repo dir here
+# sed -i 's|^reposdir=.*|reposdir=/etc/yum.repos.d/, curr_build_repo_dir |g' /etc/dnf/dnf.conf
 # dnf check-update -y -q
 # dnf_status=$?
 # total_try=0
@@ -74,8 +75,8 @@ log_dir=${out_dir}/log
 mkdir ${log_dir}
 
 cd ${conf_dir}
-# launch parser here and generate a file called toml_parsed_env
-# source ./toml_parsed_env
+# launch parser here and generate a file called env_var.sh
+# source ./env_var.sh
 # if parser succeed then move on
 # mv parser log to log_dir
 
@@ -117,7 +118,7 @@ if [ "${env_parser_mode}" = false ]; then
     fi
 
     livemedia-creator --ks flat-${generated_ks}.ks --no-virt \
-    --resultdir ${iso_dir} --project ${os_name} --make-iso --volid ${os_name} \
+    --resultdir ${iso_dir} --project ${env_os_name} --make-iso --volid ${env_os_name} \
     --iso-only --iso-name ${generated_ks}.iso --releasever ${env_releasever} \
     --title ${env_os_name} --macboot
 fi

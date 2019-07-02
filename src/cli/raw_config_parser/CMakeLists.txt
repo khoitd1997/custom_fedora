@@ -10,7 +10,7 @@ add_subdirectory(distro_info_handler)
 file(GLOB CppSources *.cpp)
 add_library(raw_config_parser ${CppSources})
 target_link_libraries(raw_config_parser
-                      PUBLIC raw_config_parser_common_type
+                      PUBLIC hatter_config_type
                       PRIVATE utils
                               toml_utils
                               raw_config_parser_common_error

@@ -3,7 +3,7 @@ include(GoogleTest)
 add_library(raw_config_parser_distro_info_sanitize distro_info_sanitize.cpp)
 target_link_libraries(raw_config_parser_distro_info_sanitize
                       PUBLIC toml11 raw_config_parser_common_error
-                             raw_config_parser_common_type
+                             hatter_config_type
                       PRIVATE raw_config_parser_common_sanitize formatter
                               raw_config_parser_utils)
 target_include_directories(raw_config_parser_distro_info_sanitize

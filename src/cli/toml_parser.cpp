@@ -13,19 +13,18 @@
 #include <cstdlib>
 #include <filesystem>
 #include <iostream>
+#include <regex>
 #include <stdexcept>
 #include <string>
 
 #include "toml11/toml.hpp"
 
+#include "build_variable.hpp"
 #include "config_builder.hpp"
+#include "config_decoder.hpp"
 #include "logger.hpp"
 #include "raw_config_parser.hpp"
 #include "utils.hpp"
-
-// bool parseInputTOMLFile(const std::string& filePath, toml::table& out) {
-//     // TODO(kd): Investigate cleaner error message
-// }
 
 int main(int argc, char** argv) {
     if (argc < 2) {
@@ -37,9 +36,35 @@ int main(int argc, char** argv) {
     std::cout << std::endl;
 
     auto               filePath = std::filesystem::path(std::string(argv[1]));
-    hatter::FullConfig fullConfig;
-    hatter::getFullConfig(filePath, fullConfig);
+    hatter::FullConfig currConfig;
+    auto               hasError = hatter::getFullConfig(filePath, currConfig);
 
+    const hatter::build_variable::CLIBuildVariable currBuildVar;
+    hatter::build_variable::CLIBuildVariable       prevBuildVar;
+
+    // TODO(kd): Remove after test
+    (void)(hasError);
+    // if (hasError) {
+    //     hatter::logger::error("failed to parse");
+    //     return 1;
+    // }
+
+    if (!currBuildVar.parserMode) {
+        hatter::FullConfig prevConfig;
+        if (!hatter::build_variable::kIsFirstBuild) {
+            prevBuildVar = hatter::build_variable::CLIBuildVariable{"prev"};
+            hatter::getFullConfig(hatter::build_variable::kPrevParentConfigPath, prevConfig, true);
+            // TODO(kd): Enable after test
+            //         assert(
+            // !hatter::getFullConfig(hatter::build_variable::kPrevParentConfigPath, prevConfig));
+        }
+        hatter::config_builder::build(currConfig, prevConfig, currBuildVar, prevBuildVar);
+    }
+
+    hatter::writeFileWithHeader(hatter::config_decoder::decode(currConfig),
+                                hatter::build_variable::kPrevParentConfigPath);
+
+    return 0;
     // hatter::TOMLConfigFile conf(fileName);
 
     // if (!conf) { std::cout << "Failed to get conf file" << std::endl; }
@@ -145,6 +170,4 @@ int main(int argc, char** argv) {
     //     std::cerr << "Failed to parse setting file: " << argv[1] << ": " << e.what() <<
     //     std::endl; return 1;
     // }
-
-    return 0;
 }

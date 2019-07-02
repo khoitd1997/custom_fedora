@@ -140,9 +140,9 @@ std::shared_ptr<TOMLError> getTOMLVal(toml::table& t, ConfigMember<std::string>&
 std::shared_ptr<TOMLError> getBaseTable(toml::table&             t,
                                         const ConfigSectionBase& confSection,
                                         toml::table&             out);
-std::shared_ptr<TOMLError> getBaseTable(toml::table&              t,
-                                        const ConfigSectionBase&  confSection,
-                                        std::vector<toml::table>& out);
+std::shared_ptr<TOMLError> getBaseTables(toml::table&              t,
+                                         const std::string&        arrayName,
+                                         std::vector<toml::table>& out);
 
 template <>
 std::shared_ptr<TOMLError> getTOMLVal(toml::table& t, ConfigMember<std::vector<std::string>>& conf);

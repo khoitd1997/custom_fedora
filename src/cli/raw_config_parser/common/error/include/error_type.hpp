@@ -11,10 +11,8 @@ struct HatterParserError {
 struct SingleKeyError : public HatterParserError {
     const std::string keyName;
 
-    SingleKeyError(const std::string& keyName);
+    explicit SingleKeyError(const std::string& keyName);
     virtual ~SingleKeyError();
-
-    virtual std::string what() const = 0;
 };
 
 struct SectionMergeConflictError : public SingleKeyError {

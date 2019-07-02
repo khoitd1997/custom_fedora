@@ -6,7 +6,7 @@ add_subdirectory(get)
 add_library(raw_config_parser_image_info image_info_handler.cpp)
 target_link_libraries(raw_config_parser_image_info
                       PUBLIC toml11 raw_config_parser_common_error
-                             raw_config_parser_common_type
+                             hatter_config_type
                       PRIVATE raw_config_parser_image_info_sanitize
                               raw_config_parser_image_info_get
                               raw_config_parser_utils

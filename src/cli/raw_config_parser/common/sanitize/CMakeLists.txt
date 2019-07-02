@@ -4,7 +4,7 @@ target_link_libraries(raw_config_parser_common_sanitize
                       PUBLIC toml11
                              raw_config_parser_common_error
                              raw_config_parser_utils
-                             raw_config_parser_common_type
+                             hatter_config_type
                       PRIVATE utils formatter)
 
 target_include_directories(raw_config_parser_common_sanitize

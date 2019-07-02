@@ -2,15 +2,27 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <functional>
+#include <initializer_list>
 #include <memory>
 #include <string>
 #include <string_view>
 #include <unordered_set>
 
 namespace hatter {
-void writeFile(const std::string& s, const std::string& path);
-void writeFile(const std::vector<std::string>& lines, const std::string& path);
-bool readFile(std::vector<std::string>& lines, const std::string& path);
+std::string getCurrentTime(const std::string& fmt);
+
+std::string buildCommentBlock(const std::vector<std::string>& lines,
+                              const std::string&              commentPrefix);
+
+void        writeFile(const std::string& s, const std::filesystem::path& path);
+void        writeFile(const std::vector<std::string>& lines, const std::filesystem::path& path);
+void        writeFileWithHeader(const std::string&           content,
+                                const std::filesystem::path& path,
+                                const std::string&           commentPrefix     = "#",
+                                const std::string&           additionalComment = "");
+void        appendFile(const std::string& s, const std::filesystem::path& path);
+std::string readFile(const std::filesystem::path& path);
 
 void replacePattern(std::vector<std::string>& lines,
                     const std::string&        regexPattern,
@@ -21,6 +33,23 @@ std::string getExeDir(void);
 std::string toUpper(std::string_view str);
 
 std::string strJoin(const std::vector<std::string>& strings, const std::string& delimiter = ", ");
+template <typename T>
+std::string strJoin(const std::vector<T>&                vals,
+                    std::function<std::string(const T&)> func,
+                    const std::string&                   delimiter = ", ") {
+    std::vector<std::string> v;
+    for (const auto& val : vals) { v.push_back(func(val)); }
+    return strJoin(v, delimiter);
+}
+void strAddLine(std::string& dest, const std::string& src);
+void strAddLine(std::string& dest, const std::vector<std::string>& src);
+void strAddLine(std::string& dest, const std::initializer_list<std::string>& src);
+void strAddNonEmptyLine(std::string& dest, const std::string& src);
+void strAddNonEmptyLine(std::string& dest, const std::vector<std::string>& src);
+void strAddNonEmptySection(std::string&       dest,
+                           const std::string& content,
+                           const std::string& sectionName,
+                           const std::string& commentPrefix = "#");
 
 bool inStr(const std::string& strToLookFor, const std::string& strToSearchIn);
 
@@ -43,6 +72,17 @@ void appendVector(std::vector<T>& resultVec, const std::vector<T>& targetVec) {
 }
 
 template <typename T>
+std::vector<T> subtractVector(std::vector<T> v1, std::vector<T> v2) {
+    std::vector<T> ret;
+
+    std::sort(v1.begin(), v1.end());
+    std::sort(v2.begin(), v2.end());
+    std::set_difference(v1.begin(), v1.end(), v2.begin(), v2.end(), std::back_inserter(ret));
+
+    return ret;
+}
+
+template <typename T>
 void removeDuplicateVector(std::vector<T>& v) {
     std::unordered_set<T> s(v.begin(), v.end());
     v.assign(s.begin(), s.end());
@@ -58,5 +98,6 @@ template <>
 void appendUniqueVector(std::vector<std::filesystem::path>&       dest,
                         const std::vector<std::filesystem::path>& src);
 
+int execCommand(const std::string& cmd);
 int execCommand(const std::string& cmd, std::string& output, const size_t outputBufferSize = 1000);
 }  // namespace hatter

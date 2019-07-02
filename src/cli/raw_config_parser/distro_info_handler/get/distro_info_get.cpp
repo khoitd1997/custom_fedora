@@ -14,9 +14,8 @@ TopSectionErrorReport get(toml::table& rawConfig,
     isEmpty = outRawConf.empty();
     if (errorReport || outRawConf.empty()) { return errorReport; }
 
-    errorReport.add({getTOMLVal(outRawConf, outConf.kickstartTag),
-                     getTOMLVal(outRawConf, outConf.baseSpin),
-                     getTOMLVal(outRawConf, outConf.osName)});
+    errorReport.add(
+        {getTOMLVal(outRawConf, outConf.kickstartTag), getTOMLVal(outRawConf, outConf.baseSpin)});
 
     return errorReport;
 }

@@ -57,10 +57,10 @@ std::shared_ptr<TOMLError> getBaseTable(toml::table&             t,
                                         toml::table&             out) {
     return getNonMemberTOMLVal(t, confSection.keyName, out);
 }
-std::shared_ptr<TOMLError> getBaseTable(toml::table&              t,
-                                        const ConfigSectionBase&  confSection,
-                                        std::vector<toml::table>& out) {
-    return getNonMemberTOMLVal(t, confSection.keyName, out);
+std::shared_ptr<TOMLError> getBaseTables(toml::table&              t,
+                                         const std::string&        arrayName,
+                                         std::vector<toml::table>& out) {
+    return getNonMemberTOMLVal(t, arrayName, out);
 }
 
 template <>

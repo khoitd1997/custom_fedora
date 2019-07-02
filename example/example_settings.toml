@@ -7,26 +7,24 @@ include_files=["child_setting_1.toml", "child_path/child_setting_2.toml"]
 [distro_info]
 base_kickstart_tag="0.23.1" 
 base_spin="xfce"
-os_name="fedora-kd" 
 
 # scripts appended right first(lowest priority)
 [image_info]
 partition_size=7000
-# first_login_scripts=["first_login.sh"] # put in profile.d to launch at first login
+first_login_scripts=["test_first_login.sh"] # put in profile.d to launch at first login
 # post_build_scripts=["post_script.sh"] # post build script
 # post_build_script_no_chroots=["post_no_chroot_script.sh"] # post build script in no chroot
 user_files=["path_to_dir1", "path_to_dir2"] # will be put in /usr/share/hatter_user_file
 
 [build_process]
-custom_mock_script=["script.sh"] # custom script to run in mock env
+# custom_mock_script=["script.sh"] # custom script to run in mock env
 enable_custom_cache=true
 
 # define list of repos
 # $releasever and $basearch will be replaced when doing build
 [repo]
 standard_repos=["google-chrome", "nvidia", "vscode"]
-copr_repos=["khoitd1997/toml11"]
-sklfjlsd="flasd"
+copr_repos=["khoitd1997/toml11", "khoitd1997/toml11","khoitd1997/toml11"]
 
     # start defining custom repos here
     [[repo.custom_repos]]
@@ -39,8 +37,8 @@ sklfjlsd="flasd"
 
 
     [[repo.custom_repos]]
-    # name="test"
-    name=""
+    name="test"
+    # name=""
     display_name="RPM Fusion for Fedora $releasever - Free" 
     metalink="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-$releasever&arch=$basearch"
     baseurl="http://download1.rpmfusion.org/free/fedora/releases/$releasever/Everything/$basearch/os/"
@@ -53,8 +51,6 @@ sklfjlsd="flasd"
     [package.rpm]
     install=[
         "moreutils",
-        "dklassa",
-        "jq",
         "ripgrep",
         "gnome-terminal"
     ]
@@ -68,7 +64,6 @@ sklfjlsd="flasd"
     [package.rpm_group]
     install=[
         "multimedia",
-        # "fkasjklfjasdklfjasdklfjaklsdjfadkljsd",
         "sound-and-video"
     ]
 
