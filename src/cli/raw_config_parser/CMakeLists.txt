@@ -13,6 +13,7 @@ target_link_libraries(raw_config_parser
                       PUBLIC hatter_config_type
                       PRIVATE utils
                               toml_utils
+                              build_variable
                               raw_config_parser_common_error
                               raw_config_parser_common_sanitize
                               raw_config_parser_repo

@@ -1,11 +1,13 @@
 #include "raw_config_parser.hpp"
 
 #include <filesystem>
+#include <functional>
 #include <iostream>
 #include <memory>
 
 #include "logger.hpp"
 
+#include "build_variable.hpp"
 #include "error_report_file_type.hpp"
 #include "toml_utils.hpp"
 
@@ -18,10 +20,14 @@
 
 namespace hatter {
 namespace {
-bool getFile(const std::filesystem::path& filePath,
-             const std::string&           parentFileName,
-             FullConfig&                  fullConfig,
-             FullErrorReport&             fullReport) {
+bool depthFirstSearch(
+    const std::filesystem::path&                                           filePath,
+    const std::string&                                                     parentFileName,
+    FullConfig&                                                            fullConfig,
+    FullErrorReport&                                                       fullReport,
+    std::function<std::vector<TopSectionErrorReport>(
+        toml::table&, const std::filesystem::path& filePath, FullConfig&)> parseFunc,
+    std::function<std::vector<TopSectionErrorReport>(FullConfig&, const FullConfig&)> mergeFunc) {
     auto currDirectory = filePath.parent_path().string();
     auto currFileName  = filePath.filename().string();
     auto failed        = false;
@@ -32,25 +38,19 @@ bool getFile(const std::filesystem::path& filePath,
     // TODO(kd): error handling here
     std::vector<std::string> includeFiles;
     getNonMemberTOMLVal(rawConfig, "include_files", includeFiles);
-    std::cout << "current file: " << filePath << std::endl;
+    // std::cout << "current file: " << filePath << std::endl;
 
     FileSectionErrorReport fileSectionReport(currFileName, parentFileName);
 
-    fileSectionReport.add(
-        {distro_info_handler::parse(rawConfig, fullConfig.distroInfo),
-         repo_handler::parse(rawConfig, fullConfig.repoConfig),
-         package_handler::parse(rawConfig, fullConfig.packageConfig),
-         misc_handler::parse(rawConfig, fullConfig.miscConfig),
-         build_process_handler::parse(rawConfig, filePath.parent_path(), fullConfig.buildConfig),
-         image_info_handler::parse(rawConfig, filePath.parent_path(), fullConfig.imageInfo)});
+    fileSectionReport.add(parseFunc(rawConfig, filePath, fullConfig));
 
     fullReport.add(std::make_shared<FileSectionErrorReport>(fileSectionReport));
     failed = failed || fileSectionReport;
 
-    std::cout << "First Login Path:" << std::endl;
-    for (const auto& filePath : fullConfig.imageInfo.firstLoginScripts.value) {
-        std::cout << filePath.string() << std::endl;
-    }
+    // std::cout << "First Login Path:" << std::endl;
+    // for (const auto& filePath : fullConfig.imageInfo.firstLoginScripts.value) {
+    //     std::cout << filePath.string() << std::endl;
+    // }
 
     for (const auto& childFile : includeFiles) {
         auto childPath = std::filesystem::path(
@@ -59,17 +59,13 @@ bool getFile(const std::filesystem::path& filePath,
         auto childTable    = toml::parse(childPath.string());
 
         FullConfig childConf;
-        failed |= getFile(childPath, currFileName, childConf, fullReport);
+        failed |=
+            depthFirstSearch(childPath, currFileName, childConf, fullReport, parseFunc, mergeFunc);
 
         if (!failed) {
             FileMergeErrorReport mergeReport(currFileName, childFileName);
 
-            mergeReport.add(
-                {distro_info_handler::merge(fullConfig.distroInfo, childConf.distroInfo),
-                 image_info_handler::merge(fullConfig.imageInfo, childConf.imageInfo),
-                 repo_handler::merge(fullConfig.repoConfig, childConf.repoConfig),
-                 package_handler::merge(fullConfig.packageConfig, childConf.packageConfig),
-                 misc_handler::merge(fullConfig.miscConfig, childConf.miscConfig)});
+            mergeReport.add(mergeFunc(fullConfig, childConf));
 
             fullReport.add(std::make_shared<FileMergeErrorReport>(mergeReport));
             failed = failed || mergeReport;
@@ -78,6 +74,35 @@ bool getFile(const std::filesystem::path& filePath,
     }
 
     return failed;
+}
+
+bool getFile(const std::filesystem::path& filePath,
+             const std::string&           parentFileName,
+             FullConfig&                  fullConfig,
+             FullErrorReport&             fullReport) {
+    auto parseFunc = std::function<std::vector<TopSectionErrorReport>(
+        toml::table&, const std::filesystem::path& filePath, FullConfig&)>{
+        [](toml::table& rawConfig, const std::filesystem::path& filePath, FullConfig& fullConfig) {
+            return std::vector<TopSectionErrorReport>{
+                distro_info_handler::parse(rawConfig, fullConfig.distroInfo),
+                repo_handler::parse(rawConfig, fullConfig.repoConfig),
+                package_handler::parse(rawConfig, fullConfig.packageConfig),
+                misc_handler::parse(rawConfig, fullConfig.miscConfig),
+                build_process_handler::parse(
+                    rawConfig, filePath.parent_path(), fullConfig.buildConfig),
+                image_info_handler::parse(rawConfig, filePath.parent_path(), fullConfig.imageInfo)};
+        }};
+    auto mergeFunc =
+        std::function<std::vector<TopSectionErrorReport>(FullConfig&, const FullConfig&)>{
+            [](FullConfig& parentConfig, const FullConfig& childConfig) {
+                return std::vector<TopSectionErrorReport>{
+                    distro_info_handler::merge(parentConfig.distroInfo, childConfig.distroInfo),
+                    image_info_handler::merge(parentConfig.imageInfo, childConfig.imageInfo),
+                    repo_handler::merge(parentConfig.repoConfig, childConfig.repoConfig),
+                    package_handler::merge(parentConfig.packageConfig, childConfig.packageConfig),
+                    misc_handler::merge(parentConfig.miscConfig, childConfig.miscConfig)};
+            }};
+    return depthFirstSearch(filePath, parentFileName, fullConfig, fullReport, parseFunc, mergeFunc);
 }
 }  // namespace
 
@@ -88,246 +113,11 @@ bool getFullConfig(const std::filesystem::path& filePath,
     getFile(filePath, "", fullConfig, fullReport);
     if (fullReport) {
         if (!suppressOuput) {
-            std::cout << "Printing out error" << std::endl;
+            // std::cout << "Printing out error" << std::endl;
             fullReport.what();
         }
         return true;
     }
     return false;
 }
-
-// namespace {
-// void printSection(const std::string& colorCode, const std::string& sectionName) {
-//     spdlog::info("");
-//     spdlog::info("parsing section: " + colorCode + hatter::toUpper(sectionName) +
-//     kResetColorCode);
-// }
-
-// bool listContain(const std::vector<std::string>& list, const std::string& value) {
-//     return static_cast<bool>(std::count(list.begin(), list.end(), value));
-// }
-
-// bool checkUnknownOptions(const toml::table& table, const std::vector<std::string>& validOptions)
-// {
-//     auto isValid = true;
-//     for (auto const& [key, val] : table) {
-//         if (!listContain(validOptions, key)) {
-//             spdlog::error("unknown option: " + key);
-//             isValid = false;
-//         }
-//     }
-
-//     return isValid;
-// }
-
-// template <typename T>
-// bool checkConfigSame(const std::string& configName, const T& conf1, const T& conf2) {
-//     if (conf1 != conf2) {
-//         spdlog::error("conflicting {0}: {1} vs {2}", configName, conf1, conf2);
-//         return false;
-//     }
-//     return true;
-// }
-// }  // namespace
-
-// BaseConfig::~BaseConfig() {}
-
-// toml::table BaseConfig::getBaseTable_(const toml::table& rawConfig,
-//                                       const std::string& tableName,
-//                                       const std::string& colorCode) {
-//     toml::table ret;
-//     std::string errorMessage = "";
-
-//     try {
-//         ret = toml::get<toml::table>(rawConfig.at(tableName));
-//         if (ret.size() > 0) { isPresent_ = true; }
-//     } catch (const toml::type_error& e) {
-//         errorMessage = "table " + tableName + " has wrong type";
-//         isValid_     = false;
-//     } catch (const std::out_of_range& e) {
-//         // the base table is always optional
-//     }
-
-//     if ((isPresent_ || !isValid_) && (!colorCode.empty())) { printSection(colorCode, tableName);
-//     } if (!isValid_) { spdlog::error(errorMessage); } return ret;
-// }
-
-// toml::table BaseConfig::getBaseTable_(const RawTOMLConfig& rawConfig,
-//                                       const std::string&   tableName,
-//                                       const std::string&   colorCode) {
-//     if (rawConfig) { return getBaseTable_(rawConfig.config, tableName, colorCode); }
-
-//     isPresent_ = false;
-//     isValid_   = true;
-//     return toml::table();
-// }
-
-// DistroInfo::DistroInfo(const RawTOMLConfig& rawConfig) {
-//     auto rawDistroInfo = getBaseTable_(rawConfig, "distro_info", kCyanColorCode);
-
-//     if (isPresent_) {
-//         isValid_ &= getTOMLVal(rawDistroInfo, "base_kickstart_tag", kickstartTag, true);
-//         isValid_ &= getTOMLVal(rawDistroInfo, "base_spin", baseSpin);
-//         isValid_ &= getTOMLVal(rawDistroInfo, "os_name", osName);
-
-//         const std::vector<std::string> validOptions = {
-//             "base_kickstart_tag", "base_spin", "os_name"};
-//         isValid_ &= checkUnknownOptions(rawDistroInfo, validOptions);
-//     }
-// }
-
-// bool DistroInfo::merge(const DistroInfo& target) {
-//     auto isValid = true;
-//     if (target.isPresent_) {
-//         isValid &= checkConfigSame("base_kickstart_tag", this->kickstartTag,
-//         target.kickstartTag); isValid &= checkConfigSame("base_spin", this->baseSpin,
-//         target.baseSpin);
-//     }
-
-//     return isValid;
-// }
-
-// ImageInfo::ImageInfo(const RawTOMLConfig& rawConfig) {
-//     auto rawImageInfo = getBaseTable_(rawConfig, "image_info", kErrorListFormatColorCode);
-
-//     if (isPresent_) {
-//         isValid_ &= getTOMLVal(rawImageInfo, "partition_size", partitionSize);
-//         isValid_ &= getTOMLVal(rawImageInfo, "first_login_script", firstLoginScript, true);
-//         isValid_ &= getTOMLVal(rawImageInfo, "post_build_script", postBuildScript, true);
-//         isValid_ &=
-//             getTOMLVal(rawImageInfo, "post_build_script_no_chroot", postBuildNoRootScript, true);
-//         isValid_ &= getTOMLVal(rawImageInfo, "user_files", userFiles, true);
-
-//         const std::vector<std::string> validOptions = {"partition_size",
-//                                                        "first_login_script",
-//                                                        "post_build_script",
-//                                                        "post_build_script_no_chroot",
-//                                                        "user_files"};
-//         isValid_ &= checkUnknownOptions(rawImageInfo, validOptions);
-//     }
-// }
-
-// bool ImageInfo::merge(const ImageInfo& target) {
-//     auto isValid = true;
-//     if (target.isPresent_) {
-//         // TODO(kd): Finish
-//         this->partitionSize = std::max(this->partitionSize, target.partitionSize);
-
-//         this->userFiles.insert(
-//             this->userFiles.end(), target.userFiles.begin(), target.userFiles.end());
-//     }
-
-//     return isValid;
-// }
-
-// BuildProcessConfig::BuildProcessConfig(const RawTOMLConfig& rawConfig) {
-//     auto rawBuildConfig = getBaseTable_(rawConfig, "build_process", kDarkGreenColorCode);
-
-//     if (isPresent_) {
-//         isValid_ &= getTOMLVal(rawBuildConfig, "enable_custom_cache", enableCustomCache, true);
-//         isValid_ &= getTOMLVal(rawBuildConfig, "custom_mock_script", mockScript, true);
-
-//         const std::vector<std::string> validOptions = {"enable_custom_cache",
-//         "custom_mock_script"}; isValid_ &= checkUnknownOptions(rawBuildConfig, validOptions);
-//     }
-// }
-
-// void Repo::from_toml(const toml::value& v) {
-//     auto table = v.as_table();
-
-//     isValid_ &= getTOMLVal(table,
-//                            "name",
-//                            name,
-//                            false,
-//                            "repo's name needs to have type string, moving to next repo",
-//                            "repo's name(string) is undefined, moving to next repo");
-//     if (isValid_) {
-//         spdlog::info("parsing repo: " + name);
-//         isValid_ &= getTOMLVal(table, "display_name", displayName, false);
-
-//         isValid_ &= getTOMLVal(table, "metalink", metaLink, true);
-//         isValid_ &= getTOMLVal(table, "baseurl", baseurl, true);
-
-//         if (metaLink.empty() && baseurl.empty()) {
-//             spdlog::error("repo has neither metalink or baseurl");
-//             isValid_ = false;
-//         }
-
-//         auto gpgcheckValid = getTOMLVal(table, "gpgcheck", gpgcheck, false);
-//         isValid_ &= gpgcheckValid;
-//         if (gpgcheckValid && gpgcheck) {
-//             isValid_ &= getTOMLVal(table,
-//                                    "gpgkey",
-//                                    gpgkey,
-//                                    false,
-//                                    "gpgkey needs to have type string when gpgcheck is true",
-//                                    "gpgkey(string) needs to be defined when gpgcheck is true");
-//         }
-
-//         const std::vector<std::string> validOptions = {
-//             "name", "display_name", "metalink", "baseurl", "gpgcheck", "gpgkey"};
-//         isValid_ &= checkUnknownOptions(table, validOptions);
-//     }
-// }
-
-// RepoConfig::RepoConfig(const RawTOMLConfig& rawConfig) {
-//     auto rawRepoConfig = getBaseTable_(rawConfig, "repo", kGreenColorCode);
-
-//     if (isPresent_) {
-//         isValid_ &= getTOMLVal(rawRepoConfig, "standard_repos", standardRepos, true);
-//         isValid_ &= getTOMLVal(rawRepoConfig, "copr_repos", coprRepos, true);
-
-//         getTOMLVal(rawRepoConfig, "custom_repos", customRepos, true);
-//         isValid_ &= std::accumulate(
-//             customRepos.begin(), customRepos.end(), true, [](bool isValid, Repo const& repo) {
-//                 return isValid && repo;
-//             });
-
-//         const std::vector<std::string> validOptions = {
-//             "standard_repos", "copr_repos", "custom_repos"};
-//         isValid_ &= checkUnknownOptions(rawRepoConfig, validOptions);
-//     }
-// }
-
-// PackageSet::PackageSet() {}
-
-// PackageSet::PackageSet(const toml::table& rawPackageConfig, const std::string& tableName) {
-//     auto setConfig = getBaseTable_(rawPackageConfig, tableName);
-
-//     if (isPresent_) {
-//         spdlog::info("parsing package set: " + tableName);
-//         isValid_ &= getTOMLVal(setConfig, "install", installList, true);
-//         isValid_ &= getTOMLVal(setConfig, "remove", removeList, true);
-
-//         const std::vector<std::string> validOptions = {"install", "remove"};
-//         isValid_ &= checkUnknownOptions(setConfig, validOptions);
-//     }
-// }
-
-// PackageConfig::PackageConfig(const RawTOMLConfig& rawConfig) {
-//     auto rawPackageConfig = getBaseTable_(rawConfig, "package", kYellowColorCode);
-
-//     if (isPresent_) {
-//         rpm      = PackageSet(rawPackageConfig, "rpm");
-//         rpmGroup = PackageSet(rawPackageConfig, "rpm_group");
-//         isValid_ &= rpm && rpmGroup;
-
-//         const std::vector<std::string> validOptions = {"rpm", "rpm_group"};
-//         isValid_ &= checkUnknownOptions(rawPackageConfig, validOptions);
-//     }
-// }
-
-// MiscConfig::MiscConfig(const RawTOMLConfig& rawConfig) {
-//     auto rawMiscConfig = getBaseTable_(rawConfig, "misc", kBlueColorCode);
-
-//     if (isPresent_) {
-//         isValid_ &= getTOMLVal(rawMiscConfig, "language", language, true);
-//         isValid_ &= getTOMLVal(rawMiscConfig, "keyboard", keyboard);
-//         isValid_ &= getTOMLVal(rawMiscConfig, "timezone", timezone);
-
-//         const std::vector<std::string> validOptions = {"language", "keyboard", "timezone"};
-//         isValid_ &= checkUnknownOptions(rawMiscConfig, validOptions);
-//     }
-// }
-
 }  // namespace hatter
