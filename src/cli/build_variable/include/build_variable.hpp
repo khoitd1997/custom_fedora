@@ -18,10 +18,10 @@ struct CLIBuildVariable {
 extern const bool kIsFirstBuild;
 
 // path variables
-extern const std::filesystem::path kBaseSharedDir;
+extern const std::filesystem::path kShareDir;
 extern const std::filesystem::path kStockKickstartDir;
 
-extern const std::filesystem::path kBaseWorkingDir;
+extern const std::filesystem::path kBaseDir;
 extern const std::filesystem::path kBuildDir;
 
 extern const std::filesystem::path kRepoDir;
@@ -40,7 +40,7 @@ extern const std::filesystem::path kPostBuildScriptNoRootPath;
 extern const std::filesystem::path kKickstartLogDir;
 extern const std::filesystem::path kLogDir;
 
-extern const std::filesystem::path kBaseUserFileDir;
+extern const std::filesystem::path kUserSuppliedDir;
 extern const std::filesystem::path kPrevParentConfigPath;
 extern const std::filesystem::path kParentConfigPath;
 

@@ -7,59 +7,74 @@
 namespace hatter {
 namespace build_variable {
 namespace {
-std::string getEnv(const std::string& envVar) {
-    auto res = std::getenv(envVar.c_str());
-    if (res) {
-        return std::string{res};
-    } else {
-        throw std::runtime_error("failed to get environment variable " + envVar);
+std::string getStrEnv(const std::string& varName) {
+    auto res = std::getenv(varName.c_str());
+    if (res) { return std::string{res}; }
+    throw std::runtime_error("failed to get environment variable " + varName);
+}
+bool getBoolEnv(const std::string& varName) {
+    const auto str = getStrEnv(varName);
+    if (str == "true") {
+        return true;
+    } else if (str == "false") {
+        return false;
     }
+    throw std::runtime_error("bool variable " + varName + " has invalid value");
+}
+int getIntEnv(const std::string& varName) {
+    const auto str = getStrEnv(varName);
+    return std::stoi(str);
+}
+std::filesystem::path getPathEnv(const std::string& varName) {
+    const auto str = getStrEnv(varName);
+    return std::filesystem::path{str};
 }
 }  // namespace
 
 CLIBuildVariable::CLIBuildVariable(const std::string& prefix) {
     const std::string fullPrefix = prefix.empty() ? "" : prefix + "_";
 
-    osName     = getEnv(fullPrefix + "env_os_name");
-    releasever = std::stoi(getEnv(fullPrefix + "env_releasever"));
-    arch       = getEnv(fullPrefix + "env_arch");
-    parserMode = (getEnv(fullPrefix + "env_parser_mode") == "true") ? true : false;
+    osName     = getStrEnv(fullPrefix + "env_os_name");
+    releasever = getIntEnv(fullPrefix + "env_releasever");
+    arch       = getStrEnv(fullPrefix + "env_arch");
+    parserMode = getBoolEnv(fullPrefix + "env_parser_mode");
 }
 
-extern const bool kIsFirstBuild = (getEnv("env_is_first_build") == "true") ? true : false;
+extern const bool kIsFirstBuild = getBoolEnv("env_is_first_build");
 
 // path variables
-extern const std::filesystem::path kBaseSharedDir     = std::filesystem::path("/build_shared");
-extern const std::filesystem::path kStockKickstartDir = kBaseSharedDir / "fedora-kickstarts";
+extern const std::filesystem::path kBaseDir  = getPathEnv("env_base_dir");
+extern const std::filesystem::path kBuildDir = getPathEnv("env_build_dir");
 
-extern const std::filesystem::path kBaseWorkingDir = std::filesystem::current_path();
-extern const std::filesystem::path kBuildDir       = kBaseWorkingDir / "build";
+extern const std::filesystem::path kShareDir          = getPathEnv("env_base_dir");
+extern const std::filesystem::path kStockKickstartDir = getPathEnv("env_stock_kickstart_dir");
 
-// extern const std::filesystem::path kRepoDir = kBuildDir / "repos";
+// extern const std::filesystem::path kRepoDir =getPathEnv("");
 extern const std::filesystem::path kRepoDir         = "/etc/yum.repos.d";  // TODO(kd): remove after
-extern const std::filesystem::path kPackageListPath = kBuildDir / "package_list.txt";
-extern const std::filesystem::path kGroupListPath   = kBuildDir / "group_list.txt";
+extern const std::filesystem::path kPackageListPath = getPathEnv("env_package_list_path");
+extern const std::filesystem::path kGroupListPath   = getPathEnv("env_group_list_path");
 
 // out
-extern const std::filesystem::path kBaseOutDir = kBaseWorkingDir / "out";
-extern const std::filesystem::path kMainKickstartPath =
-    kBaseOutDir / (std::string{std::getenv("env_os_name")} + ".ks");
-extern const std::filesystem::path kFirstLoginScriptPath = kBaseOutDir / "first_login.sh";
-extern const std::filesystem::path kPostBuildScriptPath  = kBaseOutDir / "post_build.sh";
+extern const std::filesystem::path kBaseOutDir        = getPathEnv("env_out_dir");
+extern const std::filesystem::path kMainKickstartPath = getPathEnv("env_main_kickstart_path");
+extern const std::filesystem::path kFirstLoginScriptPath =
+    getPathEnv("env_first_login_script_path");
+extern const std::filesystem::path kPostBuildScriptPath = getPathEnv("env_post_build_script_path");
 extern const std::filesystem::path kPostBuildScriptNoRootPath =
-    kBaseOutDir / "post_build_no_root.sh";
+    getPathEnv("env_post_build_script_no_root_path");
 
 // log dir
-extern const std::filesystem::path kKickstartLogDir = "/root" / kBaseOutDir / "log";
-extern const std::filesystem::path kLogDir          = kBaseOutDir / "log";
+extern const std::filesystem::path kKickstartLogDir = getPathEnv("env_kickstart_log_dir");
+extern const std::filesystem::path kLogDir          = getPathEnv("env_log_dir");
 
-extern const std::filesystem::path kBaseUserFileDir      = kBuildDir / "user_supplied";
-extern const std::filesystem::path kConfigBuilderEnvVar  = kBuildDir / "config_builder_env_var.sh";
-extern const std::filesystem::path kPrevEnvVarPath       = kBuildDir / "prev_env_var.sh";
-extern const std::filesystem::path kPrevParentConfigPath = kBuildDir / "prev_config.toml";
-extern const std::filesystem::path kParentConfigPath =
-    kBaseUserFileDir / std::string{std::getenv("env_parent_config")};
+extern const std::filesystem::path kUserSuppliedDir = getPathEnv("env_user_supplied_dir");
+extern const std::filesystem::path kConfigBuilderEnvVar =
+    getPathEnv("env_config_builder_env_var_path");
+extern const std::filesystem::path kPrevEnvVarPath = getPathEnv("env_prev_var_path");
+extern const std::filesystem::path kPrevParentConfigPath =
+    getPathEnv("env_prev_parent_config_path");
+extern const std::filesystem::path kParentConfigPath = getPathEnv("env_parent_config_path");
 
-extern const std::filesystem::path kUserFileDest = "/mnt/sysimage/usr/share/hatter_user_file";
+extern const std::filesystem::path kUserFileDest = getPathEnv("env_user_file_dest");
 }  // namespace build_variable
 }  // namespace hatter

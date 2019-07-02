@@ -1,12 +1,13 @@
 #!/bin/bash
 # mock related functions for hatter
 
-script_dir="$(dirname "$(readlink -f "$0")")"
-source ${script_dir}/exit_code.sh
+current_script_dir="$(dirname "$(readlink -f "$0")")"
+source ${current_script_dir}/exit_code.sh
 
 mock_software_list=" lorax-lmc-novirt nano pykickstart git bash genisoimage squashfs-tools nano vim dnf-plugins-core dnf createrepo cpp bat "
-mock_env_base_dir="/build_dir/"${os_name} # build directory once in mock env
-mock_env_build_dir="/build_dir/"${os_name}/build # build directory once in mock env
+env_base_dir="/builddir/"${os_name} # build directory once in mock env
+env_build_dir=${env_base_dir}/build # build directory once in mock env
+env_script_dir=${env_build_dir}/scripts # build directory once in mock env
 mock_cfg_path=${build_working_dir}/mock.cfg
 
 clear_mock_env() {
@@ -23,23 +24,23 @@ bootstrap_mock_env() {
 
 prepare_mock_build() {
     # wipe previous build stuffs and generate directories
-    mock -r ${mock_cfg_path} --chroot "rm -rf ${mock_env_base_dir}"
-    mock -r ${mock_cfg_path} --chroot "mkdir -p ${mock_env_build_dir}/user_supplied"
-    mock -r ${mock_cfg_path} --chroot "mkdir -p ${mock_env_base_dir}/out"
+    mock -r ${mock_cfg_path} --chroot "rm -rf ${env_base_dir}"
+    mock -r ${mock_cfg_path} --chroot "mkdir -p ${env_build_dir}/user_supplied"
+    mock -r ${mock_cfg_path} --chroot "mkdir -p ${env_base_dir}/out"
 
     # copy build scripts
     # TODO(kd): Move scripts to shared
-    mock -r ${mock_cfg_path} --copyin ${script_dir}/exit_code.sh ${mock_env_build_dir}
-    mock -r ${mock_cfg_path} --copyin ${script_dir}/build_mock.sh ${mock_env_build_dir}
-    mock -r ${mock_cfg_path} --copyin ${script_dir}/general_utils.sh ${mock_env_build_dir}
-    # mock -r ${mock_cfg_path} --copyin ${script_dir}/hatter_parser ${mock_env_build_dir}
+    mock -r ${mock_cfg_path} --copyin ${current_script_dir}/exit_code.sh ${env_script_dir}
+    mock -r ${mock_cfg_path} --copyin ${current_script_dir}/build_mock.sh ${env_script_dir}
+    mock -r ${mock_cfg_path} --copyin ${current_script_dir}/general_utils.sh ${env_script_dir}
+    # mock -r ${mock_cfg_path} --copyin ${current_script_dir}/hatter_parser ${env_script_dir}
     
     # copy hatter generated files and files given by user
-    mock -r ${mock_cfg_path} --copyin ${input_dir}/* ${mock_env_build_dir}/user_supplied
-    mock -r ${mock_cfg_path} --copyin ${mock_build_file_dir}/* ${mock_env_build_dir}
+    mock -r ${mock_cfg_path} --copyin ${input_dir}/* ${env_build_dir}/user_supplied
+    mock -r ${mock_cfg_path} --copyin ${mock_build_file_dir}/* ${env_build_dir}
 }
 
 execute_mock_build() {
-    mock -r ${mock_cfg_path} --old-chroot --chroot ${mock_env_build_dir}/build_mock.sh
-    mock -r ${mock_cfg_path} --copyout ${mock_env_build_dir}/out ${build_working_dir}/out
+    mock -r ${mock_cfg_path} --old-chroot --cwd=${env_build_dir} --chroot /build_mock.sh
+    mock -r ${mock_cfg_path} --copyout ${env_build_dir}/out ${build_working_dir}/out
 }

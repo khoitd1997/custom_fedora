@@ -200,7 +200,7 @@ EOF
 
 # generate env variable for build script inside mock
 os_name=${input_config##*.}
-cat > ${mock_build_file_dir}/env_var << EOF
+cat > ${mock_build_file_dir}/env_var.sh << EOF
 export env_parent_config=${input_config}
 export env_os_name=${os_name}
 
@@ -212,6 +212,7 @@ export env_parser_mode=${parser_mode}
 EOF
 
 # source here once all variables have been set
+source ${mock_build_file_dir}/env_var.sh
 source ${script_dir}/mock_utils.sh
 
 if [ ! -f ${build_working_dir}/.mock_bootstrapped_done ]; then

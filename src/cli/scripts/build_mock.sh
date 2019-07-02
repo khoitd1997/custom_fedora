@@ -9,7 +9,7 @@ script_dir="$(dirname "$(readlink -f "$0")")"
 cd ${script_dir}
 source ${script_dir}/exit_code.sh
 source ${script_dir}/general_utils.sh
-source ${script_dir}/env
+source ${script_dir}/env_var.sh
 
 # function error_callback {
 #     exit ${error_build_failed}
