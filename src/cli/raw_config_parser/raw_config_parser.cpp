@@ -64,7 +64,6 @@ bool depthFirstSearch(const std::filesystem::path& filePath,
         depthFirstSearch(childPath, currFileName, childConf, fullReport, parseFunc, mergeFunc);
 
         if (!fullReport) {
-            std::cout << "Merging" << std::endl;
             FileMergeErrorReport mergeReport(currFileName, childFileName);
 
             mergeReport.add(mergeFunc(fullConfig, childConf));
