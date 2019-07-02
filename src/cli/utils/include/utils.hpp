@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <functional>
 #include <initializer_list>
 #include <memory>
 #include <string>
@@ -23,9 +24,19 @@ std::string getExeDir(void);
 std::string toUpper(std::string_view str);
 
 std::string strJoin(const std::vector<std::string>& strings, const std::string& delimiter = ", ");
-void        strAddLine(std::string& dest, const std::string& src);
-void        strAddLine(std::string& dest, const std::vector<std::string>& src);
-void        strAddLine(std::string& dest, const std::initializer_list<std::string>& src);
+template <typename T>
+std::string strJoin(const std::vector<T>&                vals,
+                    std::function<std::string(const T&)> func,
+                    const std::string&                   delimiter = ", ") {
+    std::vector<std::string> v;
+    for (const auto& val : vals) { v.push_back(func(val)); }
+    return strJoin(v, delimiter);
+}
+void strAddLine(std::string& dest, const std::string& src);
+void strAddLine(std::string& dest, const std::vector<std::string>& src);
+void strAddLine(std::string& dest, const std::initializer_list<std::string>& src);
+void strAddNonEmptyLine(std::string& dest, const std::string& src);
+void strAddNonEmptyLine(std::string& dest, const std::vector<std::string>& src);
 
 bool inStr(const std::string& strToLookFor, const std::string& strToSearchIn);
 

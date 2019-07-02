@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -19,6 +20,7 @@ struct ConfigSectionBase {
 
 template <typename T>
 struct ConfigMember {
+   public:
     std::string keyName;
     T           value      = {};
     bool        isOptional = true;
@@ -74,7 +76,7 @@ struct CustomRepo : public ConfigSectionBase {
     }
     bool operator!=(const CustomRepo &r) const { return !(this->operator==(r)); }
 
-    CustomRepo() : ConfigSectionBase{"custom_repo"} {}
+    CustomRepo() : ConfigSectionBase{"custom_repos"} {}
 };
 
 struct RepoConfig : public ConfigSectionBase {

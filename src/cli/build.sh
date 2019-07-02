@@ -33,6 +33,7 @@ cmake -G Ninja -DUSE_CPPLINT=ON -DUSE_CPPCHECK=ON -DRUN_TEST=ON .. && ninja
 # GTEST_BREAK_ON_FAILURE=1 GTEST_COLOR=1 ctest --verbose --gtest_print_time=0 
 cd bin
 mkdir -p out
+mkdir -p out/logs
 set -e
 if [ -f "build/prev_env_var.sh" ]; then 
     source build/prev_env_var.sh
@@ -58,7 +59,5 @@ else
     echo "toml parser succeeded"
     cp build/env_var.sh build/prev_env_var.sh
     sed '/env_/s/env_/prev_env_/' -i build/prev_env_var.sh
-
-    cp example_settings.toml build/prev_config.toml
 fi
 # cmake -G Ninja .. && ninja && ./bin/tomlparser ./bin/random.toml

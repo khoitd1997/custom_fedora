@@ -81,12 +81,16 @@ bool getFile(const std::filesystem::path& filePath,
 }
 }  // namespace
 
-bool getFullConfig(const std::filesystem::path& filePath, FullConfig& fullConfig) {
+bool getFullConfig(const std::filesystem::path& filePath,
+                   FullConfig&                  fullConfig,
+                   const bool                   suppressOuput) {
     FullErrorReport fullReport;
     getFile(filePath, "", fullConfig, fullReport);
     if (fullReport) {
-        std::cout << "Printing out error" << std::endl;
-        fullReport.what();
+        if (!suppressOuput) {
+            std::cout << "Printing out error" << std::endl;
+            fullReport.what();
+        }
         return true;
     }
     return false;

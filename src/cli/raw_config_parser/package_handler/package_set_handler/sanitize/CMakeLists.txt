@@ -3,7 +3,7 @@ add_library(raw_config_parser_package_set_sanitize ${CppSources})
 target_link_libraries(raw_config_parser_package_set_sanitize
                       PUBLIC toml11
                              raw_config_parser_common_error
-                             raw_config_parser_common_type
+                             hatter_config_type
                              raw_config_parser_package_set
                       PRIVATE raw_config_parser_common_sanitize
                               formatter

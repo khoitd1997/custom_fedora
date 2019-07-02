@@ -3,7 +3,7 @@ include(GoogleTest)
 add_library(raw_config_parser_distro_info_get distro_info_get.cpp)
 target_link_libraries(raw_config_parser_distro_info_get
                       PUBLIC toml11 raw_config_parser_common_error
-                             raw_config_parser_common_type
+                             hatter_config_type
                       PRIVATE raw_config_parser_common_get toml_utils)
 target_include_directories(raw_config_parser_distro_info_get
                            PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

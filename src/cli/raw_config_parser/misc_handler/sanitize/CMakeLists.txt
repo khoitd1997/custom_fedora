@@ -2,7 +2,7 @@ file(GLOB CppSources *.cpp)
 add_library(raw_config_parser_misc_sanitize ${CppSources})
 target_link_libraries(raw_config_parser_misc_sanitize
                       PUBLIC toml11 raw_config_parser_common_error
-                             raw_config_parser_common_type
+                             hatter_config_type
                       PRIVATE raw_config_parser_common_sanitize formatter
                               raw_config_parser_utils)
 

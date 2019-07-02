@@ -97,6 +97,12 @@ void strAddLine(std::string& dest, const std::vector<std::string>& src) {
 void strAddLine(std::string& dest, const std::initializer_list<std::string>& src) {
     strAddLine(dest, std::vector<std::string>{src});
 }
+void strAddNonEmptyLine(std::string& dest, const std::string& src) {
+    if (!src.empty()) { strAddLine(dest, src); }
+}
+void strAddNonEmptyLine(std::string& dest, const std::vector<std::string>& src) {
+    for (const auto& str : src) { strAddNonEmptyLine(dest, str); }
+}
 
 bool inStr(const std::string& strToLookFor, const std::string& strToSearchIn) {
     if (strToSearchIn.find(strToLookFor) != std::string::npos) { return true; }

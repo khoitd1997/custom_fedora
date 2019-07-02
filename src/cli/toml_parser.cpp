@@ -21,6 +21,7 @@
 
 #include "build_variable.hpp"
 #include "config_builder.hpp"
+#include "config_decoder.hpp"
 #include "logger.hpp"
 #include "raw_config_parser.hpp"
 #include "utils.hpp"
@@ -41,19 +42,27 @@ int main(int argc, char** argv) {
     const hatter::build_variable::CLIBuildVariable currBuildVar;
     hatter::build_variable::CLIBuildVariable       prevBuildVar;
 
+    // TODO(kd): Remove after test
+    (void)(hasError);
+    // if (hasError) {
+    //     hatter::logger::error("failed to parse");
+    //     return 1;
+    // }
+
     if (!currBuildVar.parserMode) {
-        if (!hasError) {
-            hatter::FullConfig prevConfig;
-            if (!hatter::build_variable::kIsFirstBuild) {
-                prevBuildVar = hatter::build_variable::CLIBuildVariable{"prev"};
-                hatter::getFullConfig(hatter::build_variable::kPrevParentConfigPath, prevConfig);
-            }
-            hatter::config_builder::build(currConfig, prevConfig, currBuildVar, prevBuildVar);
-        } else {
-            hatter::logger::error("failed to parse");
-            return 1;
+        hatter::FullConfig prevConfig;
+        if (!hatter::build_variable::kIsFirstBuild) {
+            prevBuildVar = hatter::build_variable::CLIBuildVariable{"prev"};
+            hatter::getFullConfig(hatter::build_variable::kPrevParentConfigPath, prevConfig, true);
+            // TODO(kd): Enable after test
+            //         assert(
+            // !hatter::getFullConfig(hatter::build_variable::kPrevParentConfigPath, prevConfig));
         }
+        hatter::config_builder::build(currConfig, prevConfig, currBuildVar, prevBuildVar);
     }
+
+    hatter::writeFile(hatter::config_decoder::decode(currConfig),
+                      hatter::build_variable::kPrevParentConfigPath);
 
     return 0;
     // hatter::TOMLConfigFile conf(fileName);
