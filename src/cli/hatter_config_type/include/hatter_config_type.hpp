@@ -40,7 +40,7 @@ struct DistroInfo : public ConfigSectionBase {
 
 struct ImageInfo : public ConfigSectionBase {
     ConfigMember<int>                                partitionSize{"partition_size"};
-    ConfigMember<std::vector<std::filesystem::path>> firstLoginScripts{"first_login_script"};
+    ConfigMember<std::vector<std::filesystem::path>> firstLoginScripts{"first_login_scripts"};
     ConfigMember<std::vector<std::filesystem::path>> postBuildScripts{"post_build_scripts"};
     ConfigMember<std::vector<std::filesystem::path>> postBuildNoRootScripts{
         "post_build_script_no_chroots"};

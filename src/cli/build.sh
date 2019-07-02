@@ -18,10 +18,15 @@ mkdir -p ${currDir}/build/googletest-src
 mkdir -p ${currDir}/build/googletest-download
 mkdir -p ${currDir}/build/googletest-build
 
-ln -sfv ~/hatter/example/example_settings.toml ~/hatter/src/cli/build/bin
-ln -sfv ~/hatter/example/child_setting_1.toml ~/hatter/src/cli/build/bin
+cp ~/hatter/example/example_settings.toml ~/hatter/src/cli/build/bin
+cp ~/hatter/example/child_setting_1.toml ~/hatter/src/cli/build/bin
 mkdir -p ~/hatter/src/cli/build/bin/child_path
-ln -sfv ~/hatter/example/child_path/child_setting_2.toml ~/hatter/src/cli/build/bin/child_path
+cp ~/hatter/example/child_path/child_setting_2.toml ~/hatter/src/cli/build/bin/child_path
+cat > ~/hatter/src/cli/build/bin/test_first_login.sh <<EOF
+cp place_1 place_2
+# some comment
+ls
+EOF
 
 # cmake .. && make && ./bin/tomlparser ./bin/example_settings.toml
 # scan-build cmake -G Ninja .. && scan-build ninja && ./bin/tomlparser ./bin/settings.toml

@@ -61,8 +61,8 @@ int main(int argc, char** argv) {
         hatter::config_builder::build(currConfig, prevConfig, currBuildVar, prevBuildVar);
     }
 
-    hatter::writeFile(hatter::config_decoder::decode(currConfig),
-                      hatter::build_variable::kPrevParentConfigPath);
+    hatter::writeFileWithHeader(hatter::config_decoder::decode(currConfig),
+                                hatter::build_variable::kPrevParentConfigPath);
 
     return 0;
     // hatter::TOMLConfigFile conf(fileName);

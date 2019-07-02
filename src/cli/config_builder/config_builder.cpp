@@ -76,6 +76,14 @@ std::string buildKickstartSection(const std::string& header, const std::string& 
     if (!content.empty()) { return "\n\%" + header + "\n" + content + "\n\%end\n"; }
     return "";
 }
+
+std::string buildUserScript(const std::vector<std::filesystem::path>& files) {
+    std::string ret;
+
+    strAddNonEmptySection(ret, joinFile(files), "USER'S SCRIPT");
+
+    return ret;
+}
 }  // namespace
 
 std::string buildBaseKickstartGitTag(const int releasever, const std::string& targetTag) {
@@ -264,7 +272,7 @@ void buildBaseLayer(const FullConfig&                       currConfig,
                     buildBaseKickstartGitTag(currBuildVar.releasever,
                                              currConfig.distroInfo.kickstartTag.value)});
 
-    writeFile(configBuilderEnvFile, build_variable::kConfigBuilderEnvVar);
+    writeFileWithHeader(configBuilderEnvFile, build_variable::kConfigBuilderEnvVar);
 }
 void buildVolatileLayer(const FullConfig& currConfig,
                         const FullConfig& prevConfig,
@@ -286,12 +294,14 @@ void buildVolatileLayer(const FullConfig& currConfig,
     strAddNonEmptyLine(kickstartFile, repoList.first);
     strAddNonEmptyLine(firstLoginScript, repoList.second);
 
-    strAddNonEmptyLine(firstLoginScript, joinFile(currConfig.imageInfo.firstLoginScripts.value));
-    strAddNonEmptyLine(postBuildScript, joinFile(currConfig.imageInfo.postBuildScripts.value));
+    strAddNonEmptyLine(firstLoginScript,
+                       buildUserScript(currConfig.imageInfo.firstLoginScripts.value));
+    strAddNonEmptyLine(postBuildScript,
+                       buildUserScript(currConfig.imageInfo.postBuildScripts.value));
 
     strAddNonEmptyLine(postBuildNoRootScript,
                        {buildUserFileTransferCommand(currConfig.imageInfo.userFiles.value),
-                        joinFile(currConfig.imageInfo.postBuildNoRootScripts.value)});
+                        buildUserScript(currConfig.imageInfo.postBuildNoRootScripts.value)});
 
     strAddNonEmptyLine(
         kickstartFile,
@@ -300,11 +310,11 @@ void buildVolatileLayer(const FullConfig& currConfig,
              postBuildScript),
          buildKickstartSection("post --nochroot --log=" + build_variable::kKickstartLogDir.string(),
                                postBuildNoRootScript)});
-    writeFile(kickstartFile, build_variable::kMainKickstartPath);
+    writeFileWithHeader(kickstartFile, build_variable::kMainKickstartPath);
 
-    writeFile(firstLoginScript, build_variable::kFirstLoginScriptPath);
-    writeFile(postBuildScript, build_variable::kPostBuildScriptPath);
-    writeFile(postBuildNoRootScript, build_variable::kPostBuildScriptNoRootPath);
+    writeFileWithHeader(firstLoginScript, build_variable::kFirstLoginScriptPath);
+    writeFileWithHeader(postBuildScript, build_variable::kPostBuildScriptPath);
+    writeFileWithHeader(postBuildNoRootScript, build_variable::kPostBuildScriptNoRootPath);
 }
 
 void build(const FullConfig&                       currConfig,

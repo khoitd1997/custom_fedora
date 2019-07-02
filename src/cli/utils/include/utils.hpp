@@ -10,8 +10,17 @@
 #include <unordered_set>
 
 namespace hatter {
+std::string getCurrentTime(const std::string& fmt);
+
+std::string buildCommentBlock(const std::vector<std::string>& lines,
+                              const std::string&              commentPrefix);
+
 void        writeFile(const std::string& s, const std::filesystem::path& path);
 void        writeFile(const std::vector<std::string>& lines, const std::filesystem::path& path);
+void        writeFileWithHeader(const std::string&           content,
+                                const std::filesystem::path& path,
+                                const std::string&           commentPrefix     = "#",
+                                const std::string&           additionalComment = "");
 void        appendFile(const std::string& s, const std::filesystem::path& path);
 std::string readFile(const std::filesystem::path& path);
 
@@ -37,6 +46,10 @@ void strAddLine(std::string& dest, const std::vector<std::string>& src);
 void strAddLine(std::string& dest, const std::initializer_list<std::string>& src);
 void strAddNonEmptyLine(std::string& dest, const std::string& src);
 void strAddNonEmptyLine(std::string& dest, const std::vector<std::string>& src);
+void strAddNonEmptySection(std::string&       dest,
+                           const std::string& content,
+                           const std::string& sectionName,
+                           const std::string& commentPrefix = "#");
 
 bool inStr(const std::string& strToLookFor, const std::string& strToSearchIn);
 
