@@ -2,6 +2,7 @@
 
 currDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
+mkdir -p ${currDir}/build
 cd ${currDir}/build
 
 while (( "$#" )); do
@@ -33,7 +34,7 @@ EOF
 
 set -e
 # export GTEST_FILTER="CommonSanitizeTest_*" # MUST SPECIFY HERE BEFORE THE TESTS ARE DISCOVERED
-cmake -G Ninja -DUSE_CPPLINT=ON -DUSE_CPPCHECK=ON -DRUN_TEST=ON .. && ninja 
+cmake -G Ninja -DUSE_CPPLINT=ON -DUSE_CPPCHECK=ON .. && ninja 
 
 # GTEST_BREAK_ON_FAILURE=1 GTEST_COLOR=1 ctest --verbose --gtest_print_time=0 
 cd bin
