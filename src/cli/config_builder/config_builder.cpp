@@ -29,9 +29,10 @@ std::string buildCommandWithListParam(const std::string&              cmd,
     std::string ret;
     std::string align(cmd.length(), ' ');
 
-    if (!beginComment.empty()) { strAddLine(ret, "# " + beginComment); }
+    if (!beginComment.empty() && !params.empty()) { strAddLine(ret, "# " + beginComment); }
     for (auto param = params.cbegin(); param != params.cend(); ++param) {
         std::string tempLine;
+        logger::info("adding param for " + beginComment);
         if (param == params.cbegin()) {
             tempLine += cmd + " " + *param;
         } else {
@@ -43,7 +44,7 @@ std::string buildCommandWithListParam(const std::string&              cmd,
         } else {
             tempLine += " \\";
         }
-        strAddLine(ret, {tempLine});
+        strAddLine(ret, tempLine);
     }
 
     return ret;
@@ -67,12 +68,13 @@ std::string getCOPRBaseURL(std::string coprRepo) {
 std::string joinFile(const std::vector<std::filesystem::path>& files) {
     std::string ret;
 
-    for (const auto& file : files) { strAddLine(ret, readFile(file)); }
+    for (const auto& file : files) { strAddNonEmptyLine(ret, readFile(file)); }
 
     return ret;
 }
 std::string buildKickstartSection(const std::string& header, const std::string& content) {
-    return "\n\%" + header + "\n" + content + "\n\%end\n";
+    if (!content.empty()) { return "\n\%" + header + "\n" + content + "\n\%end\n"; }
+    return "";
 }
 }  // namespace
 
@@ -167,9 +169,9 @@ std::pair<std::string, std::string> buildRepoList(const RepoConfig& repoConfig) 
         strAddLine(ksStr, {buildKickstartRepo(ksRepoName, ksBaseURL, ksMetaLink)});
     }
 
-    strAddLine(firstBootStr,
-               buildCommandWithListParam(
-                   "sudo dnf copr enable", repoConfig.coprRepos.value, "-y", "copr repos"));
+    strAddNonEmptyLine(firstBootStr,
+                       buildCommandWithListParam(
+                           "sudo dnf copr enable", repoConfig.coprRepos.value, "-y", "copr repos"));
     for (const auto& coprRepo : repoConfig.coprRepos.value) {
         strAddLine(ksStr, {buildKickstartRepo(coprRepo, getCOPRBaseURL(coprRepo), "")});
     }
@@ -183,9 +185,10 @@ std::pair<std::string, std::string> buildRepoList(const RepoConfig& repoConfig) 
                 customRepo.name.value, customRepo.baseurl.value, customRepo.metaLink.value)});
         customRepoNames.push_back(customRepo.name.value);
     }
-    strAddLine(firstBootStr,
-               buildCommandWithListParam(
-                   "sudo dnf config-manager --set-enabled", customRepoNames, "", "custom repos"));
+    strAddNonEmptyLine(
+        firstBootStr,
+        buildCommandWithListParam(
+            "sudo dnf config-manager --set-enabled", customRepoNames, "", "custom repos"));
 
     return std::make_pair(ksStr, firstBootStr);
 }
@@ -195,23 +198,23 @@ std::pair<std::string, std::string> buildPackageCommand(const PackageConfig& cur
     std::string install;
     std::string remove;
 
-    strAddLine(install, "# rpm package");
-    strAddLine(install, currPkgConfig.rpm.installList.value);
-    strAddLine(install, {"", "# rpm group"});
-    for (const auto& groupInstall : currPkgConfig.rpmGroup.installList.value) {
-        strAddLine(install, "@" + groupInstall);
-    }
-
-    strAddLine(remove,
-               {buildCommandWithListParam(
-                    "dnf remove", currPkgConfig.rpm.removeList.value, "-y", "remove rpm package"),
-                buildCommandWithListParam("dnf group remove",
-                                          currPkgConfig.rpmGroup.removeList.value,
-                                          "-y",
-                                          "remove rpm group")});
-
-    if (!isFullBuild) {
-        strAddLine(
+    strAddNonEmptyLine(
+        remove,
+        {buildCommandWithListParam(
+             "dnf remove", currPkgConfig.rpm.removeList.value, "-y", "remove rpm package"),
+         buildCommandWithListParam("dnf group remove",
+                                   currPkgConfig.rpmGroup.removeList.value,
+                                   "-y",
+                                   "remove rpm group")});
+    if (isFullBuild) {
+        strAddLine(install, "# rpm package");
+        strAddLine(install, currPkgConfig.rpm.installList.value);
+        strAddLine(install, {"", "# rpm group"});
+        for (const auto& groupInstall : currPkgConfig.rpmGroup.installList.value) {
+            strAddLine(install, "@" + groupInstall);
+        }
+    } else {
+        strAddNonEmptyLine(
             remove,
             {buildCommandWithListParam("dnf remove",
                                        subtractVector(prevPkgConfig.rpm.installList.value,
@@ -272,25 +275,25 @@ void buildVolatileLayer(const FullConfig& currConfig,
     std::string postBuildScript;
     std::string postBuildNoRootScript;
 
-    strAddLine(kickstartFile, buildMisc(currConfig.miscConfig));
+    strAddNonEmptyLine(kickstartFile, buildMisc(currConfig.miscConfig));
 
     const auto packageCmd =
         buildPackageCommand(currConfig.packageConfig, prevConfig.packageConfig, isFullBuild);
-    strAddLine(kickstartFile, buildKickstartSection("packages", packageCmd.first));
-    strAddLine(postBuildScript, packageCmd.second);
+    strAddNonEmptyLine(kickstartFile, buildKickstartSection("packages", packageCmd.first));
+    strAddNonEmptyLine(postBuildScript, packageCmd.second);
 
     const auto repoList = buildRepoList(currConfig.repoConfig);
-    strAddLine(kickstartFile, repoList.first);
-    strAddLine(firstLoginScript, repoList.second);
+    strAddNonEmptyLine(kickstartFile, repoList.first);
+    strAddNonEmptyLine(firstLoginScript, repoList.second);
 
-    strAddLine(firstLoginScript, joinFile(currConfig.imageInfo.firstLoginScripts.value));
-    strAddLine(postBuildScript, joinFile(currConfig.imageInfo.postBuildScripts.value));
+    strAddNonEmptyLine(firstLoginScript, joinFile(currConfig.imageInfo.firstLoginScripts.value));
+    strAddNonEmptyLine(postBuildScript, joinFile(currConfig.imageInfo.postBuildScripts.value));
 
-    strAddLine(postBuildNoRootScript,
-               {buildUserFileTransferCommand(currConfig.imageInfo.userFiles.value),
-                joinFile(currConfig.imageInfo.postBuildNoRootScripts.value)});
+    strAddNonEmptyLine(postBuildNoRootScript,
+                       {buildUserFileTransferCommand(currConfig.imageInfo.userFiles.value),
+                        joinFile(currConfig.imageInfo.postBuildNoRootScripts.value)});
 
-    strAddLine(
+    strAddNonEmptyLine(
         kickstartFile,
         {buildKickstartSection(
              "post --erroronfail --log=" + build_variable::kKickstartLogDir.string(),

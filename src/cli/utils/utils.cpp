@@ -1,9 +1,11 @@
 #include "utils.hpp"
 
+#include <ctype.h>
 #include <libgen.h>
 #include <limits.h>
 #include <unistd.h>
 
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
@@ -48,9 +50,10 @@ std::string readFile(const std::filesystem::path& path) {
     if (inFile.fail()) { throw std::runtime_error("failed to read file " + path.string()); }
 
     std::string line;
-    while (std::getline(inFile, line)) { strAddLine(ret, {line}); }
+    while (std::getline(inFile, line)) { strAddLine(ret, line); }
 
-    return ret;
+    if (std::any_of(std::begin(ret), std::end(ret), isalnum)) { return ret; }
+    return "";
 }
 
 void replacePattern(std::vector<std::string>& lines,
