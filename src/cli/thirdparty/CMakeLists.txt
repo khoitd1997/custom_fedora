@@ -1,3 +1,5 @@
+util_set_external_code_gen_option()
+
 util_add_external_header_lib(toml11
                              https://github.com/ToruNiina/toml11.git
                              origin/master

@@ -17,34 +17,7 @@ util_check_and_enable_test() # -DRUN_TEST=ON
 util_add_cpplint() # -DUSE_CPPLINT=ON
 util_add_cppcheck() # -DUSE_CPPCHECK=ON
 
-set(CMAKE_CXX_STANDARD 17)
-add_compile_options(-Wall
-                    -Wextra
-                    -Werror
-                    -Wnon-virtual-dtor
-                    -Wold-style-cast
-                    -Woverloaded-virtual
-                    -Wsign-conversion
-                    -Wconversion
-                    -Wduplicated-cond
-                    -Wduplicated-branches
-                    -Wlogical-op
-                    -Wnull-dereference
-                    -Wuseless-cast
-                    -Wformat=2
-                    -Wdouble-promotion
-                    -fasynchronous-unwind-tables
-                    -fstack-protector
-                    -fstack-protector-strong
-                    -fPIC
-                    -shared
-                    -pipe
-                    -fsanitize=address
-                    -fsanitize=undefined
-                    -g
-                    -fdiagnostics-color=always
-                    -fno-omit-frame-pointer)
-add_link_options(-fsanitize=address -fsanitize=undefined)
+util_set_general_code_gen_option()
 
 add_subdirectory(utils)
 add_subdirectory(test_utils)
