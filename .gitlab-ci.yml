@@ -12,5 +12,4 @@ build_hatter:
     - dnf install cppcheck gtest-devel gtest valgrind -y -q # other tools
     - pip3 install cpplint -q # pip tools
   script:
-    - ls -l # probably run unit test here
-    - pwd
+    - sh src/cli/build.sh
