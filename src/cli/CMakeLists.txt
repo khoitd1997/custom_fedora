@@ -18,6 +18,7 @@ util_add_cpplint() # -DUSE_CPPLINT=ON
 util_add_cppcheck() # -DUSE_CPPCHECK=ON
 
 # TODO(kd): resolve clang bug in magic_enum and research check for clang-tidy
+# util_add_clang_tidy() # -DUSE_CLANG-TIDY=ON
 if(USE_CLANG-TIDY)
   find_program(CMAKE_CXX_CLANG_TIDY NAMES clang-tidy)
   list(
