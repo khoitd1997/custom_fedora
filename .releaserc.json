@@ -1,5 +1,6 @@
 {
     "branch": "feat/ci",
+    "repositoryUrl": "https://github.com/khoitd1997/hatter.git",
     "plugins": [
         "@semantic-release/commit-analyzer",
         "@semantic-release/release-notes-generator",
