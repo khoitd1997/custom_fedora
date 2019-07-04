@@ -12,6 +12,7 @@ build_hatter:
     - dnf install ninja-build git cmake gcc-c++ clang -y -q # build tools
     - dnf install cppcheck gtest-devel gtest valgrind -y -q # other tools
     - pip3 install cpplint -q # pip tools
+    - dnf install curl jq ripgrep -y -q # run time tool
   script:
     - sh src/cli/build.sh
   artifacts:
@@ -21,10 +22,12 @@ build_hatter:
 deploy_hatter:
   stage: deploy
   before_script:
-    - sudo dnf install golang -y -q
+    - sudo dnf install golang npm -y -q
     - go get -u github.com/tcnksm/ghr
   script:
+    - npx semantic-release
     - recent_tag=$(git describe)
     - echo ${recent_tag}
     - ls -l
+    # - GITHUB_TOKEN
     # - ghr ${recent_tag}

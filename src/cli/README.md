@@ -26,6 +26,9 @@ sudo dnf install git ninja-build cmake gcc-c++ clang
 # for extra stuffs
 sudo dnf install cppcheck gtest-devel gtest
 pip3 install cpplint
+
+# run time
+sudo dnf install curl jq ripgrep
 ```
 
 ### Build
