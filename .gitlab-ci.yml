@@ -25,8 +25,8 @@ build_hatter:
 
 deploy_hatter:
   stage: deploy
-  # before_script:
-    # - sudo dnf install golang npm -y -q
+  before_script:
+    - sudo dnf install golang npm -y -q
     # - go get -u github.com/tcnksm/ghr
   script:
     - npx semantic-release
