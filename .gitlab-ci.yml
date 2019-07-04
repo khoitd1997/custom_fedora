@@ -14,7 +14,9 @@ build_hatter:
     - pip3 install cpplint -q # pip tools
     - dnf install curl jq ripgrep dnf-plugins-core -y -q # run time tool
   script:
-    - sh src/cli/build.sh
+    - touch /build_temp/package_list.txt
+    - touch /build_temp/group_list.txt
+    # - sh src/cli/build.sh
   artifacts:
     paths:
       - src/cli/build/bin/tomlparser
