@@ -25,6 +25,8 @@ build_hatter:
 
 deploy_hatter:
   stage: deploy
+  dependencies:
+    - build_hatter
   before_script:
     - sudo dnf install golang npm -y -q
     # - go get -u github.com/tcnksm/ghr
