@@ -9,7 +9,8 @@
             {
                 "assets": [
                     {
-                        "path": "src/cli/*",
+                        "path": "src/cli",
+                        "name": "src",
                         "label": "CLI source code"
                     }
                 ]
