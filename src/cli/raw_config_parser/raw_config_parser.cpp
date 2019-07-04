@@ -27,7 +27,7 @@ bool getFile(const std::filesystem::path& filePath,
     auto failed        = false;
 
     // TODO(kd): error handling here
-    auto rawConfig = toml::parse(filePath);
+    auto rawConfig = toml::get<toml::table>(toml::parse(filePath));
 
     // TODO(kd): error handling here
     std::vector<std::string> includeFiles;

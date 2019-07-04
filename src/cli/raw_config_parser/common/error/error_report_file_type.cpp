@@ -68,8 +68,10 @@ class PrettyPrinter {
     }
 };
 }  // namespace
-FileErrorReportBase::operator bool() const { return (!errorReports.empty()); }
-void                 FileErrorReportBase::add(const std::vector<TopSectionErrorReport>& errorReps) {
+FileErrorReportBase::operator bool() const {
+    return (!errorReports.empty());
+}
+void FileErrorReportBase::add(const std::vector<TopSectionErrorReport>& errorReps) {
     for (const auto& errorReport : errorReps) {
         if (errorReport) { errorReports.push_back(errorReport); }
     }
@@ -119,8 +121,10 @@ void FullErrorReport::what() const {
         logger::skipLine();
     }
 }
-FullErrorReport::operator bool() const { return (!errorReports.empty()); }
-void             FullErrorReport::add(const std::shared_ptr<FileErrorReportBase>& errorReport) {
+FullErrorReport::operator bool() const {
+    return (!errorReports.empty());
+}
+void FullErrorReport::add(const std::shared_ptr<FileErrorReportBase>& errorReport) {
     if (*errorReport) { errorReports.push_back(errorReport); }
 }
 }  // namespace hatter
