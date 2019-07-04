@@ -1,7 +1,5 @@
 {
-    "release": {
-        "branch": "feat/ci"
-    },
+    "branch": "feat/ci",
     "plugins": [
         "@semantic-release/commit-analyzer",
         "@semantic-release/release-notes-generator",
