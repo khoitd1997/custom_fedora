@@ -39,16 +39,7 @@ TopSectionErrorReport parse(toml::table&                 rawConfig,
 TopSectionErrorReport merge(BuildProcessConfig& resultConf, const BuildProcessConfig& targetConf) {
     TopSectionErrorReport errorReport(kSectionName);
 
-    for (const auto& filePath : targetConf.mockScriptPaths.value) {
-        auto isDup = false;
-        for (const auto& resFilePath : resultConf.mockScriptPaths.value) {
-            if (resFilePath.string() == filePath.string()) {
-                isDup = true;
-                break;
-            }
-        }
-        if (!isDup) { resultConf.mockScriptPaths.value.push_back(filePath); }
-    }
+    appendUniqueVector(resultConf.mockScriptPaths.value, targetConf.mockScriptPaths.value);
     mergeAndCheckConflict(errorReport, resultConf.enableCustomCache, targetConf.enableCustomCache);
 
     return errorReport;

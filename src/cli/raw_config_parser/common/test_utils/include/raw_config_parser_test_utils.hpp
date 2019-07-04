@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <functional>
 #include <memory>
 #include <vector>
@@ -22,11 +23,9 @@ int checkTotalError(const std::vector<std::shared_ptr<HatterParserError>>& error
 }
 template <typename TErrorType>
 int checkTotalOtherError(const std::vector<std::shared_ptr<HatterParserError>>& errors) {
-    auto totalError = 0;
-    for (const auto& error : errors) {
-        if (!(dynamic_cast<TErrorType*>(error.get()))) { ++totalError; }
-    }
-
-    return totalError;
+    return static_cast<int>(
+        std::count_if(std::begin(errors), std::end(errors), [](const auto& error) {
+            return !(dynamic_cast<TErrorType*>(error.get()));
+        }));
 }
 }  // namespace hatter

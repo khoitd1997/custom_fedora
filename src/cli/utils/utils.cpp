@@ -108,10 +108,9 @@ std::string getExeDir(void) {
     return std::string("");
 }
 
-std::string toUpper(std::string_view str) {
-    std::string ret(str);
-    std::transform(ret.begin(), ret.end(), ret.begin(), ::toupper);
-    return ret;
+std::string toUpper(std::string str) {
+    std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+    return str;
 }
 
 std::string strJoin(const std::vector<std::string>& strings, const std::string& delimiter) {
@@ -127,7 +126,9 @@ std::string strJoin(const std::vector<std::string>& strings, const std::string& 
     return out;
 }
 
-void strAddLine(std::string& dest, const std::string& src) { dest += src + "\n"; }
+void strAddLine(std::string& dest, const std::string& src) {
+    dest += src + "\n";
+}
 void strAddLine(std::string& dest, const std::vector<std::string>& src) {
     for (const auto& str : src) { strAddLine(dest, str); }
 }
@@ -179,8 +180,10 @@ template <>
 void appendUniqueVector(std::vector<std::filesystem::path>&       dest,
                         const std::vector<std::filesystem::path>& src) {
     for (const auto& target : dest) {
-        for (const auto& result : src) {
-            if (target.string() == result.string()) { break; }
+        if (std::any_of(std::begin(src), std::end(src), [target](const auto& s) {
+                return s.string() == target.string();
+            })) {
+            break;
         }
         dest.push_back(target);
     }

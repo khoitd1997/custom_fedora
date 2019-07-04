@@ -1,6 +1,7 @@
 #include "config_builder.hpp"
 
 #include <algorithm>
+#include <numeric>
 #include <regex>
 
 #include "logger.hpp"
@@ -121,14 +122,17 @@ std::string buildBaseKickstartName(const std::string& baseSpin) {
     return "fedora-live-" + baseSpin;
 }
 
-std::string buildUserFileTransferCommand(const std::vector<std::filesystem::path> userFiles) {
+std::string buildUserFileTransferCommand(const std::vector<std::filesystem::path>& userFiles) {
     std::string ret;
 
-    std::string userFileStr;
-    for (const auto& userFile : userFiles) { userFileStr += userFile.string() + " "; }
+    const auto userFileStrList =
+        strJoin(userFiles,
+                std::function<std::string(const std::filesystem::path&)>{
+                    [](const auto& userFile) { return userFile.string(); }},
+                " ");
 
     strAddLine(ret,
-               {"cp -r " + userFileStr + " " + build_variable::kUserFileDest.string(),
+               {"cp -r " + userFileStrList + " " + build_variable::kUserFileDest.string(),
                 "chmod -R a+r+x " + build_variable::kUserFileDest.string()});
 
     return ret;

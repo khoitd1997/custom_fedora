@@ -4,18 +4,30 @@ include(FetchContent)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 FetchContent_Declare(
   util_cmake_content
   GIT_REPOSITORY https://github.com/khoitd1997/util_cmake_modules.git
   GIT_TAG origin/master)
 FetchContent_MakeAvailable(util_cmake_content)
+util_misc_init()
+
 add_subdirectory(thirdparty)
 
 util_check_and_enable_test() # -DRUN_TEST=ON
 util_add_cpplint() # -DUSE_CPPLINT=ON
 util_add_cppcheck() # -DUSE_CPPCHECK=ON
+
+# TODO(kd): resolve clang bug in magic_enum and research check for clang-tidy
+# util_add_clang_tidy() # -DUSE_CLANG-TIDY=ON
+if(USE_CLANG-TIDY)
+  find_program(CMAKE_CXX_CLANG_TIDY NAMES clang-tidy)
+  list(
+    APPEND
+      CMAKE_CXX_CLANG_TIDY
+      "-checks=-*,clang-analyzer-*,-clang-analyzer-cplusplus*,bugprone-*,cppcoreguidelines-*,google-*,misc-*,modernize-*,performance-*,portability-*,readability-*"
+    )
+endif()
 
 util_set_general_code_gen_option()
 
