@@ -18,9 +18,10 @@ build_hatter:
     - touch /build_temp/package_list.txt
     - touch /build_temp/group_list.txt
     # - sh src/cli/build.sh
-  # artifacts:
-  #   paths:
-  #     - src/cli/build/bin/tomlparser
+  artifacts:
+    paths:
+      # - src/cli/build/bin/tomlparser
+      - src/cli/build.sh
 
 deploy_hatter:
   stage: deploy
@@ -32,5 +33,4 @@ deploy_hatter:
     - recent_tag=$(git describe)
     - echo ${recent_tag}
     - ls -l
-    # - GITHUB_TOKEN
-    # - ghr ${recent_tag}
+    # - ghr ${recent_tag} src/cli/build.sh
