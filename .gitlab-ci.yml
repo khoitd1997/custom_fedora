@@ -1,10 +1,16 @@
 image: "fedora:latest"
-before_script:
-  - dnf install spdlog libasan -y -q # libs
-  - dnf install ninja-build cmake gcc-c++ clang -y -q # build tools
-  - dnf install cppcheck gtest-devel gtest -y -q # other tools
-  - pip3 install cpplint -q
 
-end_to_end_test:
+stages:
+  - build
+  - test
+
+build_hatter:
+  stage: build
+  before_script:
+    - dnf install spdlog libasan -y -q # libs
+    - dnf install ninja-build cmake gcc-c++ clang -y -q # build tools
+    - dnf install cppcheck gtest-devel gtest valgrind -y -q # other tools
+    - pip3 install cpplint -q # pip tools
   script:
-    - echo "this is nice"
+    - ls -l # probably run unit test here
+    - pwd
