@@ -1,0 +1,10 @@
+image: "fedora:latest"
+before_script:
+  - dnf install spdlog libasan -y -q # libs
+  - dnf install ninja-build cmake gcc-c++ clang -y -q # build tools
+  - dnf install cppcheck gtest-devel gtest -y -q # other tools
+  - pip3 install cpplint -q
+
+end_to_end_test:
+  script:
+    - echo "this is nice"
