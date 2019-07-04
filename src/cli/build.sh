@@ -5,15 +5,8 @@ currDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 mkdir -p ${currDir}/build
 cd ${currDir}/build
 
-while (( "$#" )); do
-    case "$1" in
-        --clean)
-            rm -rf ./*
-            shift 1
-        ;;
-    esac
-done
-# rm -rf ${currDir}/build
+# test setup
+# TODO(kd): Move this to end-to-end test place
 mkdir -p ${currDir}/build/bin/build/logs
 mkdir -p ${currDir}/build/googletest-src
 mkdir -p ${currDir}/build/googletest-download
@@ -29,14 +22,15 @@ cp place_1 place_2
 ls
 EOF
 
-# cmake .. && make && ./bin/tomlparser ./bin/example_settings.toml
 # scan-build cmake -G Ninja .. && scan-build ninja && ./bin/tomlparser ./bin/settings.toml
 
 set -e
 # export GTEST_FILTER="CommonSanitizeTest_*" # MUST SPECIFY HERE BEFORE THE TESTS ARE DISCOVERED
+# GTEST_BREAK_ON_FAILURE=1 GTEST_COLOR=1 ctest --verbose --gtest_print_time=0
 cmake .. && cmake --build .
 
-# GTEST_BREAK_ON_FAILURE=1 GTEST_COLOR=1 ctest --verbose --gtest_print_time=0
+# exercise the executable
+# TODO(kd): Move this to end-to-end test place
 cd bin
 mkdir -p out
 mkdir -p out/logs
@@ -98,4 +92,3 @@ else
     cp build/env_var.sh build/prev_env_var.sh
     sed '/env_/s/env_/prev_env_/' -i build/prev_env_var.sh
 fi
-# cmake -G Ninja .. && ninja && ./bin/tomlparser ./bin/random.toml

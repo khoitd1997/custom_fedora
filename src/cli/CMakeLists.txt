@@ -4,13 +4,14 @@ include(FetchContent)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 FetchContent_Declare(
   util_cmake_content
   GIT_REPOSITORY https://github.com/khoitd1997/util_cmake_modules.git
   GIT_TAG origin/master)
 FetchContent_MakeAvailable(util_cmake_content)
+util_misc_init()
+
 add_subdirectory(thirdparty)
 
 util_check_and_enable_test() # -DRUN_TEST=ON
