@@ -28,11 +28,12 @@ deploy_hatter:
   dependencies:
     - build_hatter
   before_script:
-    - sudo dnf install golang npm -y -q
-    # - go get -u github.com/tcnksm/ghr
+    - sudo dnf install npm -y -q
+    - npm install @semantic-release/github -D
+    - npm install @semantic-release/commit-analyzer -D
+    - npm install @semantic-release/release-notes-generator -D
   script:
     - npx semantic-release
     - recent_tag=$(git describe)
     - echo ${recent_tag}
     - ls -l
-    # - ghr ${recent_tag} src/cli/build.sh
