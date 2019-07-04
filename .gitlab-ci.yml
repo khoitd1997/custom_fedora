@@ -17,9 +17,9 @@ build_hatter:
     - touch /build_temp/package_list.txt
     - touch /build_temp/group_list.txt
     # - sh src/cli/build.sh
-  artifacts:
-    paths:
-      - src/cli/build/bin/tomlparser
+  # artifacts:
+  #   paths:
+  #     - src/cli/build/bin/tomlparser
 
 deploy_hatter:
   stage: deploy
