@@ -18,7 +18,7 @@ The project uses C++17 features so to compile it, the newer g++ are needed. The 
 
 ```shell
 # library
-sudo dnf install spdlog libasan
+sudo dnf install spdlog libasan libubsan
 
 # for bare minimum build tool
 sudo dnf install git ninja-build cmake gcc-c++ clang

@@ -3,13 +3,28 @@ image: "fedora:latest"
 stages:
   - build
   - test
+  - deploy
 
 build_hatter:
   stage: build
   before_script:
-    - dnf install spdlog libasan -y -q # libs
+    - dnf install spdlog libasan libubsan -y -q # libs
     - dnf install ninja-build git cmake gcc-c++ clang -y -q # build tools
     - dnf install cppcheck gtest-devel gtest valgrind -y -q # other tools
     - pip3 install cpplint -q # pip tools
   script:
     - sh src/cli/build.sh
+  artifacts:
+    paths:
+      - src/cli/build/
+
+deploy_hatter:
+  stage: deploy
+  before_script:
+    - sudo dnf install golang -y -q
+    - go get -u github.com/tcnksm/ghr
+  script:
+    - recent_tag=$(git describe)
+    - echo ${recent_tag}
+    - ls -l
+    # - ghr ${recent_tag}
