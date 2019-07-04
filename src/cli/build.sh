@@ -12,11 +12,11 @@ mkdir -p ${currDir}/build/googletest-src
 mkdir -p ${currDir}/build/googletest-download
 mkdir -p ${currDir}/build/googletest-build
 
-cp ~/hatter/example/example_settings.toml ~/hatter/src/cli/build/bin
-cp ~/hatter/example/child_setting_1.toml ~/hatter/src/cli/build/bin
-mkdir -p ~/hatter/src/cli/build/bin/child_path
-cp ~/hatter/example/child_path/child_setting_2.toml ~/hatter/src/cli/build/bin/child_path
-cat > ~/hatter/src/cli/build/bin/test_first_login.sh <<EOF
+cp ${currDir}/../../example/example_settings.toml ${currDir}/build/bin
+cp ${currDir}/../../example/child_setting_1.toml ${currDir}/build/bin
+mkdir -p ${currDir}/build/bin/child_path
+cp ${currDir}/../../example/child_path/child_setting_2.toml ${currDir}/build/bin/child_path
+cat > ${currDir}/build/bin/test_first_login.sh <<EOF
 cp place_1 place_2
 # some comment
 ls
@@ -52,7 +52,7 @@ export env_clear_cache=true
 export env_parser_mode=false
 
 # export env_base_dir="/builddir/${env_os_name}"
-export env_base_dir="/home/kd/hatter/src/cli/build/bin" # TODO(kd): remove after
+export env_base_dir="${currDir}/build/bin" # TODO(kd): remove after
 export env_build_dir="${env_base_dir}/build"
 export env_script_dir="${env_build_dir}/scripts"
 
