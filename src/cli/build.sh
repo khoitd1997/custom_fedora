@@ -3,7 +3,7 @@
 set -eo pipefail
 hatter_src_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cmake_build_dir=/cmake_build_dir
-if [ -z "${IN_HATTER_DOCKER}" ]; then
+if [ -z "${IN_HATTER_DOCKER}" ] && [ -z "${CI}" ]; then
     cd ${hatter_src_dir}
     
     docker build -t hattertest .
