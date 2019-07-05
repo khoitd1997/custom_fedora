@@ -1,4 +1,4 @@
-image: "fedora:latest"
+image: "khoitd1997/docker-hatter:latest"
 
 stages:
   - build
