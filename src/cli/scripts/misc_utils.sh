@@ -7,7 +7,6 @@ cyan='\033[38;5;087m' # for marking the being of a new sections
 green='\033[38;5;154m' # for general messages
 reset='\033[0m' # for resetting the color
 
-## general util functions
 print_message() {
     printf "\n${1}"
 }

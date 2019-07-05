@@ -40,8 +40,6 @@ CLIBuildVariable::CLIBuildVariable(const std::string& prefix) {
     parserMode = getBoolEnv(fullPrefix + "env_parser_mode");
 }
 
-extern const bool kIsFirstBuild = getBoolEnv("env_is_first_build");
-
 // path variables
 extern const std::filesystem::path kBaseDir  = getPathEnv("env_base_dir");
 extern const std::filesystem::path kBuildDir = getPathEnv("env_build_dir");
@@ -79,5 +77,7 @@ extern const std::filesystem::path kPrevParentConfigPath =
 extern const std::filesystem::path kParentConfigPath = getPathEnv("env_parent_config_path");
 
 extern const std::filesystem::path kUserFileDest = getPathEnv("env_user_file_dest");
+
+extern const bool kIsFirstBuild = std::filesystem::exists(kPrevEnvVarPath);
 }  // namespace build_variable
 }  // namespace hatter

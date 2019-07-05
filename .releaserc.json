@@ -14,7 +14,7 @@
                         "label": "CLI source code"
                     },
                     {
-                        "path": "src/cli/build/bin/tomlparser",
+                        "path": "src/cli/build/bin/hatter_cli",
                         "name": "hatter_exe",
                         "label": "Hatter executable"
                     }

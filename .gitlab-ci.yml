@@ -1,4 +1,6 @@
-image: "khoitd1997/docker-hatter:latest"
+image: 
+  name: "khoitd1997/docker-hatter:latest"
+  entrypoint: [""] # do not use build command from dockerfile, since we have build stage here
 
 stages:
   - build
@@ -11,7 +13,7 @@ build_hatter:
     - sh src/cli/build.sh
   artifacts:
     paths:
-      - src/cli/build/bin/tomlparser
+      - src/cli/build/bin/hatter_cli
 
 deploy_hatter:
   stage: deploy

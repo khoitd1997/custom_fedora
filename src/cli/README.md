@@ -67,7 +67,7 @@ For example building an OS called ```fedora_kd```, the main config file will be 
     - scripts/: shared scripts
         - build_mock.sh
         - exit_code.sh
-        - general_utils.sh
+        - misc_utils.sh
   - builddir/
     - fedora_kd/ <- env_build_dir, exe working dir
       - build/

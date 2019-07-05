@@ -1,0 +1,19 @@
+FROM fedora:latest 
+LABEL maintainer khoidinhtrinh@gmail.com 
+
+ENV IN_HATTER_DOCKER True
+RUN dnf install spdlog libasan libubsan -y -q # libs
+# build tools
+RUN dnf install ninja-build git cmake gcc-c++ clang -y -q
+# other tools
+RUN dnf install cppcheck gtest-devel gtest valgrind -y -q
+RUN pip3 install cpplint -q
+# runtime tools
+RUN dnf install curl jq ripgrep dnf-plugins-core dbus -y -q
+# publishing tools
+RUN dnf install npm -y -q
+RUN npm install semantic-release @semantic-release/github @semantic-release/commit-analyzer @semantic-release/release-notes-generator -D
+
+COPY . /root
+# will be empty in gitlab-ci
+ENTRYPOINT [ "/root/build.sh" ]

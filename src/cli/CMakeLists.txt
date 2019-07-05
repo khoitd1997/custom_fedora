@@ -42,8 +42,8 @@ add_subdirectory(config_builder)
 add_subdirectory(raw_config_parser)
 add_subdirectory(config_decoder)
 
-add_executable(tomlparser ${PROJECT_SOURCES} toml_parser.cpp)
-target_link_libraries(tomlparser
+add_executable(hatter_cli ${PROJECT_SOURCES} hatter_cli.cpp)
+target_link_libraries(hatter_cli
                       PRIVATE toml11
                               utils
                               build_variable
