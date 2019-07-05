@@ -7,21 +7,20 @@ stages:
 
 build_hatter:
   stage: build
-  # before_script:
-    # - dnf install spdlog libasan libubsan -y -q # libs
-    # - dnf install ninja-build git cmake gcc-c++ clang -y -q # build tools
-    # - dnf install cppcheck gtest-devel gtest valgrind -y -q # other tools
-    # - pip3 install cpplint -q # pip tools
-    # - dnf install curl jq ripgrep dnf-plugins-core -y -q # run time tool
+  before_script:
+    - dnf install spdlog libasan libubsan -y -q # libs
+    - dnf install ninja-build git cmake gcc-c++ clang -y -q # build tools
+    - dnf install cppcheck gtest-devel gtest valgrind -y -q # other tools
+    - pip3 install cpplint -q # pip tools
+    - dnf install curl jq ripgrep dnf-plugins-core -y -q # run time tool
   script:
     - mkdir -p /build_temp
     - touch /build_temp/package_list.txt
     - touch /build_temp/group_list.txt
-    # - sh src/cli/build.sh
+    - sh src/cli/build.sh
   artifacts:
     paths:
-      # - src/cli/build/bin/tomlparser
-      - src/cli/profile.sh
+      - src/cli/build/bin/tomlparser
 
 deploy_hatter:
   stage: deploy
@@ -29,11 +28,6 @@ deploy_hatter:
     - build_hatter
   before_script:
     - sudo dnf install git npm -y -q
-    - npm install @semantic-release/github -D
-    - npm install @semantic-release/commit-analyzer -D
-    - npm install @semantic-release/release-notes-generator -D
+    - npm install @semantic-release/github @semantic-release/commit-analyzer @semantic-release/release-notes-generator -D
   script:
     - npx semantic-release
-    - recent_tag=$(git describe)
-    - echo ${recent_tag}
-    - ls -l
