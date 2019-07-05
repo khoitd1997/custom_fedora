@@ -1,4 +1,5 @@
 **.iso
 build/*
 user_file/*
-.vscode/ipch/*
+.vscode/*
+fedora-kickstarts*
