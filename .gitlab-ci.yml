@@ -17,7 +17,5 @@ deploy_hatter:
   stage: deploy
   dependencies:
     - build_hatter
-  before_script:
-    - npm install @semantic-release/github @semantic-release/commit-analyzer @semantic-release/release-notes-generator -D
   script:
     - npx semantic-release
