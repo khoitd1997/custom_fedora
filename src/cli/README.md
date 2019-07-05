@@ -58,7 +58,7 @@ cd bin
 For example building an OS called ```fedora_kd```, the main config file will be called ```fedora_kd.toml```
 
 - /
-  - build_shared/
+  - build_share/
     - assets/
       - valid_keyboard.txt
     - fedora-kickstarts/

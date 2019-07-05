@@ -47,6 +47,7 @@ std::shared_ptr<InvalidValueError> checkInvalidValue(const std::string&         
     std::shared_ptr<InvalidValueError> error = nullptr;
 
     for (const auto& val : values) {
+        if (val.empty()) { continue; }
         if (!inVector(val, validVals)) {
             if (!error) { error = std::make_shared<InvalidValueError>(typeName, extraMessage); }
             error->invalidVals.push_back(val);

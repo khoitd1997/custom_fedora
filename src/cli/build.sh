@@ -24,13 +24,10 @@ EOF
 
 # scan-build cmake -G Ninja .. && scan-build ninja && ./bin/tomlparser ./bin/settings.toml
 
-mkdir -p /build_shared
-cp -r ${currDir}/assets /build_shared
+mkdir -p /build_share
+cp -r ${currDir}/assets /build_share
 
 set -e
-# export GTEST_FILTER="CommonSanitizeTest_*" # MUST SPECIFY HERE BEFORE THE TESTS ARE DISCOVERED
-# GTEST_BREAK_ON_FAILURE=1 GTEST_COLOR=1 ctest --verbose --gtest_print_time=0
-cmake .. && cmake --build .
 
 # exercise the executable
 # TODO(kd): Move this to end-to-end test place
@@ -61,9 +58,12 @@ export env_base_dir="${currDir}/build/bin" # TODO(kd): remove after
 export env_build_dir="${env_base_dir}/build"
 export env_script_dir="${env_build_dir}/scripts"
 
-export env_share_dir="/build_shared"
+export env_share_dir="/build_share"
 export env_stock_kickstart_dir="${env_share_dir}/fedora-kickstarts"
-export env_valid_keyboard_path="${env_share_dir}/assets/valid_keyboard.txt"
+export env_asset_dir="${env_share_dir}/assets"
+export env_valid_keyboard_path="${env_asset_dir}/valid_keyboard.txt"
+export env_valid_language_path="${env_asset_dir}/valid_language.txt"
+export env_valid_timezone_path="${env_asset_dir}/valid_timezone.txt"
 
 # export env_repo_dir="env_build_dir/repos"
 export env_repo_dir="/etc/yum.repos.d"  # TODO(kd): remove after
@@ -90,6 +90,13 @@ export env_parent_config_path="${env_user_supplied_dir}/${env_parent_config}"
 export env_user_file_dest="/mnt/sysimage/usr/share/hatter_user_file"
 EOF
 source ./build/env_var.sh
+
+# export GTEST_FILTER="CommonSanitizeTest_*" # MUST SPECIFY HERE BEFORE THE TESTS ARE DISCOVERED
+# GTEST_BREAK_ON_FAILURE=1 GTEST_COLOR=1 ctest --verbose --gtest_print_time=0
+cd ${currDir}/build
+cmake .. && cmake --build .
+
+cd ${currDir}/build/bin
 ./tomlparser example_settings.toml
 if [ $? -ne 0 ]; then
     echo "toml parser failed"
