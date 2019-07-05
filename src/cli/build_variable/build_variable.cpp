@@ -78,6 +78,6 @@ extern const std::filesystem::path kParentConfigPath = getPathEnv("env_parent_co
 
 extern const std::filesystem::path kUserFileDest = getPathEnv("env_user_file_dest");
 
-extern const bool kIsFirstBuild = std::filesystem::exists(kPrevEnvVarPath);
+extern const bool kIsFirstBuild = !(std::filesystem::exists(kPrevEnvVarPath));
 }  // namespace build_variable
 }  // namespace hatter
