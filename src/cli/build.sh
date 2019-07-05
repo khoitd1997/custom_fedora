@@ -11,6 +11,9 @@ if [ -z "${IN_HATTER_DOCKER}" ] && [ -z "${CI}" ]; then
     # SYS_PTRACE because of sanitizer
     docker run --tty --rm -v cmake_build_vol:${cmake_build_dir} --name test_instance --cap-add SYS_PTRACE hattertest
 else
+    if [ ! -z "${CI}" ]; then
+        mkdir -p ${cmake_build_dir}
+    fi
     # TODO(kd): Move this to end-to-end test place
     
     dnf copr enable khoitd1997/toml11 -y
