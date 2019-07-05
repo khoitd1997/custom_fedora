@@ -7,12 +7,6 @@ stages:
 
 build_hatter:
   stage: build
-  before_script:
-    - dnf install spdlog libasan libubsan -y -q # libs
-    - dnf install ninja-build git cmake gcc-c++ clang -y -q # build tools
-    - dnf install cppcheck gtest-devel gtest valgrind -y -q # other tools
-    - pip3 install cpplint -q # pip tools
-    - dnf install curl jq ripgrep dnf-plugins-core dbus -y -q # run time tool
   script:
     - sh src/cli/build.sh
   artifacts:
@@ -24,7 +18,6 @@ deploy_hatter:
   dependencies:
     - build_hatter
   before_script:
-    - sudo dnf install git npm -y -q
     - npm install @semantic-release/github @semantic-release/commit-analyzer @semantic-release/release-notes-generator -D
   script:
     - npx semantic-release
