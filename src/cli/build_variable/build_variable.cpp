@@ -48,6 +48,7 @@ extern const std::filesystem::path kBuildDir = getPathEnv("env_build_dir");
 
 extern const std::filesystem::path kShareDir          = getPathEnv("env_base_dir");
 extern const std::filesystem::path kStockKickstartDir = getPathEnv("env_stock_kickstart_dir");
+extern const std::filesystem::path kValidKeyboardPath = getPathEnv("env_valid_keyboard_path");
 
 // extern const std::filesystem::path kRepoDir =getPathEnv("");
 extern const std::filesystem::path kRepoDir         = "/etc/yum.repos.d";  // TODO(kd): remove after

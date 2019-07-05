@@ -5,6 +5,7 @@
 
 #include "magic_enum.hpp"
 
+#include "build_variable.hpp"
 #include "common_sanitize.hpp"
 #include "formatter.hpp"
 #include "raw_config_parser_utils.hpp"
@@ -12,10 +13,7 @@
 
 namespace hatter {
 namespace package_set_handler {
-namespace {
-const auto packageListPath = "/build_temp/package_list.txt";
-const auto groupListPath   = "/build_temp/group_list.txt";
-}  // namespace
+namespace {}  // namespace
 std::shared_ptr<InvalidValueError> checkPackageNotFound(const PackageSet &pkgSet) {
     std::filesystem::path                           searchFile;
     auto                                            useRegex = false;
@@ -26,7 +24,7 @@ std::shared_ptr<InvalidValueError> checkPackageNotFound(const PackageSet &pkgSet
             makeSearchTarget = [](const std::string &pkg) -> std::string {
                 return "'^" + pkg + "\\.'";
             };
-            searchFile = std::filesystem::path{packageListPath};
+            searchFile = build_variable::kPackageListPath;
             useRegex   = true;
             break;
 
@@ -34,7 +32,7 @@ std::shared_ptr<InvalidValueError> checkPackageNotFound(const PackageSet &pkgSet
             makeSearchTarget = [](const std::string &pkg) -> std::string {
                 return "'(" + pkg + ")'";
             };
-            searchFile = std::filesystem::path{groupListPath};
+            searchFile = build_variable::kGroupListPath;
             break;
 
         default:

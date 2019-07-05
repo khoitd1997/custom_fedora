@@ -59,6 +59,8 @@ For example building an OS called ```fedora_kd```, the main config file will be 
 
 - /
   - build_shared/
+    - assets/
+      - valid_keyboard.txt
     - fedora-kickstarts/
         - git clone of fedora-kickstarts repo
     - package_cache/: cache of all packages

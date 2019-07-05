@@ -24,6 +24,9 @@ EOF
 
 # scan-build cmake -G Ninja .. && scan-build ninja && ./bin/tomlparser ./bin/settings.toml
 
+mkdir -p /build_shared
+cp -r ${currDir}/assets /build_shared
+
 set -e
 # export GTEST_FILTER="CommonSanitizeTest_*" # MUST SPECIFY HERE BEFORE THE TESTS ARE DISCOVERED
 # GTEST_BREAK_ON_FAILURE=1 GTEST_COLOR=1 ctest --verbose --gtest_print_time=0
@@ -34,6 +37,8 @@ cmake .. && cmake --build .
 cd bin
 mkdir -p out
 mkdir -p out/logs
+touch ${currDir}/build/bin/build/package_list.txt
+touch ${currDir}/build/bin/build/group_list.txt
 set -e
 if [ -f "build/prev_env_var.sh" ]; then
     source build/prev_env_var.sh
@@ -58,6 +63,7 @@ export env_script_dir="${env_build_dir}/scripts"
 
 export env_share_dir="/build_shared"
 export env_stock_kickstart_dir="${env_share_dir}/fedora-kickstarts"
+export env_valid_keyboard_path="${env_share_dir}/assets/valid_keyboard.txt"
 
 # export env_repo_dir="env_build_dir/repos"
 export env_repo_dir="/etc/yum.repos.d"  # TODO(kd): remove after

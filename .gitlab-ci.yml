@@ -14,10 +14,6 @@ build_hatter:
     - pip3 install cpplint -q # pip tools
     - dnf install curl jq ripgrep dnf-plugins-core dbus -y -q # run time tool
   script:
-    - mkdir -p /build_temp
-    - touch /build_temp/package_list.txt
-    - touch /build_temp/group_list.txt
-    # - service systemd-localed start
     - sh src/cli/build.sh
   artifacts:
     paths:

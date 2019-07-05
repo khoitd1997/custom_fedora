@@ -1,5 +1,6 @@
 #include "misc_sanitize.hpp"
 
+#include "build_variable.hpp"
 #include "common_sanitize.hpp"
 #include "raw_config_parser_utils.hpp"
 
@@ -12,7 +13,7 @@ std::vector<std::shared_ptr<HatterParserError>> sanitize(const MiscConfig&  misc
     if (auto error = checkUnknownValue(table)) { errors.push_back(error); }
     if (auto error = checkInvalidValue(miscConf.keyboard.keyName,
                                        {miscConf.keyboard.value},
-                                       "localectl list-x11-keymap-layouts")) {
+                                       build_variable::kValidKeyboardPath)) {
         errors.push_back(error);
     }
     if (auto error =
