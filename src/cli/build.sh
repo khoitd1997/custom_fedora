@@ -7,12 +7,13 @@ cmake_build_dir=/cmake_build_dir
 if [ -z "${IN_HATTER_DOCKER}" ] && [ -z "${CI}" ]; then
     cd ${hatter_src_dir}
     
+    # docker rm -f test_instance
     docker build -t hattertest .
     docker volume create cmake_build_vol
     # SYS_PTRACE because of sanitizer
     docker run --tty --rm -v cmake_build_vol:${cmake_build_dir} --name test_instance --cap-add SYS_PTRACE hattertest
 else
-    # rm -rf ${cmake_build_dir}/*
+    rm -rf ${cmake_build_dir}/*
     if [ ! -z "${CI}" ]; then
         mkdir -p ${cmake_build_dir}
     fi
@@ -22,8 +23,7 @@ else
     
     test_build_root_dir=${cmake_build_dir}/bin
     mkdir -p ${test_build_root_dir}
-    # cd ${test_build_root_dir}
-    # ls | rg -v hatter_cli | xargs rm -r
+    # rm -rf ${test_build_root_dir}/*
     mkdir -p ${test_build_root_dir}/build
     cat > ${test_build_root_dir}/build/env_var.sh << 'EOF'
     export env_os_name="example_setting"
@@ -39,8 +39,6 @@ EOF
     build_env_var_file "example_setting" "29" \
     "x86_64" "false" \
     "false" ${test_build_root_dir}/build/env_var.sh
-    
-    source ${test_build_root_dir}/build/env_var.sh
     
     cd ${test_build_root_dir} # set pwd to test_build_root_dir
     source ${hatter_src_dir}/scripts/set_env_var.sh
@@ -59,12 +57,20 @@ EOF
     # cd bin
     # GTEST_BREAK_ON_FAILURE=1 GTEST_COLOR=1 ctest --verbose --gtest_print_time=0
     
-    ./bin/hatter_cli
+    if [ -f "${env_prev_var_path}" ]; then
+        source ${env_prev_var_path}
+    fi
+    ${test_build_root_dir}/hatter_cli
     if [ $? -ne 0 ]; then
         echo "toml parser failed"
     else
         echo "toml parser succeeded"
-        cp ${env_build_dir}/env_var.sh ${env_prev_var_path}
+        cp ${env_var_path} ${env_prev_var_path}
         sed '/env_/s/env_/prev_env_/' -i ${env_prev_var_path}
+    fi
+    
+    # gitlab ci has bug with artifacts being in absolute path
+    if [ ! -z "${CI}" ]; then
+        cp ${test_build_root_dir}/hatter_cli ${hatter_src_dir}
     fi
 fi

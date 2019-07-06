@@ -5,6 +5,14 @@
 export env_base_dir=$(pwd)
 export env_build_dir="${env_base_dir}/build"
 export env_script_dir="${env_build_dir}/scripts"
+export env_var_path="${env_build_dir}/env_var.sh"
+source ${env_var_path}
+
+export env_user_supplied_dir="${env_build_dir}/user_supplied"
+export env_config_builder_env_var_path="${env_build_dir}/config_builder_env_var.sh"
+export env_prev_var_path="${env_build_dir}/prev_env_var.sh"
+export env_prev_parent_config_path="${env_build_dir}/prev_config.toml"
+export env_parent_config_path="${env_user_supplied_dir}/${env_parent_config}"
 
 export env_share_dir="/build_share"
 export env_stock_kickstart_dir="${env_share_dir}/fedora-kickstarts"
@@ -28,11 +36,5 @@ export env_post_build_script_no_root_path="${env_out_dir}/post_build_no_root.sh"
 # log dir
 export env_kickstart_log_dir="/root${env_out_dir}/log" # used when specifying log in .ks file
 export env_log_dir="${env_out_dir}/log"
-
-export env_user_supplied_dir="${env_build_dir}/user_supplied"
-export env_config_builder_env_var_path="${env_build_dir}/config_builder_env_var.sh"
-export env_prev_var_path="${env_build_dir}/prev_env_var.sh"
-export env_prev_parent_config_path="${env_build_dir}/prev_config.toml"
-export env_parent_config_path="${env_user_supplied_dir}/${env_parent_config}"
 
 export env_user_file_dest="/mnt/sysimage/usr/share/hatter_user_file"
