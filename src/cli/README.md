@@ -8,61 +8,49 @@ Mock refreshes dnf.conf every invocation
 
 Maybe /libexec for all other files and just the main one in /usr/bin
 
-Support classic kickstart file but with additional settings through the TOML file like caching.
+Support classic kickstart file but with additional settings through the TOML file like caching
 
 ## Building from Source
 
 ### Dependency
 
-The project uses C++17 features so to compile it, the newer g++ are needed. The project uses gtest for unit testing as well as cppcheck and cpplint for extra linting, the default cmake won't turn these options on.
+The project uses C++17 features so to compile it, the newer g++ are needed. The project uses gtest for unit testing as well as cppcheck and cpplint for extra linting, the default cmake won't turn these options on
 
-```shell
-# library
-sudo dnf install spdlog libasan
-
-# for bare minimum build tool
-sudo dnf install ninja-build cmake gcc-c++ clang
-
-# for extra stuffs
-sudo dnf install cppcheck gtest-devel gtest
-pip3 install cpplint
-```
+For the list of dependency please check the [Dockerfile](./Dockerfile)
 
 ### Build
 
 ```shell
-# assume in source directory
+# assume in src/cli
 mkdir -p build
 cd build
-cmake -G Ninja .. && ninja # bare minimum build
-cmake -G Ninja -DUSE_CPPLINT=ON -DUSE_CPPCHECK=ON .. && ninja  # full build with unit test and linting
 
+# configure in cmake
+cmake .. # bare minimum build OR
+cmake -G Ninja -DRUN_TEST=ON -DUSE_CPPLINT=ON -DUSE_CPPCHECK=ON .. # build with check and test
+
+cmake --build .
+
+# run test it was enabled in the configure step
 cd bin
+GTEST_BREAK_ON_FAILURE=1 GTEST_COLOR=1 ctest --verbose --gtest_print_time=0
 ```
-
-## Build Stages
-
-- First stage: Outside of mock
-  - Handle TOML wrong syntax
-  - Sanitize command line options
-  - Sanitize all sections possible
-- Second stage: Inside mock
-  - Sanitize packages, repo
-  - Control build scripts, enable caching, etc
 
 ## Mock building directory structure
 
 For example building an OS called ```fedora_kd```, the main config file will be called ```fedora_kd.toml```
 
 - /
-  - build_shared/
+  - build_share/
+    - assets/
+      - valid_keyboard.txt
     - fedora-kickstarts/
         - git clone of fedora-kickstarts repo
     - package_cache/: cache of all packages
     - scripts/: shared scripts
         - build_mock.sh
         - exit_code.sh
-        - general_utils.sh
+        - misc_utils.sh
   - builddir/
     - fedora_kd/ <- env_build_dir, exe working dir
       - build/

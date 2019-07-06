@@ -2,6 +2,8 @@
 #include <cstdlib>
 #include <iostream>
 #include <memory>
+#include <string_view>
+using namespace std::string_view_literals;
 
 #include "gmock/gmock.h"
 
@@ -108,6 +110,13 @@ int main(int argc, char** argv) {
     auto envPtr = std::getenv("GTEST_FILTER");
 
     if (envPtr) { testing::GTEST_FLAG(filter) = envPtr; }
+    // auto isDiscoverRun = false;
+    // for (auto i = 0; i < argc; ++i) {
+    //     if (argv[i] == "--gtest_list_tests"sv) {
+    //         isDiscoverRun = true;
+    //         break;
+    //     }
+    // }
     testing::InitGoogleMock(&argc, argv);
 
     // remove the default listener
@@ -118,5 +127,6 @@ int main(int argc, char** argv) {
     listeners.Append(listener);
 
     // run
+    // if (isDiscoverRun) { std::cout << "is discover run" << std::endl; }
     return RUN_ALL_TESTS();
 }

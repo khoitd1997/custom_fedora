@@ -47,10 +47,11 @@ template <typename TBool, typename T = std::enable_if_t<std::is_same<TBool, bool
 std::shared_ptr<InvalidValueError> checkInvalidValue(const std::string&              typeName,
                                                      const std::vector<std::string>& values,
                                                      const std::filesystem::path&    filePath,
-                                                     const TBool        useRegex     = true,
+                                                     const TBool                     useRegex,
                                                      const std::string& extraMessage = "") {
     std::shared_ptr<InvalidValueError> error = nullptr;
     for (const auto& value : values) {
+        if (value.empty()) { continue; }
         const auto match = ripgrepSearchFile(value, filePath.string(), useRegex);
 
         if (match < 1) {

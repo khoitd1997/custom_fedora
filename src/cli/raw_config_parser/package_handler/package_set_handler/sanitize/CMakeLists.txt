@@ -9,6 +9,7 @@ target_link_libraries(raw_config_parser_package_set_sanitize
                               formatter
                               magic_enum
                               raw_config_parser_package_set
+                              build_variable
                               raw_config_parser_utils)
 
 target_include_directories(raw_config_parser_package_set_sanitize

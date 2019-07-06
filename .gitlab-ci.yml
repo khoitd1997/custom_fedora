@@ -1,0 +1,23 @@
+image: 
+  name: "khoitd1997/docker-hatter:latest"
+  entrypoint: [""] # do not use build command from dockerfile, since we have build stage here
+
+stages:
+  - build
+  - test
+  - deploy
+
+build_hatter:
+  stage: build
+  script:
+    - sh src/cli/build.sh
+  artifacts:
+    paths:
+      - src/cli/hatter_cli
+
+deploy_hatter:
+  stage: deploy
+  dependencies:
+    - build_hatter
+  script:
+    - npx semantic-release

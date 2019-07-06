@@ -33,7 +33,6 @@ std::string buildCommandWithListParam(const std::string&              cmd,
     if (!beginComment.empty() && !params.empty()) { strAddLine(ret, "# " + beginComment); }
     for (auto param = params.cbegin(); param != params.cend(); ++param) {
         std::string tempLine;
-        logger::info("adding param for " + beginComment);
         if (param == params.cbegin()) {
             tempLine += cmd + " " + *param;
         } else {

@@ -1,0 +1,25 @@
+{
+    "branch": "feat/ci",
+    "repositoryUrl": "https://github.com/khoitd1997/hatter.git",
+    "plugins": [
+        "@semantic-release/commit-analyzer",
+        "@semantic-release/release-notes-generator",
+        [
+            "@semantic-release/github",
+            {
+                "assets": [
+                    {
+                        "path": "src/cli",
+                        "name": "src",
+                        "label": "CLI source code"
+                    },
+                    {
+                        "path": "src/cli/build/bin/hatter_cli",
+                        "name": "hatter_exe",
+                        "label": "Hatter executable"
+                    }
+                ]
+            }
+        ]
+    ]
+}

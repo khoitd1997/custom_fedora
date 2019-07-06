@@ -3,7 +3,9 @@ add_library(raw_config_parser_misc_sanitize ${CppSources})
 target_link_libraries(raw_config_parser_misc_sanitize
                       PUBLIC toml11 raw_config_parser_common_error
                              hatter_config_type
-                      PRIVATE raw_config_parser_common_sanitize formatter
+                      PRIVATE raw_config_parser_common_sanitize
+                              formatter
+                              build_variable
                               raw_config_parser_utils)
 
 target_include_directories(raw_config_parser_misc_sanitize

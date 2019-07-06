@@ -5,7 +5,7 @@
 
 ## importing functions and variables
 script_dir="$(dirname "$(readlink -f "$0")")"
-source ${script_dir}/general_utils.sh
+source ${script_dir}/misc_utils.sh
 source ${script_dir}/exit_code.sh
 
 original_user=$(logname)

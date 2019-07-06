@@ -3,5 +3,5 @@
 
 currDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd ${currDir}/build/bin
-perf record -g ./tomlparser example_settings.toml
+perf record -g ./hatter_cli example_setting.toml
 perf report -g 'graph,0.1,caller'

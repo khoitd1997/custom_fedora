@@ -20,6 +20,9 @@ extern const bool kIsFirstBuild;
 // path variables
 extern const std::filesystem::path kShareDir;
 extern const std::filesystem::path kStockKickstartDir;
+extern const std::filesystem::path kValidKeyboardPath;
+extern const std::filesystem::path kValidLanguagePath;
+extern const std::filesystem::path kValidTimezonePath;
 
 extern const std::filesystem::path kBaseDir;
 extern const std::filesystem::path kBuildDir;

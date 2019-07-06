@@ -118,9 +118,34 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
-# Editor-based Rest Client
 .idea/httpRequests
+# Editor-based Rest Client
 
 # Android studio 3.1+ serialized cache file
 .idea/caches/build_file_checksums.ser
 Testing/*
+fedora-kickstarts/*
+fedora-kickstarts
+
+.vagrant*
+bin
+docker/docker
+.*.swp
+a.out
+*.orig
+build_src
+.flymake*
+.idea
+.DS_Store
+docs/_build
+docs/_static
+docs/_templates
+.gopath/
+.dotcloud
+*.test
+bundles/
+.hg/
+.git/
+vendor/pkg/
+pyenv
+Vagrantfile

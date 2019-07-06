@@ -1,5 +1,7 @@
 # Hatter
 
+[![pipeline status](https://gitlab.com/khoitd1997/hatter/badges/develop/pipeline.svg)](https://gitlab.com/khoitd1997/hatter/commits/develop)
+
 Hatter is a tool used for automating Custom Fedora OS build.
 
 ## References

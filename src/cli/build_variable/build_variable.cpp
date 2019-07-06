@@ -40,14 +40,15 @@ CLIBuildVariable::CLIBuildVariable(const std::string& prefix) {
     parserMode = getBoolEnv(fullPrefix + "env_parser_mode");
 }
 
-extern const bool kIsFirstBuild = getBoolEnv("env_is_first_build");
-
 // path variables
 extern const std::filesystem::path kBaseDir  = getPathEnv("env_base_dir");
 extern const std::filesystem::path kBuildDir = getPathEnv("env_build_dir");
 
 extern const std::filesystem::path kShareDir          = getPathEnv("env_base_dir");
 extern const std::filesystem::path kStockKickstartDir = getPathEnv("env_stock_kickstart_dir");
+extern const std::filesystem::path kValidKeyboardPath = getPathEnv("env_valid_keyboard_path");
+extern const std::filesystem::path kValidLanguagePath = getPathEnv("env_valid_language_path");
+extern const std::filesystem::path kValidTimezonePath = getPathEnv("env_valid_timezone_path");
 
 // extern const std::filesystem::path kRepoDir =getPathEnv("");
 extern const std::filesystem::path kRepoDir         = "/etc/yum.repos.d";  // TODO(kd): remove after
@@ -76,5 +77,7 @@ extern const std::filesystem::path kPrevParentConfigPath =
 extern const std::filesystem::path kParentConfigPath = getPathEnv("env_parent_config_path");
 
 extern const std::filesystem::path kUserFileDest = getPathEnv("env_user_file_dest");
+
+extern const bool kIsFirstBuild = !(std::filesystem::exists(kPrevEnvVarPath));
 }  // namespace build_variable
 }  // namespace hatter
