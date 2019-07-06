@@ -30,6 +30,7 @@ if(USE_CLANG-TIDY)
 endif()
 
 util_set_general_code_gen_option()
+set(CXX_STANDARD_REQUIRED ON)
 
 add_subdirectory(utils)
 add_subdirectory(test_utils)
