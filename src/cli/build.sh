@@ -7,11 +7,17 @@ cmake_build_dir=/cmake_build_dir
 if [ -z "${IN_HATTER_DOCKER}" ] && [ -z "${CI}" ]; then
     cd ${hatter_src_dir}
     
+    if [ ! -d "${hatter_src_dir}/cmake_build_dir" ]; then
+        mkdir ${hatter_src_dir}/cmake_build_dir
+        chmod 0777 -R ${hatter_src_dir}/cmake_build_dir
+    fi
+    
     # docker rm -f test_instance
     docker build -t hattertest .
-    docker volume create cmake_build_vol
+    # docker volume create cmake_build_vol
     # SYS_PTRACE because of sanitizer
-    docker run --tty --rm -v cmake_build_vol:${cmake_build_dir} --name test_instance --cap-add SYS_PTRACE hattertest
+    echo ${hatter_src_dir}/cmake_build_dir
+    docker run --tty --name test_instance --cap-add SYS_PTRACE --rm -v ${hatter_src_dir}/cmake_build_dir:${cmake_build_dir}:Z hattertest
 else
     # rm -rf ${cmake_build_dir}/*
     if [ ! -z "${CI}" ]; then
@@ -23,7 +29,7 @@ else
     
     test_build_root_dir=${cmake_build_dir}/bin
     mkdir -p ${test_build_root_dir}
-    # rm -rf ${test_build_root_dir}/*
+    rm -rf ${test_build_root_dir}/*
     mkdir -p ${test_build_root_dir}/build
     cat > ${test_build_root_dir}/build/env_var.sh << 'EOF'
     export env_os_name="example_setting"

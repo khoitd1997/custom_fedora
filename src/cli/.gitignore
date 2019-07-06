@@ -11,5 +11,6 @@ CTestTestfile.cmake
 _deps
 
 **/build/*
+cmake_build_dir/*
 .clang-tidy
 .rgignore
