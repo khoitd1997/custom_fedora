@@ -13,7 +13,7 @@ if [ -z "${IN_HATTER_DOCKER}" ] && [ -z "${CI}" ]; then
     # SYS_PTRACE because of sanitizer
     docker run --tty --rm -v cmake_build_vol:${cmake_build_dir} --name test_instance --cap-add SYS_PTRACE hattertest
 else
-    rm -rf ${cmake_build_dir}/*
+    # rm -rf ${cmake_build_dir}/*
     if [ ! -z "${CI}" ]; then
         mkdir -p ${cmake_build_dir}
     fi

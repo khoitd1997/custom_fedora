@@ -14,10 +14,9 @@ util_misc_init()
 
 add_subdirectory(thirdparty)
 
-util_check_and_enable_test() # -DRUN_TEST=ON
+# util_check_and_enable_test() # -DRUN_TEST=ON
 
 util_add_cpplint() # -DUSE_CPPLINT=ON
-
 util_add_cppcheck() # -DUSE_CPPCHECK=ON
 
 # util_add_clang_tidy() # -DUSE_CLANG-TIDY=ON
