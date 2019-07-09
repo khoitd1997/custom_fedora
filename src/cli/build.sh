@@ -12,12 +12,12 @@ if [ -z "${IN_HATTER_DOCKER}" ] && [ -z "${CI}" ]; then
         chmod 0777 -R ${hatter_src_dir}/cmake_build_dir
     fi
     
-    # docker rm -f test_instance
-    docker build -t hattertest .
-    # docker volume create cmake_build_vol
+    # podman rm -f test_instance
+    podman build -t hattertest .
+    # podman volume create cmake_build_vol
     # SYS_PTRACE because of sanitizer
     echo ${hatter_src_dir}/cmake_build_dir
-    docker run --tty --name test_instance --cap-add SYS_PTRACE --rm -v ${hatter_src_dir}/cmake_build_dir:${cmake_build_dir}:Z hattertest
+    podman run --tty --name test_instance --cap-add SYS_PTRACE --rm -v ${hatter_src_dir}/cmake_build_dir:${cmake_build_dir}:Z hattertest
 else
     # rm -rf ${cmake_build_dir}/*
     if [ ! -z "${CI}" ]; then

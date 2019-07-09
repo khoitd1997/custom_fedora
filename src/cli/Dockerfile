@@ -1,7 +1,6 @@
 FROM fedora:latest 
 LABEL maintainer khoidinhtrinh@gmail.com 
 
-ENV IN_HATTER_DOCKER True
 # libs
 RUN dnf install spdlog libasan libubsan -y -q
 # build tools
@@ -15,6 +14,7 @@ RUN dnf install curl jq ripgrep dnf-plugins-core dbus -y -q
 RUN dnf install npm -y -q
 RUN npm install semantic-release @semantic-release/github @semantic-release/commit-analyzer @semantic-release/release-notes-generator -D
 
+ENV IN_HATTER_DOCKER True
 COPY . /root
 # will be empty in gitlab-ci
 ENTRYPOINT [ "/root/build.sh" ]
