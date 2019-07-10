@@ -56,7 +56,7 @@ EOF
     # export GTEST_FILTER="CommonSanitizeTest_*" # MUST SPECIFY HERE BEFORE THE TESTS ARE DISCOVERED
     # scan-build cmake -G Ninja .. && scan-build ninja && ./bin/hatter_cli ./bin/settings.toml
     cd ${cmake_build_dir}
-    cmake ${hatter_src_dir} -DRUN_TEST=ON && cmake --build .
+    cmake ${hatter_src_dir} && cmake --build .
     
     # run unit tests
     # TODO(kd): Resolve gtest issue
