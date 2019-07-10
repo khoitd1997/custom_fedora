@@ -106,6 +106,7 @@ bool getFile(const std::filesystem::path& filePath,
     }};
     return depthFirstSearch(filePath, parentFileName, fullConfig, fullReport, parseFunc, mergeFunc);
 }
+
 bool getRepo(const std::filesystem::path& filePath,
              const std::string&           parentFileName,
              FullConfig&                  fullConfig,
