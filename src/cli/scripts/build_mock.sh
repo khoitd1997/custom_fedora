@@ -88,8 +88,6 @@ if [ "${env_parser_mode}" = false ]; then
 
     dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm -y -q
 
-    dnf copr enable khoitd1997/toml11 --setopt=reposdir=/etc/yum.repos.d/ -q
-
     if [ "${env_enable_custom_cache}" = true ]; then
     package_list=""
     group_list=""

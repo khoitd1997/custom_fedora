@@ -16,20 +16,23 @@ if [ -z "${IN_HATTER_DOCKER}" ] && [ -z "${CI}" ]; then
     fi
     
     # ${container_engine} rm -f test_instance
-    ${container_engine} build -t hattertest --build-arg CACHEBUST=$(date +%s) --cpuset-cpus="0-3" .
+    ${container_engine} build -t hattertest --cpuset-cpus="0-3" .
     # ${container_engine} volume create cmake_build_vol
     # SYS_PTRACE because of sanitizer
     echo ${hatter_src_dir}/cmake_build_dir
     ${container_engine} run --tty --name test_instance --cap-add SYS_PTRACE --rm -v ${hatter_src_dir}/cmake_build_dir:${cmake_build_dir}:Z hattertest
 else
+    # TODO(kd): Move to bootstrap script
+    # set -x
+    rpm --import https://packages.microsoft.com/keys/microsoft.asc
+    sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
+    # dnf check-update -y
+    
     # rm -rf ${cmake_build_dir}/*
     if [ ! -z "${CI}" ]; then
         mkdir -p ${cmake_build_dir}
     fi
     # TODO(kd): Move this to end-to-end test place
-    
-    dnf copr enable khoitd1997/toml11 -y
-    
     test_build_root_dir=${cmake_build_dir}/bin
     mkdir -p ${test_build_root_dir}
     rm -rf ${test_build_root_dir}/*
