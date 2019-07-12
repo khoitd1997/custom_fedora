@@ -28,6 +28,8 @@ extern const std::filesystem::path kBaseDir;
 extern const std::filesystem::path kBuildDir;
 
 extern const std::filesystem::path kRepoDir;
+extern const std::filesystem::path kRepoConfPath;
+extern const std::filesystem::path kRepoLogPath;
 extern const std::filesystem::path kPackageListPath;
 extern const std::filesystem::path kGroupListPath;
 

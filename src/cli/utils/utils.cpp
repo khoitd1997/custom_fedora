@@ -19,6 +19,61 @@
 #include <vector>
 
 namespace hatter {
+namespace {
+std::string buildRipgrepSearchFileCommand(const std::string&           searchTarget,
+                                          const std::filesystem::path& targetFilePath,
+                                          const bool                   useRegex) {
+    const std::string regexFlag     = (useRegex) ? " " : " -F ";
+    const std::string baseRgCommand = "rg " + regexFlag + " -c ";
+
+    return baseRgCommand + searchTarget + " " + targetFilePath.string();
+}
+
+std::string buildRipgrepSearchOutputCommand(const std::string& searchTarget,
+                                            const std::string& cmd,
+                                            const bool         useRegex) {
+    const std::string regexFlag     = (useRegex) ? " " : " -F ";
+    const std::string baseRgCommand = "rg " + regexFlag + " -c ";
+
+    return cmd + " | " + baseRgCommand + searchTarget;
+}
+}  // namespace
+
+int ripgrepSearchFile(const std::string&           searchTarget,
+                      const std::filesystem::path& targetFilePath,
+                      const bool                   useRegex) {
+    std::string output;
+    const auto  rgCommand = buildRipgrepSearchFileCommand(searchTarget, targetFilePath, useRegex);
+    const auto  errCode   = execCommand(rgCommand, output);
+
+    if (errCode == 0) {
+        return std::stoi(output);
+    } else if (errCode == 1) {
+        return 0;
+    } else {
+        throw std::runtime_error("rg failed with message: " + output);
+        return 0;
+    }
+}
+
+int ripgrepSearchCmdOutput(const std::string& searchTarget,
+                           const std::string& cmd,
+                           std::string&       errorOutput,
+                           const bool         useRegex) {
+    std::string tempOutput;
+    const auto  rgCommand = buildRipgrepSearchOutputCommand(searchTarget, cmd, useRegex);
+    const auto  errCode   = execCommand(rgCommand, tempOutput);
+
+    if (errCode == 0) {
+        return std::stoi(tempOutput);
+    } else if (errCode == 1 && tempOutput.empty()) {
+        return 0;
+    }
+
+    errorOutput = tempOutput;
+    return 0;
+}
+
 std::string getCurrentTime(const std::string& fmt) {
     std::stringstream ss;
     auto              t  = std::time(nullptr);
@@ -39,7 +94,6 @@ std::string buildCommentBlock(const std::vector<std::string>& lines,
 
 void writeFile(const std::string& s, const std::filesystem::path& path) {
     if (std::filesystem::exists(path.parent_path())) {
-        std::cout << "writing to " + path.string() << std::endl;
         std::ofstream file(path.string(), std::ofstream::trunc);
         file << s;
     } else {
@@ -81,7 +135,7 @@ std::string readFile(const std::filesystem::path& path) {
     std::string ret;
 
     std::ifstream inFile(path.string());
-    if (inFile.fail()) { throw std::runtime_error("failed to read file " + path.string()); }
+    if (inFile.fail()) { throw std::runtime_error("failed to read file named " + path.string()); }
 
     std::string line;
     while (std::getline(inFile, line)) { strAddLine(ret, line); }
@@ -90,11 +144,24 @@ std::string readFile(const std::filesystem::path& path) {
     return "";
 }
 
-void replacePattern(std::vector<std::string>& lines,
-                    const std::string&        regexPattern,
-                    const std::string&        replaceStr) {
-    std::regex e(regexPattern);
-    for (auto& line : lines) { line = std::regex_replace(line, e, replaceStr); }
+bool strInFile(const std::string& str, const std::filesystem::path& path) {
+    return ripgrepSearchFile(str, path);
+}
+
+void addOrReplaceLineFile(const std::string&           searchHint,
+                          const std::string&           finalLine,
+                          const std::filesystem::path& path) {
+    if (strInFile(searchHint, path)) {
+        execCommand("sed -i 's|.*" + searchHint + ".*|" + finalLine + "|g' " + path.string());
+    } else {
+        execCommand("printf \"\\n" + finalLine + "\" >> " + path.string());
+    }
+}
+
+std::string replacePattern(const std::string& str,
+                           const std::string& regexPattern,
+                           const std::string& replaceStr) {
+    return std::regex_replace(str, std::regex(regexPattern), replaceStr);
 }
 
 std::string getExeDir(void) {
@@ -126,9 +193,7 @@ std::string strJoin(const std::vector<std::string>& strings, const std::string& 
     return out;
 }
 
-void strAddLine(std::string& dest, const std::string& src) {
-    dest += src + "\n";
-}
+void strAddLine(std::string& dest, const std::string& src) { dest += src + "\n"; }
 void strAddLine(std::string& dest, const std::vector<std::string>& src) {
     for (const auto& str : src) { strAddLine(dest, str); }
 }

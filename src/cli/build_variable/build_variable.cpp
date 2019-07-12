@@ -50,8 +50,9 @@ extern const std::filesystem::path kValidKeyboardPath = getPathEnv("env_valid_ke
 extern const std::filesystem::path kValidLanguagePath = getPathEnv("env_valid_language_path");
 extern const std::filesystem::path kValidTimezonePath = getPathEnv("env_valid_timezone_path");
 
-// extern const std::filesystem::path kRepoDir =getPathEnv("");
-extern const std::filesystem::path kRepoDir         = "/etc/yum.repos.d";  // TODO(kd): remove after
+extern const std::filesystem::path kRepoDir         = getPathEnv("env_repo_dir");
+extern const std::filesystem::path kRepoConfPath    = getPathEnv("env_repo_conf");
+extern const std::filesystem::path kRepoLogPath     = getPathEnv("env_repo_log");
 extern const std::filesystem::path kPackageListPath = getPathEnv("env_package_list_path");
 extern const std::filesystem::path kGroupListPath   = getPathEnv("env_group_list_path");
 

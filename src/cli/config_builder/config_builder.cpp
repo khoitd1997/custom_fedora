@@ -23,6 +23,11 @@ std::string buildKickstartRepo(const std::string& repoName,
     return ret;
 }
 
+std::string buildKickstartStandardtRepo(const std::string& repoName) {
+    return buildKickstartRepo(
+        repoName, kStandardRepos.at(repoName).baseURL, kStandardRepos.at(repoName).metaURL);
+}
+
 std::string buildCommandWithListParam(const std::string&              cmd,
                                       const std::vector<std::string>& params,
                                       const std::string&              endLine,
@@ -144,40 +149,7 @@ std::pair<std::string, std::string> buildRepoList(const RepoConfig& repoConfig) 
         strAddLine(firstBootStr, "sudo dnf install fedora-workstation-repositories -y");
     }
     for (const auto& stdRepo : repoConfig.standardRepos.value) {
-        std::string ksRepoName;
-        std::string ksBaseURL;
-        std::string ksMetaLink;
-
-        if (stdRepo == "google-chrome") {
-            ksRepoName = "google-chrome";
-            ksBaseURL  = "http://dl.google.com/linux/chrome/rpm/stable/$basearch";
-
-            strAddLine(firstBootStr, {"sudo dnf config-manager --set-enabled " + ksRepoName});
-        } else if (stdRepo == "nvidia") {
-            ksRepoName = "rpmfusion-nonfree-nvidia-driver";
-            ksMetaLink =
-                "https://mirrors.rpmfusion.org/"
-                "metalink?repo=nonfree-fedora-nvidia-driver-$releasever&arch=$basearch";
-
-            strAddLine(firstBootStr, {"sudo dnf config-manager --set-enabled " + ksRepoName});
-        } else if (stdRepo == "vscode") {
-            // source: https://code.visualstudio.com/docs/setup/linux
-            ksRepoName = "code";
-            ksBaseURL  = "https://packages.microsoft.com/yumrepos/vscode";
-
-            strAddLine(
-                firstBootStr,
-                {"sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc",
-                 "sudo sh -c 'echo -e \"[code]\\nname=Visual Studio "
-                 "Code\\nbaseurl=https://packages.microsoft.com/yumrepos/"
-                 "vscode\\nenabled=1\\ngpgcheck=1\\ngpgkey=https://packages.microsoft.com/keys/"
-                 "microsoft.asc\" > /etc/yum.repos.d/vscode.repo'",
-                 "dnf check-update",
-                 "sudo dnf install code -y"});
-        } else {
-            throw std::runtime_error("unknown standard repo");
-        }
-        strAddLine(ksStr, {buildKickstartRepo(ksRepoName, ksBaseURL, ksMetaLink)});
+        strAddLine(ksStr, {buildKickstartStandardtRepo(stdRepo)});
     }
 
     strAddNonEmptyLine(firstBootStr,

@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "magic_enum.hpp"
@@ -78,6 +79,26 @@ struct CustomRepo : public ConfigSectionBase {
 
     CustomRepo() : ConfigSectionBase{"custom_repos"} {}
 };
+
+/**
+ * @brief define a supported standard repo
+ *
+ *  used only for checking and building config,
+ *  standard repo is only stored by its name in
+ *  user config
+ */
+struct StandardRepo {
+    std::string fullRepoName;
+    std::string baseURL;
+    std::string metaURL;
+    std::string firstBootInstallScript;
+
+    StandardRepo(const std::string &fullRepoName,
+                 const std::string &baseURL,
+                 const std::string &metaURL,
+                 const std::string &firstBootInstallScript);
+};
+extern const std::unordered_map<std::string, StandardRepo> kStandardRepos;
 
 struct RepoConfig : public ConfigSectionBase {
     ConfigMember<std::vector<std::string>> standardRepos{"standard_repos"};

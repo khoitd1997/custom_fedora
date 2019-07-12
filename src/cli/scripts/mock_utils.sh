@@ -4,7 +4,7 @@
 current_script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source ${current_script_dir}/exit_code.sh
 
-mock_software_list=" lorax-lmc-novirt nano pykickstart git bash genisoimage squashfs-tools nano vim dnf-plugins-core dnf createrepo cpp bat "
+mock_build_tools=" lorax-lmc-novirt nano pykickstart git bash genisoimage squashfs-tools nano vim dnf-plugins-core dnf createrepo cpp bat curl jq ripgrep fedora-workstation-repositories findutils tee "
 env_base_dir="/builddir/"${os_name} # root directory of all build folder
 env_build_dir=${env_base_dir}/build # build directory once in mock env
 env_script_dir=${env_build_dir}/scripts # script directory once in mock env
@@ -19,7 +19,7 @@ clear_mock_env() {
 
 bootstrap_mock_env() {
     mock -r ${mock_cfg_path} --init
-    mock -r ${mock_cfg_path} --install ${mock_software_list}
+    mock -r ${mock_cfg_path} --install ${mock_build_tools}
 }
 
 prepare_mock_build() {

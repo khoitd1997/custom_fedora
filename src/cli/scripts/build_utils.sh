@@ -32,4 +32,7 @@ build_project_file_structure() {
     mkdir -p ${env_share_dir}
     mkdir -p ${env_user_supplied_dir}
     mkdir -p ${env_log_dir}
+    mkdir -p ${env_repo_dir}
+    rm -rf ${env_repo_dir}/*
+    cp -r /etc/yum.repos.d/* ${env_repo_dir}
 }

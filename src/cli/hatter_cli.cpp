@@ -29,12 +29,10 @@
 int main() {
     hatter::logger::init();
 
-    hatter::FullConfig currConfig;
-    const auto         hasError =
-        hatter::getFullConfig(hatter::build_variable::kParentConfigPath, currConfig);
-
     const hatter::build_variable::CLIBuildVariable currBuildVar;
-    hatter::build_variable::CLIBuildVariable       prevBuildVar;
+    hatter::FullConfig                             currConfig;
+    const auto                                     hasError =
+        hatter::getFullConfig(hatter::build_variable::kParentConfigPath, currBuildVar, currConfig);
 
     // TODO(kd): Remove after test
     (void)(hasError);
@@ -44,10 +42,13 @@ int main() {
     // }
 
     if (!currBuildVar.parserMode) {
-        hatter::FullConfig prevConfig;
+        hatter::FullConfig                       prevConfig;
+        hatter::build_variable::CLIBuildVariable prevBuildVar;
+
         if (!hatter::build_variable::kIsFirstBuild) {
             prevBuildVar = hatter::build_variable::CLIBuildVariable{"prev"};
-            hatter::getFullConfig(hatter::build_variable::kPrevParentConfigPath, prevConfig, true);
+            hatter::getFullConfig(
+                hatter::build_variable::kPrevParentConfigPath, currBuildVar, prevConfig, true);
             // TODO(kd): Enable after test
             //         assert(
             // !hatter::getFullConfig(hatter::build_variable::kPrevParentConfigPath, prevConfig));

@@ -9,6 +9,15 @@
 #include <unordered_set>
 
 namespace hatter {
+int ripgrepSearchFile(const std::string&           searchTarget,
+                      const std::filesystem::path& targetFilePath,
+                      const bool                   useRegex = true);
+
+int ripgrepSearchCmdOutput(const std::string& searchTarget,
+                           const std::string& cmd,
+                           std::string&       errorOutput,
+                           const bool         useRegex = true);
+
 [[nodiscard]] std::string getCurrentTime(const std::string& fmt);
 
 [[nodiscard]] std::string buildCommentBlock(const std::vector<std::string>& lines,
@@ -22,10 +31,14 @@ void writeFileWithHeader(const std::string&           content,
                          const std::string&           additionalComment = "");
 void appendFile(const std::string& s, const std::filesystem::path& path);
 [[nodiscard]] std::string readFile(const std::filesystem::path& path);
+[[nodiscard]] bool        strInFile(const std::string& str, const std::filesystem::path& path);
+void                      addOrReplaceLineFile(const std::string&           searchHint,
+                                               const std::string&           finalLine,
+                                               const std::filesystem::path& path);
 
-void replacePattern(std::vector<std::string>& lines,
-                    const std::string&        regexPattern,
-                    const std::string&        replaceStr);
+std::string replacePattern(const std::string& str,
+                           const std::string& regexPattern,
+                           const std::string& replaceStr);
 
 [[nodiscard]] std::string getExeDir(void);
 

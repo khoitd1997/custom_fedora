@@ -52,7 +52,8 @@ copr_repos=["khoitd1997/toml11", "khoitd1997/toml11","khoitd1997/toml11"]
     install=[
         "moreutils",
         "ripgrep",
-        "gnome-terminal"
+        "gnome-terminal",
+        "toml11"
     ]
     # install=2
 

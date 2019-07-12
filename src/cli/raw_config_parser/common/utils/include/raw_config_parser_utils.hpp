@@ -6,15 +6,6 @@
 #include "hatter_config_type.hpp"
 
 namespace hatter {
-int ripgrepSearchFile(const std::string& searchTarget,
-                      const std::string& targetFilePath,
-                      const bool         useRegex = true);
-
-int ripgrepSearchCmdOutput(const std::string& searchTarget,
-                           const std::string& cmd,
-                           std::string&       errorOutput,
-                           const bool         useRegex = true);
-
 template <typename T>
 void mergeAndCheckConflict(TopSectionErrorReport& errorReport,
                            ConfigMember<T>&       dest,

@@ -9,11 +9,6 @@
 
 namespace hatter {
 namespace config_builder {
-// std::string                         buildIncludeKickstart(const DistroInfo& distroInfo);
-// std::string                         buildPackageList(const PackageConfig& pkgConfig);
-// std::string                         buildMisc(const MiscConfig& miscConfig);
-// std::pair<std::string, std::string> buildRepoList(const RepoConfig& repoConfig);
-
 void build(const FullConfig&                       currConfig,
            const FullConfig&                       prevConfig,
            const build_variable::CLIBuildVariable& currBuildVar,
