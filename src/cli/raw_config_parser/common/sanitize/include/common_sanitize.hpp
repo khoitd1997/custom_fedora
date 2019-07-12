@@ -7,6 +7,7 @@
 
 #include "raw_config_parser_utils.hpp"
 #include "toml11/toml.hpp"
+#include "utils.hpp"
 
 #include "error_type.hpp"
 
@@ -52,7 +53,7 @@ std::shared_ptr<InvalidValueError> checkInvalidValue(const std::string&         
     std::shared_ptr<InvalidValueError> error = nullptr;
     for (const auto& value : values) {
         if (value.empty()) { continue; }
-        const auto match = ripgrepSearchFile(value, filePath.string(), useRegex);
+        const auto match = ripgrepSearchFile(value, filePath, useRegex);
 
         if (match < 1) {
             if (!error) { error = std::make_shared<InvalidValueError>(typeName, extraMessage); }

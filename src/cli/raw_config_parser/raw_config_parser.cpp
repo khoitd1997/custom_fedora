@@ -7,9 +7,9 @@
 
 #include "logger.hpp"
 
-#include "build_variable.hpp"
 #include "error_report_file_type.hpp"
 #include "toml_utils.hpp"
+#include "utils.hpp"
 
 #include "build_process_handler.hpp"
 #include "distro_info_handler.hpp"
@@ -69,7 +69,6 @@ bool depthFirstSearch(const std::filesystem::path& filePath,
             mergeReport.add(mergeFunc(fullConfig, childConf));
 
             fullReport.add(std::make_shared<FileMergeErrorReport>(mergeReport));
-        } else {
         }
     }
 
@@ -107,10 +106,42 @@ bool getFile(const std::filesystem::path& filePath,
     return depthFirstSearch(filePath, parentFileName, fullConfig, fullReport, parseFunc, mergeFunc);
 }
 
-bool getRepo(const std::filesystem::path& filePath,
-             const std::string&           parentFileName,
-             FullConfig&                  fullConfig,
-             FullErrorReport&             fullReport) {
+void bootstrapPackage(const build_variable::CLIBuildVariable& currBuildVar,
+                      const std::vector<std::string>&         standardRepos,
+                      const std::vector<std::string>&         coprRepos) {
+    addOrReplaceLineFile(
+        "reposdir", "reposdir=" + build_variable::kRepoDir.string(), build_variable::kRepoConfPath);
+    addOrReplaceLineFile("logfile",
+                         "logfile=" + build_variable::kRepoLogPath.string(),
+                         build_variable::kRepoConfPath);
+
+    for (const auto& pair : kStandardRepos) {
+        execCommand("dnf config-manager --set-disabled " + pair.second.fullRepoName);
+    }
+    for (const auto& repo : standardRepos) {
+        if (execCommand("dnf config-manager --set-enabled " +
+                        kStandardRepos.at(repo).fullRepoName)) {
+            throw std::runtime_error("error installing standard repo " + repo);
+        }
+    }
+
+    for (const auto& repo : coprRepos) { execCommand("dnf copr enable " + repo + " -y -q"); }
+
+    logger::info("building avaiable package list");
+    execCommand("dnf list all --releasever=" + std::to_string(currBuildVar.releasever) +
+                " --forcearch=x86_64 | tee " + build_variable::kPackageListPath.string());
+
+    logger::info("building avaiable group list");
+    execCommand("dnf group list --releasever=" + std::to_string(currBuildVar.releasever) +
+                " --forcearch=x86_64 --hidden -v | tee " + build_variable::kGroupListPath.string());
+}
+
+bool getRepo(const std::filesystem::path&            filePath,
+             const std::string&                      parentFileName,
+             const build_variable::CLIBuildVariable& currBuildVar,
+             FullConfig&                             fullConfig,
+             FullErrorReport&                        fullReport,
+             const bool                              isGetPrev) {
     auto parseFunc = ParseFunc{
         [](toml::table& rawConfig, const std::filesystem::path& filePath, FullConfig& fullConfig) {
             (void)(filePath);
@@ -123,21 +154,31 @@ bool getRepo(const std::filesystem::path& filePath,
     }};
     const auto failed =
         depthFirstSearch(filePath, parentFileName, fullConfig, fullReport, parseFunc, mergeFunc);
-    // TODO(kd): Add repo command here
+    if (failed || isGetPrev) { return failed; }
+
+    bootstrapPackage(currBuildVar,
+                     fullConfig.repoConfig.standardRepos.value,
+                     fullConfig.repoConfig.coprRepos.value);
+
     return failed;
 }
-
 }  // namespace
 
-bool getFullConfig(const std::filesystem::path& filePath,
-                   FullConfig&                  fullConfig,
-                   const bool                   suppressOuput) {
+bool getFullConfig(const std::filesystem::path&            filePath,
+                   const build_variable::CLIBuildVariable& currBuildVar,
+                   FullConfig&                             fullConfig,
+                   const bool                              isGetPrev) {
     FullErrorReport fullReport;
 
-    const auto getRepoFailed = getRepo(filePath, "", fullConfig, fullReport);
+    if (!isGetPrev) { logger::info("parsing repo config"); }
+    const auto getRepoFailed =
+        getRepo(filePath, "", currBuildVar, fullConfig, fullReport, isGetPrev);
+
+    if (!isGetPrev) { logger::info("parsing full config"); }
     getFile(filePath, "", fullConfig, fullReport, getRepoFailed);
+
     if (fullReport) {
-        if (!suppressOuput) {
+        if (!isGetPrev) {
             // std::cout << "Printing out error" << std::endl;
             fullReport.what();
         }

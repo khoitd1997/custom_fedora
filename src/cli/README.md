@@ -58,6 +58,7 @@ For example building an OS called ```fedora_kd```, the main config file will be 
             - fedora_kd.toml
             - all user input files
         - repos/
+            - dnf.conf: conf file for dnf
             - all repo files for this os
         - package_list.txt: all possible packages
         - group_list.txt: all possible groups

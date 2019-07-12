@@ -7,10 +7,6 @@
 
 namespace hatter {
 namespace repo_handler {
-namespace {
-const std::vector<std::string> supportedStandardRepos = {"google-chrome", "nvidia", "vscode"};
-}
-
 std::string StandardRepoNotSupportedError::what() const {
     const auto repoListStr = formatter::formatErrorText(strJoin(repos));
 
@@ -21,7 +17,8 @@ std::shared_ptr<StandardRepoNotSupportedError> checkStandardRepo(const RepoConfi
     std::shared_ptr<StandardRepoNotSupportedError> error = nullptr;
 
     for (const auto& standardRepo : repoConf.standardRepos.value) {
-        if (!inVector(standardRepo, supportedStandardRepos)) {
+        auto it = kStandardRepos.find(standardRepo);
+        if (kStandardRepos.end() == it) {
             if (!error) { error = std::make_shared<StandardRepoNotSupportedError>(); }
             error->repos.push_back(standardRepo);
         }

@@ -1,7 +1,6 @@
 #include "common_sanitize.hpp"
 
 #include "formatter.hpp"
-#include "utils.hpp"
 
 namespace hatter {
 std::string UnknownValueError::what() const {
