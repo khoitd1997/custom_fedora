@@ -5,6 +5,7 @@
 
 #include <spdlog/logger.h>
 #include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/ostream_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
@@ -19,11 +20,12 @@
 namespace hatter {
 namespace logger {
 static const auto logPattern = "%^%-9l%$ %v";
-void              init() {
+
+void init() {
     std::vector<spdlog::sink_ptr> sinks;
 
     auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-    consoleSink->set_level(spdlog::level::warn);
+    consoleSink->set_level(spdlog::level::debug);
     consoleSink->set_pattern(logPattern);
     sinks.push_back(consoleSink);
 
@@ -40,7 +42,13 @@ void              init() {
 
     spdlog::info("hatter log initialized");
 }
-void info(const std::string& message) { spdlog::info(message); }
+void info(const std::string& message, const bool isStartAnimation) {
+    spdlog::info(message);
+    if (isStartAnimation) {
+        std::cout << "\033[A"
+                  << "\33[" + std::to_string(message.length() + 11) + "C" << std::flush;
+    }
+}
 void warn(const std::string& message) { spdlog::warn(message); }
 
 void error(const std::string& message) { spdlog::error(message); }

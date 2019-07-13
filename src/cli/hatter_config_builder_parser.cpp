@@ -9,6 +9,8 @@
  *
  */
 
+#include <execinfo.h>
+
 #include <cassert>
 #include <cstdlib>
 #include <filesystem>
@@ -17,8 +19,6 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
-
-#include <execinfo.h>
 
 #include "toml11/toml.hpp"
 
@@ -30,7 +30,7 @@
 #include "utils.hpp"
 
 void crashHandler() {
-    const size_t traceBufSize = 30;
+    const size_t traceBufSize = 50;
     void*        traceElems[traceBufSize];
     const auto   traceCnt   = backtrace(traceElems, traceBufSize);
     auto         stackTrace = backtrace_symbols(traceElems, traceCnt);
@@ -45,11 +45,24 @@ void crashHandler() {
 
 int main() {
     hatter::logger::init();
-    std::set_terminate(crashHandler);
+    // std::set_terminate(crashHandler);
 
+    hatter::FullConfig                             prevConfig;
     const hatter::build_variable::CLIBuildVariable currBuildVar;
-    hatter::FullConfig                             currConfig;
-    const auto                                     hasError =
+    hatter::build_variable::CLIBuildVariable       prevBuildVar;
+
+    if (!hatter::build_variable::kIsFirstBuild) {
+        prevBuildVar = hatter::build_variable::CLIBuildVariable{"prev"};
+        hatter::getFullConfig(
+            hatter::build_variable::kPrevParentConfigPath, currBuildVar, prevConfig, true);
+        // TODO(kd): Enable after test
+        //         assert(
+        // !hatter::getFullConfig(hatter::build_variable::kPrevParentConfigPath, prevConfig));
+    }
+
+    hatter::FullConfig currConfig;
+    // TODO(kd): Rebuild package only when appropriate things change
+    const auto hasError =
         hatter::getFullConfig(hatter::build_variable::kParentConfigPath, currBuildVar, currConfig);
 
     // TODO(kd): Remove after test
@@ -60,17 +73,6 @@ int main() {
     // }
 
     if (!currBuildVar.parserMode) {
-        hatter::FullConfig                       prevConfig;
-        hatter::build_variable::CLIBuildVariable prevBuildVar;
-
-        if (!hatter::build_variable::kIsFirstBuild) {
-            prevBuildVar = hatter::build_variable::CLIBuildVariable{"prev"};
-            hatter::getFullConfig(
-                hatter::build_variable::kPrevParentConfigPath, currBuildVar, prevConfig, true);
-            // TODO(kd): Enable after test
-            //         assert(
-            // !hatter::getFullConfig(hatter::build_variable::kPrevParentConfigPath, prevConfig));
-        }
         hatter::config_builder::build(currConfig, prevConfig, currBuildVar, prevBuildVar);
     }
 
