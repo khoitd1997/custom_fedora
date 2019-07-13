@@ -278,13 +278,13 @@ void buildVolatileLayer(const FullConfig& currConfig,
                        {buildUserFileTransferCommand(currConfig.imageInfo.userFiles.value),
                         buildUserScript(currConfig.imageInfo.postBuildNoRootScripts.value)});
 
-    strAddNonEmptyLine(
-        kickstartFile,
-        {buildKickstartSection(
-             "post --erroronfail --log=" + build_variable::kKickstartLogDir.string(),
-             postBuildScript),
-         buildKickstartSection("post --nochroot --log=" + build_variable::kKickstartLogDir.string(),
-                               postBuildNoRootScript)});
+    strAddNonEmptyLine(kickstartFile,
+                       {buildKickstartSection("post --erroronfail --log=" +
+                                                  build_variable::kKickstartLogPath.string(),
+                                              postBuildScript),
+                        buildKickstartSection(
+                            "post --nochroot --log=" + build_variable::kKickstartLogPath.string(),
+                            postBuildNoRootScript)});
     writeFileWithHeader(kickstartFile, build_variable::kMainKickstartPath);
 
     writeFileWithHeader(firstLoginScript, build_variable::kFirstLoginScriptPath);

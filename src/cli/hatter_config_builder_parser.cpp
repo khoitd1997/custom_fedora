@@ -1,5 +1,5 @@
 /**
- * @file hatter_cli.cpp
+ * @file hatter_config_builder_parser.cpp
  * @author Khoi Trinh
  * @brief
  * @version 0.1
@@ -14,8 +14,11 @@
 #include <filesystem>
 #include <iostream>
 #include <regex>
+#include <sstream>
 #include <stdexcept>
 #include <string>
+
+#include <execinfo.h>
 
 #include "toml11/toml.hpp"
 
@@ -26,8 +29,23 @@
 #include "raw_config_parser.hpp"
 #include "utils.hpp"
 
+void crashHandler() {
+    const size_t traceBufSize = 30;
+    void*        traceElems[traceBufSize];
+    const auto   traceCnt   = backtrace(traceElems, traceBufSize);
+    auto         stackTrace = backtrace_symbols(traceElems, traceCnt);
+
+    std::stringstream ss;
+    for (auto i = 0; i < traceCnt; ++i) { ss << stackTrace[i] << std::endl; }
+    hatter::logger::error(ss.str());
+
+    free(stackTrace);
+    exit(1);
+}
+
 int main() {
     hatter::logger::init();
+    std::set_terminate(crashHandler);
 
     const hatter::build_variable::CLIBuildVariable currBuildVar;
     hatter::FullConfig                             currConfig;

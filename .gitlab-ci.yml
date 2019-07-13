@@ -13,7 +13,7 @@ build_hatter:
     - sh src/cli/build.sh
   artifacts:
     paths:
-      - src/cli/hatter_cli
+      - src/cli/hatter_config_builder_parser
 
 deploy_hatter:
   stage: deploy

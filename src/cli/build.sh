@@ -60,7 +60,7 @@ EOF
     cp -r ${hatter_src_dir}/example/* ${env_user_supplied_dir}
     
     # export GTEST_FILTER="CommonSanitizeTest_*" # MUST SPECIFY HERE BEFORE THE TESTS ARE DISCOVERED
-    # scan-build cmake -G Ninja .. && scan-build ninja && ./bin/hatter_cli ./bin/settings.toml
+    # scan-build cmake -G Ninja .. && scan-build ninja && ./bin/hatter_config_builder_parser ./bin/settings.toml
     cd ${cmake_build_dir}
     cmake ${hatter_src_dir} -DRUN_TEST=ON && cmake --build .
     
@@ -72,7 +72,7 @@ EOF
     if [ -f "${env_prev_var_path}" ]; then
         source ${env_prev_var_path}
     fi
-    ${test_build_root_dir}/hatter_cli
+    ${test_build_root_dir}/hatter_config_builder_parser
     if [ $? -ne 0 ]; then
         echo "toml parser failed"
     else
@@ -83,6 +83,6 @@ EOF
     
     # gitlab ci has bug with artifacts being in absolute path
     if [ ! -z "${CI}" ]; then
-        cp ${test_build_root_dir}/hatter_cli ${hatter_src_dir}
+        cp ${test_build_root_dir}/hatter_config_builder_parser ${hatter_src_dir}
     fi
 fi

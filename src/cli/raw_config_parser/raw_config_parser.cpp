@@ -2,8 +2,11 @@
 
 #include <filesystem>
 #include <functional>
+#include <future>
 #include <iostream>
 #include <memory>
+
+#include <unistd.h>
 
 #include "logger.hpp"
 
@@ -106,6 +109,11 @@ bool getFile(const std::filesystem::path& filePath,
     return depthFirstSearch(filePath, parentFileName, fullConfig, fullReport, parseFunc, mergeFunc);
 }
 
+template <typename R>
+bool isFutureReady(std::future<R> const& f) {
+    return f.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
+}
+
 void bootstrapPackage(const build_variable::CLIBuildVariable& currBuildVar,
                       const std::vector<std::string>&         standardRepos,
                       const std::vector<std::string>&         coprRepos) {
@@ -127,13 +135,40 @@ void bootstrapPackage(const build_variable::CLIBuildVariable& currBuildVar,
 
     for (const auto& repo : coprRepos) { execCommand("dnf copr enable " + repo + " -y -q"); }
 
-    logger::info("building avaiable package list");
-    execCommand("dnf list all --releasever=" + std::to_string(currBuildVar.releasever) +
-                " --forcearch=x86_64 | tee " + build_variable::kPackageListPath.string());
+    auto fut = std::async(std::launch::async, [&currBuildVar] {
+        sleep(10);
+        // return execCommand("dnf list all --releasever=" + std::to_string(currBuildVar.releasever)
+        // +
+        //                    " --forcearch=x86_64 | tee " +
+        //                    build_variable::kPackageListPath.string());
+    });
 
-    logger::info("building avaiable group list");
-    execCommand("dnf group list --releasever=" + std::to_string(currBuildVar.releasever) +
-                " --forcearch=x86_64 --hidden -v | tee " + build_variable::kGroupListPath.string());
+    // const auto period = 90000;
+    // std::cout << "doing stuffs " << std::flush;
+    // std::cout << '-' << std::flush;
+    // while (!isFutureReady(fut)) {
+    //     usleep(period);
+    //     std::cout << "\b\\" << std::flush;
+    //     usleep(period);
+    //     std::cout << "\b|" << std::flush;
+    //     usleep(period);
+    //     std::cout << "\b/" << std::flush;
+    //     usleep(period);
+    //     std::cout << "\b-" << std::flush;
+    // }
+    // std::cout << "\b\nfuture done" << std::flush;
+    fut.get();
+
+    (void)(currBuildVar);
+    // logger::info("building avaiable package list");
+    // execCommand("dnf list all --releasever=" + std::to_string(currBuildVar.releasever) +
+    // " --forcearch=x86_64 | tee " + build_variable::kPackageListPath.string());
+
+    // logger::info("building avaiable group list");
+    // execCommand("dnf group list --releasever=" +
+    // std::to_string(currBuildVar.releasever) +
+    //             " --forcearch=x86_64 --hidden -v | tee " +
+    //             build_variable::kGroupListPath.string());
 }
 
 bool getRepo(const std::filesystem::path&            filePath,

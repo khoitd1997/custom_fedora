@@ -14,7 +14,7 @@
                         "label": "CLI source code"
                     },
                     {
-                        "path": "src/cli/build/bin/hatter_cli",
+                        "path": "src/cli/build/bin/hatter_config_builder_parser",
                         "name": "hatter_exe",
                         "label": "Hatter executable"
                     }

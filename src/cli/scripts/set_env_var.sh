@@ -29,8 +29,9 @@ export env_post_build_script_path="${env_out_dir}/post_build.sh"
 export env_post_build_script_no_root_path="${env_out_dir}/post_build_no_root.sh"
 
 # log dir
-export env_kickstart_log_dir="/root${env_out_dir}/log" # used when specifying log in .ks file
 export env_log_dir="${env_out_dir}/log"
+export env_parser_log_path="${env_log_dir}/parser.log"
+export env_kickstart_log_path="/root${env_log_dir}/kickstart.log" # used when specifying log in .ks file
 
 export env_repo_dir="${env_build_dir}/repos"
 export env_repo_conf="/etc/dnf/dnf.conf"
