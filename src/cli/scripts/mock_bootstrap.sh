@@ -6,9 +6,10 @@ source /build_share/scripts/set_env_var.sh
 source ${env_script_dir}/misc_utils.sh
 
 # runtime tools
-dnf install -y -q curl findutils git jq ripgrep 
-                  fedora-workstation-repositories 
-                  dnf-plugins-core 
+dnf install -y -q curl findutils git jq ripgrep \
+                  fedora-workstation-repositories \
+                  dnf-plugins-core createrepo cpp \
+                  squashfs-tools nano vim
 
 print_info "cloning stock fedora-kickstart repo"
 git clone https://pagure.io/fedora-kickstarts.git ${env_stock_kickstart_dir}

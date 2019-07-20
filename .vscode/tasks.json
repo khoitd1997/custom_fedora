@@ -4,13 +4,24 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build",
+            "label": "build_mock",
             "type": "shell",
             "command": "${workspaceFolder}/src/cli/scripts/hatter.sh -i ${workspaceFolder}/src/cli/example/example_setting.toml -o ${workspaceFolder}/src/cli/scripts/test",
             "presentation": {
                 "showReuseMessage": false,
                 "clear": true
             },
+            "group": "build"
+        },
+        {
+            "label": "build_docker",
+            "type": "shell",
+            "command": "./src/cli/build.sh",
+            "presentation": {
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "problemMatcher": [],
             "group": {
                 "kind": "build",
                 "isDefault": true
