@@ -11,7 +11,7 @@ ${base_dnf_cmd} ninja-build git cmake gcc-c++ clang
 
 # other tools
 ${base_dnf_cmd} cppcheck gtest-devel gtest valgrind
-pip3 install cpplint -q
+pip3 install cpplint
 
 # publishing tools
 ${base_dnf_cmd} npm
