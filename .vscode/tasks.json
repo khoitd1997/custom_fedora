@@ -6,7 +6,7 @@
         {
             "label": "build",
             "type": "shell",
-            "command": "./src/cli/build.sh",
+            "command": "${workspaceFolder}/src/cli/scripts/hatter.sh -i ${workspaceFolder}/src/cli/example/example_setting.toml -o ${workspaceFolder}/src/cli/scripts/test",
             "presentation": {
                 "showReuseMessage": false,
                 "clear": true
