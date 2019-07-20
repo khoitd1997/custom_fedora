@@ -1,18 +1,10 @@
 #!/bin/bash
-# launch at the initial creation of mock env
+# used for installing runtime software for mock build env
 
-set -e
-source /build_share/scripts/set_env_var.sh
-source ${env_script_dir}/misc_utils.sh
-
-# runtime tools
 dnf install -y -q curl findutils git jq ripgrep \
                   fedora-workstation-repositories \
                   dnf-plugins-core createrepo cpp \
                   squashfs-tools nano vim
-
-print_info "cloning stock fedora-kickstart repo"
-git clone https://pagure.io/fedora-kickstarts.git ${env_stock_kickstart_dir}
 
 # install vscode repo
 print_info "installing vscode repo"
@@ -22,6 +14,3 @@ sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.micros
 # install rpmfusion
 print_info "installing rpmfusion"
 dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm -y -q
-
-print_info "refreshing dnf cache"
-dnf check-update -y -q
