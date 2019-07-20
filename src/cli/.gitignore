@@ -14,3 +14,4 @@ _deps
 cmake_build_dir/*
 .clang-tidy
 .rgignore
+.mock*

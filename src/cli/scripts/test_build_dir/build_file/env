@@ -1,8 +1,0 @@
-env_input_config=test.toml
-env_input_dir=/home/kd/hatter/src/cli/scripts/test
-
-env_releasever=30
-env_arch=x86_64
-
-env_clear_cache=true
-env_parser_mode=true
