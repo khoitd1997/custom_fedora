@@ -66,8 +66,9 @@ extern const std::filesystem::path kPostBuildScriptNoRootPath =
     getPathEnv("env_post_build_script_no_root_path");
 
 // log dir
-extern const std::filesystem::path kKickstartLogDir = getPathEnv("env_kickstart_log_dir");
-extern const std::filesystem::path kLogDir          = getPathEnv("env_log_dir");
+extern const std::filesystem::path kLogDir           = getPathEnv("env_log_dir");
+extern const std::filesystem::path kParserLogPath    = getPathEnv("env_parser_log_path");
+extern const std::filesystem::path kKickstartLogPath = getPathEnv("env_kickstart_log_path");
 
 extern const std::filesystem::path kUserSuppliedDir = getPathEnv("env_user_supplied_dir");
 extern const std::filesystem::path kConfigBuilderEnvVar =

@@ -10,6 +10,7 @@
         "*.ks": "shellscript",
         "*.rasi": "css",
         "*.in": "cmake",
+        "conanfile.txt": "toml",
         "array": "cpp",
         "atomic": "cpp",
         "bit": "cpp",
@@ -71,7 +72,8 @@
         "variant": "cpp",
         "cinttypes": "cpp",
         "forward_list": "cpp",
-        "list": "cpp"
+        "list": "cpp",
+        "future": "cpp"
     },
     "C_Cpp.default.cppStandard": "c++17",
     "editor.formatOnSave": true

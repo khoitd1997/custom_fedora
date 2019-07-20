@@ -252,6 +252,9 @@ void appendUniqueVector(std::vector<std::filesystem::path>&       dest,
         }
         dest.push_back(target);
     }
+    auto newEnd = std::remove_if(
+        std::begin(dest), std::end(dest), [](const auto& path) { return path.string().empty(); });
+    dest.erase(newEnd, std::end(dest));
 }
 
 int execCommand(const std::string& cmd) {

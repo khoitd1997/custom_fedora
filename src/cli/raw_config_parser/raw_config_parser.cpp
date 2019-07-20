@@ -1,7 +1,10 @@
 #include "raw_config_parser.hpp"
 
+#include <unistd.h>
+
 #include <filesystem>
 #include <functional>
+#include <future>
 #include <iostream>
 #include <memory>
 
@@ -106,6 +109,30 @@ bool getFile(const std::filesystem::path& filePath,
     return depthFirstSearch(filePath, parentFileName, fullConfig, fullReport, parseFunc, mergeFunc);
 }
 
+template <typename R>
+bool isFutureReady(std::future<R> const& f) {
+    return f.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
+}
+
+template <typename R>
+void waitAnimation(std::future<R>& fut, const std::string& message) {
+    const auto period = 95000;
+    logger::info(message, true);
+    std::cout << '-' << std::flush;
+    while (!isFutureReady(fut)) {
+        usleep(period);
+        std::cout << "\b\\" << std::flush;
+        usleep(period);
+        std::cout << "\b|" << std::flush;
+        usleep(period);
+        std::cout << "\b/" << std::flush;
+        usleep(period);
+        std::cout << "\b-" << std::flush;
+    }
+    std::cout << "\b\n" << std::flush;
+    fut.get();
+}
+
 void bootstrapPackage(const build_variable::CLIBuildVariable& currBuildVar,
                       const std::vector<std::string>&         standardRepos,
                       const std::vector<std::string>&         coprRepos) {
@@ -127,13 +154,19 @@ void bootstrapPackage(const build_variable::CLIBuildVariable& currBuildVar,
 
     for (const auto& repo : coprRepos) { execCommand("dnf copr enable " + repo + " -y -q"); }
 
-    logger::info("building avaiable package list");
-    execCommand("dnf list all --releasever=" + std::to_string(currBuildVar.releasever) +
-                " --forcearch=x86_64 | tee " + build_variable::kPackageListPath.string());
+    auto packageFut = std::async(std::launch::async, [&currBuildVar] {
+        return execCommand("dnf list all --releasever=" + std::to_string(currBuildVar.releasever) +
+                           " --forcearch=x86_64 | tee " +
+                           build_variable::kPackageListPath.string());
+    });
+    waitAnimation(packageFut, "building available package list");
 
-    logger::info("building avaiable group list");
-    execCommand("dnf group list --releasever=" + std::to_string(currBuildVar.releasever) +
-                " --forcearch=x86_64 --hidden -v | tee " + build_variable::kGroupListPath.string());
+    auto groupFut = std::async(std::launch::async, [&currBuildVar] {
+        return execCommand(
+            "dnf group list --releasever=" + std::to_string(currBuildVar.releasever) +
+            " --forcearch=x86_64 --hidden -v | tee " + build_variable::kGroupListPath.string());
+    });
+    waitAnimation(groupFut, "building avaiable group list");
 }
 
 bool getRepo(const std::filesystem::path&            filePath,

@@ -5,11 +5,12 @@ include(FetchContent)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-FetchContent_Declare(
-  util_cmake_content
-  GIT_REPOSITORY https://github.com/khoitd1997/util_cmake_modules.git
-  GIT_TAG origin/master)
-FetchContent_MakeAvailable(util_cmake_content)
+fetchcontent_declare(util_cmake_content
+                     GIT_REPOSITORY
+                     https://github.com/khoitd1997/util_cmake_modules.git
+                     GIT_TAG
+                     origin/master)
+fetchcontent_makeavailable(util_cmake_content)
 util_misc_init()
 
 add_subdirectory(thirdparty)
@@ -34,8 +35,9 @@ add_subdirectory(config_builder)
 add_subdirectory(raw_config_parser)
 add_subdirectory(config_decoder)
 
-add_executable(hatter_cli ${PROJECT_SOURCES} hatter_cli.cpp)
-target_link_libraries(hatter_cli
+add_executable(hatter_config_builder_parser ${PROJECT_SOURCES}
+               hatter_config_builder_parser.cpp)
+target_link_libraries(hatter_config_builder_parser
                       PRIVATE toml11
                               utils
                               build_variable

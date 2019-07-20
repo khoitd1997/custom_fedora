@@ -42,8 +42,9 @@ extern const std::filesystem::path kPostBuildScriptPath;
 extern const std::filesystem::path kPostBuildScriptNoRootPath;
 
 // log dir
-extern const std::filesystem::path kKickstartLogDir;
 extern const std::filesystem::path kLogDir;
+extern const std::filesystem::path kParserLogPath;
+extern const std::filesystem::path kKickstartLogPath;
 
 extern const std::filesystem::path kUserSuppliedDir;
 extern const std::filesystem::path kPrevParentConfigPath;

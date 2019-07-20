@@ -69,6 +69,8 @@ For example building an OS called ```fedora_kd```, the main config file will be 
         - base.iso
       - out/
         - logs/
+          - parser.log
+          - kickstart.log
         - first_login.sh
         - post_build.sh
         - post_build_no_root.sh
