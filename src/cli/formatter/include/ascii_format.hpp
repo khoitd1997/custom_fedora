@@ -13,6 +13,7 @@ static const std::string kReset     = "\033[0m";
 static const std::string kBlue      = "\033[38;5;33m";
 static const std::string kLightBlue = "\033[38;5;33m";
 
+static const std::string kDefaultGreen  = "\033[38;5;2m";
 static const std::string kMidGreen      = "\033[38;5;084m";
 static const std::string kLightMidGreen = "\033[38;5;156m";
 
@@ -25,6 +26,8 @@ static const std::string kLightCyan = "\033[38;5;123m";
 
 static const std::string kYellow     = "\033[38;5;226m";
 static const std::string kDarkYellow = "\033[38;5;220m";
+
+static const std::string kDefaultRed = "\033[38;5;9m";
 
 static const std::string kGrey = "\033[38;5;246m";
 

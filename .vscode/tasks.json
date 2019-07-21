@@ -11,7 +11,10 @@
                 "showReuseMessage": false,
                 "clear": true
             },
-            "group": "build"
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         },
         {
             "label": "build_docker",
@@ -22,10 +25,7 @@
                 "clear": true
             },
             "problemMatcher": [],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
+            "group": "build"
         },
         {
             "label": "rebuild",

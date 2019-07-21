@@ -1,11 +1,12 @@
 #!/bin/bash
 # used for installing runtime software for mock build env
+set -e
 base_dnf_cmd="dnf install -y -q"
 
 ${base_dnf_cmd} curl findutils git jq ripgrep \
-                  fedora-workstation-repositories \
-                  dnf-plugins-core createrepo cpp \
-                  squashfs-tools nano vim
+fedora-workstation-repositories \
+dnf-plugins-core createrepo cpp \
+squashfs-tools nano vim
 
 # install vscode repo
 rpm --import https://packages.microsoft.com/keys/microsoft.asc

@@ -5,7 +5,8 @@ include_files=["child_setting_1.toml", "child_path/child_setting_2.toml"]
 # include_files=["child_setting_1.toml"]
 
 [distro_info]
-base_kickstart_tag="0.23.1" 
+# can be a specific tag of the fedora-kickstart repo or "latest"
+base_kickstart_tag="latest"
 base_spin="xfce"
 
 # scripts appended right first(lowest priority)

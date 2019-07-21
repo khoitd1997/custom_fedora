@@ -7,9 +7,11 @@ source /build_share/scripts/set_env_var.sh
 source ${env_script_dir}/misc_utils.sh
 
 # runtime tools
+print_info "installing software tools"
 source ${current_script_dir}/mock_software_install.sh
 
 print_info "cloning stock fedora-kickstart repo"
+rm -rf ${env_stock_kickstart_dir}
 git clone https://pagure.io/fedora-kickstarts.git ${env_stock_kickstart_dir}
 
 print_info "refreshing dnf cache"

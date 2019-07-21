@@ -25,6 +25,7 @@ export env_user_file_dest="/mnt/sysimage/usr/share/hatter_user_file"
 # shared dir
 export env_share_dir="/build_share"
 export env_script_dir="${env_share_dir}/scripts"
+export env_boostrap_script_dir="${env_script_dir}/bootstrap"
 export env_stock_kickstart_dir="${env_share_dir}/fedora-kickstarts"
 export env_asset_dir="${env_share_dir}/assets"
 export env_valid_keyboard_path="${env_asset_dir}/valid_keyboard.txt"
@@ -34,7 +35,8 @@ export env_valid_timezone_path="${env_asset_dir}/valid_timezone.txt"
 # intermediate build results
 export env_base_kickstart_path="${env_build_dir}/flat-base.ks"
 export env_base_image_name="base.iso"
-export env_base_image_path="${env_build_dir}/${env_base_image_name}"
+export env_base_image_dir="${env_build_dir}/base"
+export env_base_image_path="${env_base_image_dir}/${env_base_image_name}"
 
 # out
 export env_out_dir="${env_base_dir}/out"
