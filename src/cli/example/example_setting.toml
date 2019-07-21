@@ -1,54 +1,96 @@
+### GENERAL NOTES ###
+# when there are many values in lists for files like scripts or include files
 # order of inclusion from left to right, may override or raise error depending on the options
 # top level and then left to right high to low priority
-# NOTE: relative path will be relative to the main config file
+# ALL PATHS RELATIVE TO THE CURRENT CONFIG FILE
+# not all keys need to be specified
+
+# will be concacenated with or overrided by parent or raise errors if serious conflicts
 include_files=["child_setting_1.toml", "child_path/child_setting_2.toml"]
-# include_files=["child_setting_1.toml"]
 
 [distro_info]
-# can be a specific tag of the fedora-kickstart repo or "latest"
-base_kickstart_tag="latest"
-base_spin="xfce"
+    # can be a specific tag of the fedora-kickstart repo like "0.30.0" or "latest"
+    # check https://pagure.io/fedora-kickstarts for tag values
+    # default: "latest"
+    base_kickstart_tag="latest"
 
-# scripts appended right first(lowest priority)
+    # can be any value of "cinnamon", "xfce", "kde", "lxqt"
+    # this value will be used to determine the base iso image
+    base_spin="xfce"
+
 [image_info]
-partition_size=7000
-first_login_scripts=["example_first_login.sh"] # put in profile.d to launch at first login
-# post_build_scripts=["post_script.sh"] # post build script
-# post_build_script_no_chroots=["post_no_chroot_script.sh"] # post build script in no chroot
-user_files=["path_to_dir1", "path_to_dir2"] # will be put in /usr/share/hatter_user_file
+    # depending on how much software you have, around 8500 should be fine for general purposes
+    partition_size=8500
+
+    # put in profile.d to launch at first login
+    # default: empty
+    first_login_scripts=["example_first_login.sh"]
+
+    # post build scripts are concacenated then put into the %post section
+    # of the final fedora kickstart file
+    # consult pykickstart documentation for more info about these scripts
+    # default: empty
+    post_build_scripts=["post_script.sh"]
+
+    # similar to post build scripts but with the %post --nochroot section
+    # default: empty
+    post_build_script_no_chroots=["post_no_chroot_script.sh"]
+
+    # will be put in /usr/share/hatter_user_file
+    # useful for putting custom files like wallpaper, etc
+    # can be used with first_login_scripts to do setup
+    # default: empty
+    user_files=["user_file.txt"]
 
 [build_process]
-# custom_mock_script=["script.sh"] # custom script to run in mock env
-enable_custom_cache=true
+    # custom script to run in mock to modify build env
+    # default: empty
+    # custom_mock_script=["script.sh"]
+
+    # if set to true, most packages are downloaded once and cached in
+    # a local repos that will be used by the builder for build after
+    # default: true
+    enable_custom_cache=true
 
 # define list of repos
-# $releasever and $basearch will be replaced when doing build
+# repos will be available during kickstart build as well as
+# after iso installation on target machines
 [repo]
-standard_repos=["google-chrome", "nvidia", "vscode"]
-copr_repos=["khoitd1997/toml11", "khoitd1997/toml11","khoitd1997/toml11"]
+    # common popular repos for convenience
+    # can be any value of "google-chrome", "nvidia", "vscode"
+    # default: emtpy
+    standard_repos=["google-chrome", "nvidia", "vscode"]
 
-    # start defining custom repos here
+    # can be any copr repos in format of user_name/repo_name
+    # default: emtpy
+    copr_repos=["khoitd1997/toml11", "khoitd1997/toml11"]
+
+    # custom repos that don't fit into previous categories
+    # $releasever and $basearch will be replaced when doing build
+    # good idea to consult Fedora repo files in /etc/yum.repos.d
+    # either "metalink" or "baseurl" must be specified
+    # if "gpgcheck" is true then "gpgkey" needs to be specified
+    # default: emtpy
     [[repo.custom_repos]]
-    name="rpmfusion-free"
-    display_name="RPM Fusion for Fedora $releasever - Free" 
-    metalink="lsjfdasl"
-    baseurl="http://download1.rpmfusion.org/free/fedora/releases/$releasever/Everything/$basearch/os/"
-    gpgcheck=true
-    gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"
+        name="rpmfusion-free"
+        display_name="RPM Fusion for Fedora $releasever - Free" 
+        metalink="lsjfdasl"
+        baseurl="http://download1.rpmfusion.org/free/fedora/releases/$releasever/Everything/$basearch/os/"
+        gpgcheck=true
+        gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"
 
 
     [[repo.custom_repos]]
-    name="test"
-    # name=""
-    display_name="RPM Fusion for Fedora $releasever - Free" 
-    metalink="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-$releasever&arch=$basearch"
-    baseurl="http://download1.rpmfusion.org/free/fedora/releases/$releasever/Everything/$basearch/os/"
-    gpgcheck=true
-    gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"
+        name="test"
+        display_name="RPM Fusion for Fedora $releasever - Free" 
+        metalink="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-$releasever&arch=$basearch"
+        baseurl="http://download1.rpmfusion.org/free/fedora/releases/$releasever/Everything/$basearch/os/"
+        gpgcheck=true
+        gpgkey="file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"
 
-# define multiple types of packages to be included
 [package]
-# something="fsdkl"
+    # rpm packages to be installed/removed on the iso
+    # default: emtpy
     [package.rpm]
     install=[
         "moreutils",
@@ -56,13 +98,13 @@ copr_repos=["khoitd1997/toml11", "khoitd1997/toml11","khoitd1997/toml11"]
         "gnome-terminal",
         "toml11"
     ]
-    # install=2
 
     remove=[
         "gnome-calculator"
     ]
 
-
+    # rpm groups to be installed/removed on the iso
+    # default: emtpy
     [package.rpm_group]
     install=[
         "multimedia",
@@ -74,9 +116,14 @@ copr_repos=["khoitd1997/toml11", "khoitd1997/toml11","khoitd1997/toml11"]
     ]
 
 [misc]
-language="en_US.utf8" # locale -a
-# sdlfkas="lasd"
-# daksf="lasd"
-# keyboard="us" # localectl list-x11-keymap-layouts
-# keyboard="fdsasdfasdlkfasdlsdajls" # localectl list-x11-keymap-layouts
-timezone="US/Pacific" # cd /usr/share/zoneinfo/posix && find * -type f -or -type l
+    # possible values in locale -a
+    # default: "en_US.utf8"
+    language="en_US.utf8"
+
+    # possible values in localectl list-x11-keymap-layouts
+    # default: "us"
+    keyboard="us"
+
+    # possible values in cd /usr/share/zoneinfo/posix && find * -type f -or -type l
+    # default: "US/Pacific"
+    timezone="US/Pacific"
