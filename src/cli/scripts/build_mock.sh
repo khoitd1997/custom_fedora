@@ -30,7 +30,6 @@ syslog_ident=mock
 syslog_device=
 install_weak_deps=0
 best=1
-max_parallel_downloads=10
 clean_requirements_on_remove=True
 metadata_expire=-1
 module_platform_id=platform:f${env_releasever}
@@ -76,7 +75,7 @@ if [ "${env_parser_mode}" = false ]; then
 
         rm -rf ${env_base_image_dir} # TODO(kd): Remove after test
         livemedia-creator --ks ${env_base_kickstart_path} \
-                          --resultdir ${env_base_image_dir} \
+                          --resultdir /var/lmc \
                           --project ${env_os_name} \
                           --volid ${env_os_name} \
                           --iso-name ${env_base_image_name} \

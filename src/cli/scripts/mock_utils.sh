@@ -6,7 +6,7 @@ source ${current_script_dir}/exit_code.sh
 source ${current_script_dir}/set_env_var.sh "/builddir/${os_name}"
 
 # list of bare minimum tools needed to run the bootstrap script as well as core iso build tools
-mock_base_tools=" bash dnf lorax-lmc-novirt pykickstart genisoimage livecd-tools "
+mock_base_tools=" bash dnf lorax-lmc-novirt pykickstart genisoimage livecd-tools dnf-plugins-core nano "
 
 mock_base_cmd="mock -r ${build_working_dir}/mock.cfg -q"
 mock_execute_bash_cmd="${mock_base_cmd} --chroot"
@@ -20,19 +20,21 @@ clear_mock_env() {
 }
 
 bootstrap_mock_env() {
-    # ${mock_base_cmd} --init
+    set -e
+    ${mock_base_cmd} --init
     ${mock_base_cmd} --install ${mock_base_tools}
     
     # copy build scripts
     # TODO(kd): Reconsider path of executable
     ${mock_execute_bash_cmd} "mkdir -p ${env_asset_dir}"
-    ${mock_execute_bash_cmd} "mkdir -p ${env_script_dir}"
+    ${mock_execute_bash_cmd} "mkdir -p ${env_boostrap_script_dir}"
     ${mock_copyin_cmd} ${current_script_dir}/*.sh ${env_script_dir}
     ${mock_copyin_cmd} ${current_script_dir}/bootstrap/* ${env_boostrap_script_dir}
     ${mock_copyin_cmd} ${current_script_dir}/assets/* ${env_asset_dir}
     ${mock_copyin_cmd} ${current_script_dir}/assets/hatter_config_builder_parser ${env_share_dir}
     
     ${mock_execute_bash_cmd} ${env_script_dir}/bootstrap/mock_bootstrap.sh
+    set +e
 }
 
 prepare_mock_build() {

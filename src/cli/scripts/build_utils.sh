@@ -36,6 +36,7 @@ build_project_file_structure() {
     touch ${env_group_list_path}
     
     mkdir -p ${env_share_dir}
+    mkdir -p ${env_boostrap_script_dir}
     mkdir -p ${env_user_supplied_dir}
     mkdir -p ${env_log_dir}
     touch ${env_parser_log_path}

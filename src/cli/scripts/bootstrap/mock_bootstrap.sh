@@ -15,4 +15,7 @@ rm -rf ${env_stock_kickstart_dir}
 git clone https://pagure.io/fedora-kickstarts.git ${env_stock_kickstart_dir}
 
 print_info "refreshing dnf cache"
-dnf check-update -y -q
+set +e
+dnf check-update -y -q || true
+dnf check-update -y -q || true
+dnf check-update -y -q || true
