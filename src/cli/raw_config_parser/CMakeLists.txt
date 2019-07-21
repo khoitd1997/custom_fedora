@@ -23,6 +23,7 @@ target_link_libraries(raw_config_parser
                               raw_config_parser_image_info
                               raw_config_parser_distro_info
                               logger)
+target_link_options(raw_config_parser PUBLIC -pthread)
 
 target_include_directories(raw_config_parser
                            PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include

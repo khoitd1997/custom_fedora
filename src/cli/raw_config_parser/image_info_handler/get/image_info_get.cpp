@@ -4,14 +4,12 @@
 
 namespace hatter {
 namespace image_info_handler {
-extern const std::string kSectionName;
-
 TopSectionErrorReport get(toml::table&                 rawConfig,
                           const std::filesystem::path& fileDir,
                           ImageInfo&                   outConf,
                           toml::table&                 outRawConf,
                           bool&                        isEmpty) {
-    TopSectionErrorReport errorReport(kSectionName);
+    TopSectionErrorReport errorReport("image_info");
 
     errorReport.add({getBaseTable(rawConfig, outConf, outRawConf)});
     isEmpty = outRawConf.empty();

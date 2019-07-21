@@ -9,7 +9,6 @@
 #include "common_sanitize.hpp"
 #include "error_type.hpp"
 #include "hatter_config_type.hpp"
-#include "package_set_handler.hpp"
 
 namespace hatter {
 namespace package_set_handler {
