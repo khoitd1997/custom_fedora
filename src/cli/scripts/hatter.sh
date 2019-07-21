@@ -205,11 +205,22 @@ mkdir -p ${mock_build_file_dir}
 
 # generate mock cfg file
 base_cfg_name="fedora-${releasever}-${arch}.cfg"
-cp -v /etc/mock/${base_cfg_name} ${build_working_dir}/mock.cfg
+cp /etc/mock/${base_cfg_name} ${build_working_dir}/mock.cfg
+
+# get free loop device to mount in
+free_loop_device=$(sudo losetup -f)
+# TODO(kd): Handle loop device management
+touch /tmp/hatter_has_loop_device
+
 sed -i -r "/config_opts\['root'\]/c config_opts['root'] = 'hatter_mock'" ${build_working_dir}/mock.cfg
+
 cat >> ${build_working_dir}/mock.cfg << EOF
 config_opts['rpmbuild_networking'] = True
 config_opts['plugin_conf']['ccache_enable'] = True
+
+config_opts['plugin_conf']['bind_mount_enable'] = True
+config_opts['plugin_conf']['bind_mount_opts']['dirs'].append(('${free_loop_device}', '${free_loop_device}' ))
+# config_opts['plugin_conf']['bind_mount_opts']['dirs'].append(('/dev/loop12', '/dev/loop12' ))
 EOF
 
 if [ "${debug_mode}" = true ]; then
