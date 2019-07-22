@@ -14,6 +14,15 @@ print_info "cloning stock fedora-kickstart repo"
 rm -rf ${env_stock_kickstart_dir}
 git clone https://pagure.io/fedora-kickstarts.git ${env_stock_kickstart_dir}
 
+print_info "setting up shell prompt"
+
+cat > ~/.vimrc << EOF
+
+syntax on
+colorscheme delek
+
+EOF
+
 print_info "refreshing dnf cache"
 set +e
 dnf check-update -y -q || true
