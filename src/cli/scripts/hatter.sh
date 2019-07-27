@@ -6,6 +6,7 @@
 ## importing functions and variables
 script_dir="$(dirname "$(readlink -f "$0")")"
 source ${script_dir}/misc_utils.sh
+source ${script_dir}/build_utils.sh
 source ${script_dir}/exit_code.sh
 
 original_user=$(logname)
@@ -47,7 +48,6 @@ function all_exit_callback {
 # trap all_exit_callback EXIT
 
 set +e
-set -x
 #------------------------------------------------------------------------------
 
 # TODO(kd): Enable when done
@@ -59,11 +59,19 @@ while (( "$#" )); do
     case "$1" in
         -o|--outputdir)
             build_working_dir=$2
+            if [[ -z "${build_working_dir// }" ]]; then
+                print_error "output dir can't be empty"
+                exit 1
+            fi
             shift 2
         ;;
         
         -i|--inputconfig)
             input_config=$2
+            if [[ -z "${input_config// }" ]]; then
+                print_error "input config can't be empty"
+                exit 1
+            fi
             shift 2
         ;;
         
@@ -74,6 +82,11 @@ while (( "$#" )); do
         
         --clean)
             clean_build=true
+            shift 1
+        ;;
+
+        --debug)
+            debug_mode=true
             shift 1
         ;;
         
@@ -105,6 +118,7 @@ where:
     -p                                      only generate config file but doens't build, good for checking if config is correct and seeing internal of hatter
     --clean                                 clean all build files
     --clearcache                            clear all build cache
+    --debug                                 open a shell to the build env instead
     --help                                  show this help text
     --version                               show program version
 
@@ -146,10 +160,10 @@ else
     if [ ! -f ${input_config} ]; then
         print_error "Input config file doesn't exist"
         
-    elif [[ ! ${input_config} =~ \.toml$ ]]; then
+        elif [[ ! ${input_config} =~ \.toml$ ]]; then
         print_error "Invalid input config file"
-
-    else 
+        
+    else
         # get abs path of the top level toml config file as well as output dir
         input_dir=$(dirname "${input_config}")
         input_dir=$(cd ${input_dir} 2> /dev/null && pwd -P)
@@ -160,7 +174,7 @@ else
         if [ -z ${build_working_dir} ]; then
             build_working_dir=${PWD}/${input_config}
             generate_build_working_dir=true
-        elif [ ! -d ${build_working_dir} ]; then
+            elif [ ! -d ${build_working_dir} ]; then
             print_error "Output directory doesn't exist"
         fi
     fi
@@ -174,9 +188,9 @@ fi
 build_working_dir=$(cd ${build_working_dir} 2> /dev/null && pwd -P)
 
 if [ -d ${build_working_dir} ] && [ "${clean_build}" = true ] ; then
-    print_message "Clearing old mock env\n"
+    print_info "Clearing old mock env\n"
     clear_mock_env
-    print_message "Removing old build at ${build_working_dir}\n"
+    print_info "Removing old build at ${build_working_dir}\n"
     rm -r ${build_working_dir}
 fi
 
@@ -191,41 +205,52 @@ mkdir -p ${mock_build_file_dir}
 
 # generate mock cfg file
 base_cfg_name="fedora-${releasever}-${arch}.cfg"
-cp -v /etc/mock/${base_cfg_name} ${build_working_dir}/mock.cfg
+cp /etc/mock/${base_cfg_name} ${build_working_dir}/mock.cfg
+
+# get free loop device to mount in
+# TODO(kd): Remove this once the newest version of mock comes out
+curr_loop_num=$(sudo losetup -f | grep -Eo '[0-9]+$')
+free_loop_device1="/dev/loop${curr_loop_num}"
+let curr_loop_num+=1
+free_loop_device2="/dev/loop${curr_loop_num}"
+
 sed -i -r "/config_opts\['root'\]/c config_opts['root'] = 'hatter_mock'" ${build_working_dir}/mock.cfg
+
 cat >> ${build_working_dir}/mock.cfg << EOF
 config_opts['rpmbuild_networking'] = True
 config_opts['plugin_conf']['ccache_enable'] = True
+
+config_opts['plugin_conf']['bind_mount_enable'] = True
+config_opts['plugin_conf']['bind_mount_opts']['dirs'].append(('${free_loop_device1}', '${free_loop_device1}' ))
+config_opts['plugin_conf']['bind_mount_opts']['dirs'].append(('${free_loop_device2}', '${free_loop_device2}' ))
+config_opts['environment']['PS1'] = r'\[\033[38;5;14m\]\w\[$(tput sgr0)\]\[\033[38;5;15m\] \[$(tput sgr0)\]\[\033[38;5;9m\][\$?]\[$(tput sgr0)\] '
 EOF
+
+if [ "${debug_mode}" = true ]; then
+    mock -r ${build_working_dir}/mock.cfg --old-chroot --shell
+    exit 0
+fi 
 
 # generate env variable for build script inside mock
-os_name=${input_config##*.}
-cat > ${mock_build_file_dir}/env_var.sh << EOF
-export env_parent_config=${input_config}
-export env_os_name=${os_name}
+os_name="${input_config%.*}"
+build_env_var_file ${os_name} \
+                   ${releasever} \
+                   ${arch} \
+                   ${clear_cache} \
+                   ${parser_mode} \
+                   ${mock_build_file_dir}/env_var.sh
 
-export env_releasever=${releasever}
-export env_arch=${arch}
-
-export env_clear_cache=${clear_cache}
-export env_parser_mode=${parser_mode}
-EOF
-
-# source here once all variables have been set
-source ${mock_build_file_dir}/env_var.sh
+# start doing mock build
 source ${script_dir}/mock_utils.sh
-
-if [ ! -f ${build_working_dir}/.mock_bootstrapped_done ]; then
+# if [ ! -f ${build_working_dir}/.mock_bootstrapped_done ]; then
+    print_info "bootrapping build env"
     bootstrap_mock_env
-
+    
     touch ${build_working_dir}/.mock_bootstrapped_done
-fi
+# fi
 
+print_info "preparing build env"
 prepare_mock_build
 
+print_info "starting build"
 execute_mock_build
-
-# for debugging only
-# mock -r ${build_working_dir}/mock.cfg --old-chroot --shell
-
-# EOF

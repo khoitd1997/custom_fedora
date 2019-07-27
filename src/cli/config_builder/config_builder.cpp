@@ -245,7 +245,9 @@ void buildBaseLayer(const FullConfig&                       currConfig,
                     buildBaseKickstartName(currConfig.distroInfo.baseSpin.value),
                 "export env_base_kickstart_tag=" +
                     buildBaseKickstartGitTag(currBuildVar.releasever,
-                                             currConfig.distroInfo.kickstartTag.value)});
+                                             currConfig.distroInfo.kickstartTag.value),
+                "export env_is_first_build=" +
+                    std::string{build_variable::kIsFirstBuild ? "true" : "false"}});
 
     writeFileWithHeader(configBuilderEnvFile, build_variable::kConfigBuilderEnvVar);
 }

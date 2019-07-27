@@ -8,7 +8,6 @@
 
 #include "error_type.hpp"
 #include "hatter_config_type.hpp"
-#include "package_handler.hpp"
 
 namespace hatter {
 namespace package_handler {

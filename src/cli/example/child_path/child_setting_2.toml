@@ -1,3 +1,9 @@
-# [repo]
-# standard_repos=["child_2", "nvi"]
-# copr_repos=["child2_copr_repo1, child2_copr_repo2"]
+[repo]
+    # common popular repos for convenience
+    # can be any value of "google-chrome", "nvidia", "vscode"
+    # default: emtpy
+    standard_repos=[, "vscode"]
+
+    # can be any copr repos in format of user_name/repo_name
+    # default: emtpy
+    copr_repos=["khoitd1997/toml11"]

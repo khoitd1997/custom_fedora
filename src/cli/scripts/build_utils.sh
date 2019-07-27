@@ -3,7 +3,13 @@
 current_script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source ${current_script_dir}/misc_utils.sh
 
-## build_env_var_file os_name releasever arch clear_cache parser_mode path
+## used for building env var file to pass info to mock script
+## build_env_var_file os_name
+##                    releasever
+##                    arch
+##                    clear_cache
+##                    parser_mode
+##                    output_path
 build_env_var_file() {
     cat > "$6" << EOF
     export env_os_name="$1"
@@ -30,8 +36,10 @@ build_project_file_structure() {
     touch ${env_group_list_path}
     
     mkdir -p ${env_share_dir}
+    mkdir -p ${env_boostrap_script_dir}
     mkdir -p ${env_user_supplied_dir}
     mkdir -p ${env_log_dir}
+    touch ${env_parser_log_path}
     mkdir -p ${env_repo_dir}
     rm -rf ${env_repo_dir}/*
     cp -r /etc/yum.repos.d/* ${env_repo_dir}

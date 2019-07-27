@@ -22,12 +22,6 @@ if [ -z "${IN_HATTER_DOCKER}" ] && [ -z "${CI}" ]; then
     echo ${hatter_src_dir}/cmake_build_dir
     ${container_engine} run --tty --name test_instance --cap-add SYS_PTRACE --rm -v ${hatter_src_dir}/cmake_build_dir:${cmake_build_dir}:Z hattertest
 else
-    # TODO(kd): Move to bootstrap script
-    # set -x
-    rpm --import https://packages.microsoft.com/keys/microsoft.asc
-    sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
-    # dnf check-update -y
-    
     # rm -rf ${cmake_build_dir}/*
     if [ ! -z "${CI}" ]; then
         mkdir -p ${cmake_build_dir}
@@ -37,16 +31,7 @@ else
     mkdir -p ${test_build_root_dir}
     rm -rf ${test_build_root_dir}/*
     mkdir -p ${test_build_root_dir}/build
-    cat > ${test_build_root_dir}/build/env_var.sh << 'EOF'
-    export env_os_name="example_setting"
-    export env_parent_config="${env_os_name}.toml"
-
-    export env_releasever="29"
-    export env_arch="x86_64"
-
-    export env_clear_cache=true
-    export env_parser_mode=false
-EOF
+    
     source ${hatter_src_dir}/scripts/build_utils.sh
     build_env_var_file "example_setting" "29" \
     "x86_64" "false" \
@@ -56,13 +41,14 @@ EOF
     source ${hatter_src_dir}/scripts/set_env_var.sh
     
     build_project_file_structure
-    cp -r ${hatter_src_dir}/assets ${env_share_dir}
+    cp -r ${hatter_src_dir}/scripts/assets ${env_share_dir}
     cp -r ${hatter_src_dir}/example/* ${env_user_supplied_dir}
     
     # export GTEST_FILTER="CommonSanitizeTest_*" # MUST SPECIFY HERE BEFORE THE TESTS ARE DISCOVERED
     # scan-build cmake -G Ninja .. && scan-build ninja && ./bin/hatter_config_builder_parser ./bin/settings.toml
     cd ${cmake_build_dir}
-    cmake ${hatter_src_dir} -DRUN_TEST=ON && cmake --build .
+    cmake ${hatter_src_dir} -DRUN_TEST=ON -DCMAKE_BUILD_TYPE=Debug
+    cmake --build .
     
     # run unit tests
     # TODO(kd): Resolve gtest issue

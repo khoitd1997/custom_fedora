@@ -44,6 +44,8 @@ For example building an OS called ```fedora_kd```, the main config file will be 
   - build_share/
     - assets/
       - valid_keyboard.txt
+      - valid_language.txt
+      - valid_timezone.txt
     - fedora-kickstarts/
         - git clone of fedora-kickstarts repo
     - package_cache/: cache of all packages
@@ -51,6 +53,7 @@ For example building an OS called ```fedora_kd```, the main config file will be 
         - build_mock.sh
         - exit_code.sh
         - misc_utils.sh
+    - hatter_config_builder_parser: c++ exec to parse and build configs
   - builddir/
     - fedora_kd/ <- env_build_dir, exe working dir
       - build/

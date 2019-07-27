@@ -143,10 +143,10 @@ void bootstrapPackage(const build_variable::CLIBuildVariable& currBuildVar,
                          build_variable::kRepoConfPath);
 
     for (const auto& pair : kStandardRepos) {
-        execCommand("dnf config-manager --set-disabled " + pair.second.fullRepoName);
+        execCommand("dnf config-manager -q --set-disabled " + pair.second.fullRepoName);
     }
     for (const auto& repo : standardRepos) {
-        if (execCommand("dnf config-manager --set-enabled " +
+        if (execCommand("dnf config-manager -q --set-enabled " +
                         kStandardRepos.at(repo).fullRepoName)) {
             throw std::runtime_error("error installing standard repo " + repo);
         }
