@@ -207,13 +207,6 @@ mkdir -p ${mock_build_file_dir}
 base_cfg_name="fedora-${releasever}-${arch}.cfg"
 cp /etc/mock/${base_cfg_name} ${build_working_dir}/mock.cfg
 
-# get free loop device to mount in
-# TODO(kd): Remove this once the newest version of mock comes out
-curr_loop_num=$(sudo losetup -f | grep -Eo '[0-9]+$')
-free_loop_device1="/dev/loop${curr_loop_num}"
-let curr_loop_num+=1
-free_loop_device2="/dev/loop${curr_loop_num}"
-
 sed -i -r "/config_opts\['root'\]/c config_opts['root'] = 'hatter_mock'" ${build_working_dir}/mock.cfg
 
 cat >> ${build_working_dir}/mock.cfg << EOF
@@ -221,8 +214,10 @@ config_opts['rpmbuild_networking'] = True
 config_opts['plugin_conf']['ccache_enable'] = True
 
 config_opts['plugin_conf']['bind_mount_enable'] = True
-config_opts['plugin_conf']['bind_mount_opts']['dirs'].append(('${free_loop_device1}', '${free_loop_device1}' ))
-config_opts['plugin_conf']['bind_mount_opts']['dirs'].append(('${free_loop_device2}', '${free_loop_device2}' ))
+config_opts['dev_loop_count'] = 30
+EOF
+
+cat >> ${build_working_dir}/mock.cfg << 'EOF'
 config_opts['environment']['PS1'] = r'\[\033[38;5;14m\]\w\[$(tput sgr0)\]\[\033[38;5;15m\] \[$(tput sgr0)\]\[\033[38;5;9m\][\$?]\[$(tput sgr0)\] '
 EOF
 
