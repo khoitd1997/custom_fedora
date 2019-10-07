@@ -16,9 +16,12 @@ std::string buildKickstartRepo(const std::string& repoName,
                                const int          cost = 50) {
     std::string ret;
     ret += "repo --name=" + repoName;
-    ret += repoBaseURL.empty() ? "" : " --baseurl=" + repoBaseURL;
-    ret += repoMetaLink.empty() ? "" : " --metalink=" + repoMetaLink;
     ret += " --cost=" + std::to_string(cost);
+    if (repoMetaLink.empty()) {
+        ret += repoBaseURL.empty() ? "" : " --baseurl=" + repoBaseURL;
+    } else {
+        ret += repoMetaLink.empty() ? "" : " --metalink=" + repoMetaLink;
+    }
 
     return ret;
 }
