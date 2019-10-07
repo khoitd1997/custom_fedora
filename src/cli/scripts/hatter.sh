@@ -237,12 +237,14 @@ build_env_var_file ${os_name} \
 
 # start doing mock build
 source ${script_dir}/mock_utils.sh
-# if [ ! -f ${build_working_dir}/.mock_bootstrapped_done ]; then
+if [ ! -f ${build_working_dir}/.mock_env_created ]; then
+    print_info "creating build env"
+    create_mock_env
+fi
     print_info "bootrapping build env"
     bootstrap_mock_env
     
-    touch ${build_working_dir}/.mock_bootstrapped_done
-# fi
+    touch ${build_working_dir}/.mock_env_created
 
 print_info "preparing build env"
 prepare_mock_build

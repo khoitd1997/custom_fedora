@@ -25,11 +25,11 @@ trap cleanup EXIT
 sudo setenforce 0
 
 sudo -i -u ${original_user} bash << EOF
-if [ ! -f ${currDir}/build/.mock_bootstrapped_done ]; then
+if [ ! -f ${currDir}/build/.mock_env_created ]; then
     mock -r fedora-${env_fedora_ver}-x86_64 --init 
     mock -r fedora-${env_fedora_ver}-x86_64 --install ${mock_software_list}
 
-    touch ${currDir}/build/.mock_bootstrapped_done
+    touch ${currDir}/build/.mock_env_created
 fi
 
 mock -r fedora-"${env_fedora_ver}"-x86_64 --chroot "rm -rf /builddir/"

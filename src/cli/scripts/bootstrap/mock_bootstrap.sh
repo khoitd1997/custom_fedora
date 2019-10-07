@@ -1,7 +1,5 @@
 #!/bin/bash
 # launch at the initial creation of mock env
-
-set -e
 current_script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source /build_share/scripts/set_env_var.sh
 source ${env_script_dir}/misc_utils.sh

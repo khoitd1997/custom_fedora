@@ -19,11 +19,12 @@ clear_mock_env() {
     fi
 }
 
-bootstrap_mock_env() {
-    set -e
+create_mock_env() {
     ${mock_base_cmd} --init
     ${mock_base_cmd} --install ${mock_base_tools}
-    
+}
+
+bootstrap_mock_env() {
     # copy build scripts
     # TODO(kd): Reconsider path of executable
     ${mock_execute_bash_cmd} "mkdir -p ${env_asset_dir}"
@@ -31,10 +32,19 @@ bootstrap_mock_env() {
     ${mock_copyin_cmd} ${current_script_dir}/*.sh ${env_script_dir}
     ${mock_copyin_cmd} ${current_script_dir}/bootstrap/* ${env_boostrap_script_dir}
     ${mock_copyin_cmd} ${current_script_dir}/assets/* ${env_asset_dir}
+
+    # TODO(kd): Remove after test
+    cp /home/kd/hatter/src/cli/cmake_build_dir/bin/hatter_config_builder_parser ${current_script_dir}/assets/hatter_config_builder_parser
     ${mock_copyin_cmd} ${current_script_dir}/assets/hatter_config_builder_parser ${env_share_dir}
     
-    ${mock_execute_bash_cmd} ${env_script_dir}/bootstrap/mock_bootstrap.sh
     set +e
+    if ! ${mock_execute_bash_cmd} ${env_script_dir}/bootstrap/mock_bootstrap.sh ; then
+        print_warn "bootstrap failed the first time, rerunning again"
+        set -e
+        # this tends to fail the first time on the software install step
+        ${mock_execute_bash_cmd} ${env_script_dir}/bootstrap/mock_bootstrap.sh
+    fi
+    set -e
 }
 
 prepare_mock_build() {
