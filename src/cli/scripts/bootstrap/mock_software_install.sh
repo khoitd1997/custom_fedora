@@ -3,10 +3,11 @@
 set -e
 base_dnf_cmd="dnf install -y -q"
 
+${base_dnf_cmd} fedora-workstation-repositories dnf-plugins-core createrepo
+
 ${base_dnf_cmd} curl findutils git jq ripgrep \
-fedora-workstation-repositories \
-dnf-plugins-core createrepo cpp \
-squashfs-tools nano vim
+                cpp squashfs-tools \
+                nano vim bat
 
 # install vscode repo
 rpm --import https://packages.microsoft.com/keys/microsoft.asc
